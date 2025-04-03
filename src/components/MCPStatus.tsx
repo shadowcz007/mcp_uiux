@@ -8,13 +8,22 @@ export interface MCPStatusProps {
   resourcePath?: string;
   className?: string;
   style?: React.CSSProperties;
+  render?: (props: {
+    loading: boolean;
+    error: string | null;
+    tools: any[];
+    resources: any[];
+    resourceTemplates: any[];
+    prompts: any[];
+  }) => React.ReactNode;
 }
 
 export const MCPStatus: React.FC<MCPStatusProps> = ({
   serverUrl = 'http://localhost:8080',
   resourcePath = '',
   className,
-  style
+  style,
+  render
 }) => {
   const { 
     connect, 
@@ -29,6 +38,10 @@ export const MCPStatus: React.FC<MCPStatusProps> = ({
   useEffect(() => {
     connect(serverUrl, resourcePath);
   }, [serverUrl, resourcePath]);
+
+  if (render) {
+    return render({ loading, error, tools, resources, resourceTemplates, prompts }) as JSX.Element;
+  }
 
   if (loading) {
     return <div className={className} style={style}>正在连接 MCP 服务...</div>;

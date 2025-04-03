@@ -4,5 +4,13 @@ export interface MCPStatusProps {
     resourcePath?: string;
     className?: string;
     style?: React.CSSProperties;
+    render?: (props: {
+        loading: boolean;
+        error: string | null;
+        tools: any[];
+        resources: any[];
+        resourceTemplates: any[];
+        prompts: any[];
+    }) => React.ReactNode;
 }
 export declare const MCPStatus: React.FC<MCPStatusProps>;
