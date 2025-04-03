@@ -1,0 +1,39 @@
+{
+  "name": "mcp_ui",
+  "version": "0.0.1",
+  "description": "mcp_ui",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "test": "jest",
+    "build": "tsc",
+    "prepare": "npm run build",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
+  },
+  "keywords": [],
+  "author": "shadow",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.x.x",
+    "@babel/core": "^7.x.x",
+    "@babel/preset-env": "^7.x.x",
+    "@babel/preset-react": "^7.x.x",
+    "@babel/preset-typescript": "^7.x.x",
+    "@types/jest": "^29.x.x",
+    "@types/node": "^20.x.x",
+    "@types/react": "^18.x.x",
+    "@types/react-dom": "^18.x.x",
+    "typescript": "^5.x.x",
+    "ts-jest": "^29.x.x",
+    "jest": "^29.x.x",
+    "react": "^18.x.x",
+    "react-dom": "^18.x.x",
+    "@storybook/react": "^7.x.x",
+    "@storybook/react-webpack5": "^7.x.x"
+  }
+}
