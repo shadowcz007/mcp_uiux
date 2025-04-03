@@ -1,10 +1,16 @@
 {
   "name": "mcp-uiux",
-  "version": "1.0.0",
-  "description": "MCP 状态展示组件",
+  "version": "1.0.1",
+  "description": "MCP client and uiux",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
+  "author": "shadow",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shadowcz007/mcp_uiux.git"
+  },
   "files": [
     "dist"
   ],
