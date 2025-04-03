@@ -1,25 +1,71 @@
-import React, { useEffect, useCallback, useRef, useState } from 'react'
+import React, { useEffect, useCallback, useRef } from 'react'
 
-interface MCPProps {
+// 类型定义
+export interface MCPProps {
   url?: string
-  onToolsReady?: (tools: any[]) => void
+  onToolsReady?: (tools: Tool[]) => void
   onToolResult?: (content: any, isError: boolean) => void
   onError?: (error: Error) => void
-  onResourcesReady?: (resources: any[]) => void
-  onResourceTemplatesReady?: (resourceTemplates: any[]) => void
-  onPromptsReady?: (prompts: any[]) => void
-  onReady?: (data: any) => void
+  onResourcesReady?: (resources: Resource[]) => void
+  onResourceTemplatesReady?: (resourceTemplates: ResourceTemplate[]) => void
+  onPromptsReady?: (prompts: Prompt[]) => void
+  onReady?: (data: ServerInfo) => void
+}
+
+export interface Tool {
+  name: string
+  fromServerName?: string
+  execute?: (args: any) => Promise<any>
+  [key: string]: any
+}
+
+export interface Resource {
+  uri?: string
+  [key: string]: any
+}
+
+export interface ResourceTemplate {
+  uri?: string
+  uriTemplate?: string
+  _variables?: string[]
+  _expandUriByVariables?: (uri: string, variables: Record<string, string>) => string
+  [key: string]: any
+}
+
+export interface Prompt {
+  name: string
+  [key: string]: any
+}
+
+export interface ServerInfo {
+  name: string
+  protocolVersion: string
+  version: string
+  capabilities: any
+}
+
+interface PendingCall {
+  resolve: (value: any) => void
+  reject: (reason: any) => void
+}
+
+// MCPClient 类的错误类型
+export class MCPError extends Error {
+  constructor(message: string, public code?: string) {
+    super(message)
+    this.name = 'MCPError'
+  }
 }
 
 export class MCPClient {
   public url: string
-  private onToolsReady?: (tools: any[]) => void
+  private onToolsReady?: (tools: Tool[]) => void
   private onToolResult?: (content: any, isError: boolean) => void
   private onError?: (error: Error) => void
-  private onResourcesReady?: (resources: any[]) => void
-  private onResourceTemplatesReady?: (resourceTemplates: any[]) => void
-  private onPromptsReady?: (prompts: any[]) => void
-  private onReady?: (data: any) => void
+  private onResourcesReady?: (resources: Resource[]) => void
+  private onResourceTemplatesReady?: (resourceTemplates: ResourceTemplate[]) => void
+  private onPromptsReady?: (prompts: Prompt[]) => void
+  private onReady?: (data: ServerInfo) => void
   private sessionId: string | null = null
   private messageEndpoint: string | null = null
   private eventSource: EventSource | null = null
@@ -88,6 +134,17 @@ export class MCPClient {
     return response
   }
 
+  // 添加错误处理的辅助方法
+  private handleError(error: unknown, customMessage: string): never {
+    const mcpError = error instanceof MCPError 
+      ? error 
+      : new MCPError(
+          error instanceof Error ? error.message : customMessage
+        )
+    this.onError?.(mcpError)
+    throw mcpError
+  }
+
   // 执行工具的公共方法
   public async executeTool (toolName: string, args: any): Promise<any> {
     try {
@@ -118,8 +175,7 @@ export class MCPClient {
 
       return resultPromise
     } catch (error) {
-      this.onError?.(error instanceof Error ? error : new Error('工具执行失败'))
-      throw error
+      this.handleError(error, `执行工具失败: ${toolName}`)
     }
   }
 
@@ -239,11 +295,11 @@ export class MCPClient {
             }))
             this.onToolsReady?.(toolsWithExecute)
 
-            this.callback(message)
+            this.handleCallback(message)
           } else if (message.result?.resources) {
             console.log('获取到资源列表:', message.result.resources)
             this.onResourcesReady?.(message.result.resources)
-            this.callback(message)
+            this.handleCallback(message)
           } else if (message.result?.resourceTemplates) {
             console.log('获取到资源模板列表:', message.result.resourceTemplates)
             let resourceTemplates = message.result.resourceTemplates
@@ -271,18 +327,18 @@ export class MCPClient {
               )
             }
 
-            this.onResourceTemplatesReady?.(resourceTemplates)
+            this.onResourceTemplatesReady?.(this.processResourceTemplates(resourceTemplates))
 
-            this.callback(message)
+            this.handleCallback(message)
           } else if (message.result?.prompts) {
             console.log('获取到提示列表:', message.result.prompts)
             this.onPromptsReady?.(message.result.prompts)
-            this.callback(message)
+            this.handleCallback(message)
           }
           // 处理工具执行结果
           else if (message.result?.content) {
             console.log('工具执行结果:', message)
-            this.callback(message)
+            this.handleCallback(message)
             // 仍然调用回调函数
             this.onToolResult?.(
               message.result.content,
@@ -294,7 +350,7 @@ export class MCPClient {
               //fixbug , mcp server 里的 需要注意 metadata的处理， 用于更新id
               message.id = message.params.metadata.request_id
               console.log('fix收到采样消息:', message)
-              this.callback(message)
+              this.handleCallback(message)
             }
           }
 
@@ -302,7 +358,7 @@ export class MCPClient {
           else if (message.id != undefined) {
             // 确保任何带有 ID 的响应都能触发回调
             console.log('#callback:', message)
-            this.callback(message)
+            this.handleCallback(message)
           }
         }
       } catch (error) {
@@ -351,21 +407,29 @@ export class MCPClient {
     return toolsRequested
   }
 
-  private callback (message: any = {}) {
-    // 检查是否有callId
+  // 添加类型安全的回调处理
+  private handleCallback(message: any) {
     const callId = message.id
-    if (callId && this.pendingCalls.has(callId)) {
-      // 解析对应的Promise
-      const { resolve } = this.pendingCalls.get(callId)!
-      this.pendingCalls.delete(callId)
-      resolve(
-        message.result?.content ||
-          message.result || {
-            method: message.method,
-            params: message.params
-          }
-      )
+    if (!callId || !this.pendingCalls.has(callId)) return
+
+    const { resolve } = this.pendingCalls.get(callId) as PendingCall
+    this.pendingCalls.delete(callId)
+
+    const result = message.result?.content ?? message.result ?? {
+      method: message.method,
+      params: message.params
     }
+
+    resolve(result)
+  }
+
+  // 添加类型安全的资源模板处理
+  private processResourceTemplates(templates: ResourceTemplate[]): ResourceTemplate[] {
+    return templates.map(template => ({
+      ...template,
+      _variables: this.getTemplateVariables(template),
+      _expandUriByVariables: this.expandUriByVariables
+    }))
   }
 
   // 获取工具列表
@@ -619,27 +683,37 @@ export class MCPClient {
   }
 }
 
+// useMCP hook 的类型定义
+export interface MCPHookResult {
+  executeTool: (toolName: string, args: any) => Promise<any>
+  reconnect: () => void
+  getResources: () => Promise<Resource[]>
+  readResource: (uri: string) => Promise<any>
+  getToolsList: () => Promise<Tool[]>
+  getPromptsList: () => Promise<Prompt[]>
+  getPrompt: (name: string, args?: any) => Promise<any>
+  getResourceTemplates: () => Promise<ResourceTemplate[]>
+  expandUriByVariables: (template: string, variables: Record<string, string>) => string | undefined
+  getTemplateVariables: (template: any) => string[]
+}
+
+// 优化后的 useMCP hook
 export const useMCP = ({
   url = 'http://localhost:8000',
   onToolsReady,
   onToolResult,
   onError,
   onReady
-}: MCPProps = {}) => {
+}: MCPProps): MCPHookResult => {
   const mcpClientRef = useRef<MCPClient | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [tools, setTools] = useState<any[]>([])
-  const [resources, setResources] = useState<any[]>([])
-  const [resourceTemplates, setResourceTemplates] = useState<any[]>([])
-  const [prompts, setPrompts] = useState<any[]>([])
-  
+
   useEffect(() => {
     mcpClientRef.current = new MCPClient({
       url,
       onToolsReady,
       onToolResult,
-      onError
+      onError,
+      onReady
     })
     mcpClientRef.current.connect()
 
@@ -648,58 +722,10 @@ export const useMCP = ({
     }
   }, [url, onToolsReady, onToolResult, onError, onReady])
 
-  return {   mcpClient: mcpClientRef.current,
-    loading,
-    error,
-    tools,
-    resources, 
-    resourceTemplates,
-    prompts,
-    connect: useCallback(async (sseUrl: string,resourceFilter:string) => {
-      try {
-        setLoading(true)
-        setError(null)
-        
-        // 如果已存在客户端实例，先断开连接
-        if (mcpClientRef.current) {
-          mcpClientRef.current.disconnect()
-        }
-
-        // 创建新的客户端实例
-        mcpClientRef.current = new MCPClient({
-          url: sseUrl,
-          onToolsReady: (newTools) => {
-            setTools(newTools)
-            onToolsReady?.(newTools)
-          },
-          onToolResult,
-          onError: (err) => {
-            setError(err.message)
-            onError?.(err)
-          },
-          onResourcesReady: (newResources) => {
-            setResources(newResources)
-          },
-          onResourceTemplatesReady: (newTemplates) => {
-            setResourceTemplates(newTemplates)
-          },
-          onPromptsReady: (newPrompts) => {
-            setPrompts(newPrompts)
-          },
-          onReady
-        })
-
-        // 连接到服务器
-        await mcpClientRef.current.connect()
-        setLoading(false)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : '连接失败')
-        setLoading(false)
-        throw err
-      }
-    }, [onToolsReady, onToolResult, onError, onReady]),
+  return {
     executeTool: useCallback(async (toolName: string, args: any) => {
-      return mcpClientRef.current?.executeTool(toolName, args)
+      if (!mcpClientRef.current) throw new MCPError('MCP客户端未初始化')
+      return mcpClientRef.current.executeTool(toolName, args)
     }, []),
     reconnect: useCallback(() => {
       mcpClientRef.current?.reconnect()
@@ -734,6 +760,7 @@ export const useMCP = ({
     }, [])
   }
 }
+
 export const MCP: React.FC<MCPProps> = props => {
   useMCP(props)
   return null // 这是一个无渲染组件

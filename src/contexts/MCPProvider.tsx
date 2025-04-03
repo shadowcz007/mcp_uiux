@@ -1,9 +1,9 @@
-"use client";
-import React from 'react';
-import { createContext, useContext, useEffect, ReactNode, useState } from 'react';
-import { MCPClient } from '../hooks/useMCP';
+import * as React from 'react';
+import {  useContext, useEffect, ReactNode, useState } from 'react';
+import { MCPClient } from './MCP';
+import { Tool, Resource, ResourceTemplate, Prompt, MCPClientConfig } from '../types';
 
-export interface MCPContextType {
+interface MCPContextType {
     mcpClient: MCPClient | null;
     loading: boolean;
     error: string | null;
@@ -14,10 +14,8 @@ export interface MCPContextType {
     resourceTemplates: any[];
     prompts: any[];
 }
-export interface MCPProviderProps {
-    children: ReactNode;
-  }
-const MCPContext = createContext<MCPContextType>({
+
+const MCPContext = React.createContext<MCPContextType>({
     mcpClient: null,
     loading: false,
     error: null,
@@ -31,7 +29,7 @@ const MCPContext = createContext<MCPContextType>({
 
 export const useMCP = () => useContext(MCPContext);
 
-export function MCPProvider({ children }: { children: ReactNode }) {
+export function MCPProvider({ children }: { children: React.ReactNode }) {
     const [mcpClient, setMcpClient] = useState<MCPClient | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);

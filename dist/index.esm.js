@@ -1,16 +1,49 @@
-"use strict";
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
+import * as React from 'react';
+import React__default, { useState, useEffect, useContext } from 'react';
+
+/******************************************************************************
+Copyright (c) Microsoft Corporation.
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+***************************************************************************** */
+/* global Reflect, Promise, SuppressedError, Symbol, Iterator */
+
+var extendStatics = function(d, b) {
+    extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+    return extendStatics(d, b);
+};
+
+function __extends(d, b) {
+    if (typeof b !== "function" && b !== null)
+        throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+    extendStatics(d, b);
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+}
+
+var __assign = function() {
+    __assign = Object.assign || function __assign(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
             s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
         }
         return t;
     };
     return __assign.apply(this, arguments);
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+
+function __awaiter(thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -18,8 +51,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
+}
+
+function __generator(thisArg, body) {
     var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
     return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
@@ -45,19 +79,24 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
+}
+
+typeof SuppressedError === "function" ? SuppressedError : function (error, suppressed, message) {
+    var e = new Error(message);
+    return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
 };
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
+
+// MCPClient 类的错误类型
+var MCPError = /** @class */ (function (_super) {
+    __extends(MCPError, _super);
+    function MCPError(message, code) {
+        var _this = _super.call(this, message) || this;
+        _this.code = code;
+        _this.name = 'MCPError';
+        return _this;
     }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.MCP = exports.useMCP = exports.MCPClient = void 0;
-var react_1 = require("react");
+    return MCPError;
+}(Error));
 var MCPClient = /** @class */ (function () {
     function MCPClient(_a) {
         var _b = _a.url, url = _b === void 0 ? 'http://localhost:8000' : _b, onToolsReady = _a.onToolsReady, onToolResult = _a.onToolResult, onError = _a.onError, onResourcesReady = _a.onResourcesReady, onResourceTemplatesReady = _a.onResourceTemplatesReady, onPromptsReady = _a.onPromptsReady, onReady = _a.onReady;
@@ -83,10 +122,10 @@ var MCPClient = /** @class */ (function () {
         this.onReady = onReady;
     }
     // 发送 JSON-RPC 请求
-    MCPClient.prototype.sendJsonRpcRequest = function (method_1, params_1) {
-        return __awaiter(this, arguments, void 0, function (method, params, id) {
+    MCPClient.prototype.sendJsonRpcRequest = function (method, params, id) {
+        if (id === void 0) { id = null; }
+        return __awaiter(this, void 0, void 0, function () {
             var jsonRpcRequest, response;
-            if (id === void 0) { id = null; }
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -109,16 +148,24 @@ var MCPClient = /** @class */ (function () {
             });
         });
     };
+    // 添加错误处理的辅助方法
+    MCPClient.prototype.handleError = function (error, customMessage) {
+        var _a;
+        var mcpError = error instanceof MCPError
+            ? error
+            : new MCPError(error instanceof Error ? error.message : customMessage);
+        (_a = this.onError) === null || _a === void 0 ? void 0 : _a.call(this, mcpError);
+        throw mcpError;
+    };
     // 执行工具的公共方法
     MCPClient.prototype.executeTool = function (toolName, args) {
         return __awaiter(this, void 0, void 0, function () {
             var callId_1, resultPromise, error_1;
             var _this = this;
-            var _a;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
                     case 0:
-                        _b.trys.push([0, 2, , 3]);
+                        _a.trys.push([0, 2, , 3]);
                         callId_1 = "".concat(toolName, "_").concat(this.callIdCounter++);
                         resultPromise = new Promise(function (resolve, reject) {
                             _this.pendingCalls.set(callId_1, { resolve: resolve, reject: reject });
@@ -137,12 +184,12 @@ var MCPClient = /** @class */ (function () {
                             }, callId_1)];
                     case 1:
                         // 发送请求，添加callId作为元数据
-                        _b.sent();
+                        _a.sent();
                         return [2 /*return*/, resultPromise];
                     case 2:
-                        error_1 = _b.sent();
-                        (_a = this.onError) === null || _a === void 0 ? void 0 : _a.call(this, error_1 instanceof Error ? error_1 : new Error('工具执行失败'));
-                        throw error_1;
+                        error_1 = _a.sent();
+                        this.handleError(error_1, "\u6267\u884C\u5DE5\u5177\u5931\u8D25: ".concat(toolName));
+                        return [3 /*break*/, 3];
                     case 3: return [2 /*return*/];
                 }
             });
@@ -186,7 +233,7 @@ var MCPClient = /** @class */ (function () {
                 };
                 // 处理 endpoint 事件
                 this.eventSource.addEventListener('endpoint', function (event) { return __awaiter(_this, void 0, void 0, function () {
-                    var sessionUri, baseUrl, sessionIdMatch, error_2;
+                    var sessionUri, baseUrl, sessionIdMatch;
                     var _a;
                     return __generator(this, function (_b) {
                         switch (_b.label) {
@@ -222,7 +269,7 @@ var MCPClient = /** @class */ (function () {
                                 _b.sent();
                                 return [3 /*break*/, 4];
                             case 3:
-                                error_2 = _b.sent();
+                                _b.sent();
                                 (_a = this.onError) === null || _a === void 0 ? void 0 : _a.call(this, new Error('初始化会话失败'));
                                 return [3 /*break*/, 4];
                             case 4: return [2 /*return*/];
@@ -264,12 +311,12 @@ var MCPClient = /** @class */ (function () {
                                     console.log('获取到工具列表:', this.sessionId, message.result.tools);
                                     toolsWithExecute = message.result.tools.map(function (tool) { return (__assign(__assign({}, tool), { fromServerName: _this.serverName, execute: function (args) { return _this.executeTool(tool.name, args); } })); });
                                     (_d = this.onToolsReady) === null || _d === void 0 ? void 0 : _d.call(this, toolsWithExecute);
-                                    this.callback(message);
+                                    this.handleCallback(message);
                                 }
                                 else if ((_e = message.result) === null || _e === void 0 ? void 0 : _e.resources) {
                                     console.log('获取到资源列表:', message.result.resources);
                                     (_f = this.onResourcesReady) === null || _f === void 0 ? void 0 : _f.call(this, message.result.resources);
-                                    this.callback(message);
+                                    this.handleCallback(message);
                                 }
                                 else if ((_g = message.result) === null || _g === void 0 ? void 0 : _g.resourceTemplates) {
                                     console.log('获取到资源模板列表:', message.result.resourceTemplates);
@@ -285,18 +332,18 @@ var MCPClient = /** @class */ (function () {
                                         }
                                         console.log('缓存资源模板到capabilities:', this.capabilities.resourceTemplates);
                                     }
-                                    (_h = this.onResourceTemplatesReady) === null || _h === void 0 ? void 0 : _h.call(this, resourceTemplates);
-                                    this.callback(message);
+                                    (_h = this.onResourceTemplatesReady) === null || _h === void 0 ? void 0 : _h.call(this, this.processResourceTemplates(resourceTemplates));
+                                    this.handleCallback(message);
                                 }
                                 else if ((_j = message.result) === null || _j === void 0 ? void 0 : _j.prompts) {
                                     console.log('获取到提示列表:', message.result.prompts);
                                     (_k = this.onPromptsReady) === null || _k === void 0 ? void 0 : _k.call(this, message.result.prompts);
-                                    this.callback(message);
+                                    this.handleCallback(message);
                                 }
                                 // 处理工具执行结果
                                 else if ((_l = message.result) === null || _l === void 0 ? void 0 : _l.content) {
                                     console.log('工具执行结果:', message);
-                                    this.callback(message);
+                                    this.handleCallback(message);
                                     // 仍然调用回调函数
                                     (_m = this.onToolResult) === null || _m === void 0 ? void 0 : _m.call(this, message.result.content, message.result.isError || false);
                                 }
@@ -306,14 +353,14 @@ var MCPClient = /** @class */ (function () {
                                         //fixbug , mcp server 里的 需要注意 metadata的处理， 用于更新id
                                         message.id = message.params.metadata.request_id;
                                         console.log('fix收到采样消息:', message);
-                                        this.callback(message);
+                                        this.handleCallback(message);
                                     }
                                 }
                                 // 添加这个部分：处理任何其他类型的响应
                                 else if (message.id != undefined) {
                                     // 确保任何带有 ID 的响应都能触发回调
                                     console.log('#callback:', message);
-                                    this.callback(message);
+                                    this.handleCallback(message);
                                 }
                                 _q.label = 3;
                             case 3: return [3 /*break*/, 5];
@@ -347,9 +394,9 @@ var MCPClient = /** @class */ (function () {
     };
     // 处理初始化完成后的操作
     MCPClient.prototype.handleInitialized = function (toolsRequested) {
+        var _a;
         return __awaiter(this, void 0, void 0, function () {
-            var resourceTemplates, error_4;
-            var _a;
+            var error_4;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -373,7 +420,7 @@ var MCPClient = /** @class */ (function () {
                             // 注意：getResourceTemplates 方法内部已经处理了缓存，这里不需要额外设置
                         ];
                     case 4:
-                        resourceTemplates = _b.sent();
+                        _b.sent();
                         // 注意：getResourceTemplates 方法内部已经处理了缓存，这里不需要额外设置
                         return [4 /*yield*/, this.getPromptsList()];
                     case 5:
@@ -390,28 +437,31 @@ var MCPClient = /** @class */ (function () {
             });
         });
     };
-    MCPClient.prototype.callback = function (message) {
-        var _a;
-        if (message === void 0) { message = {}; }
-        // 检查是否有callId
+    // 添加类型安全的回调处理
+    MCPClient.prototype.handleCallback = function (message) {
+        var _a, _b, _c;
         var callId = message.id;
-        if (callId && this.pendingCalls.has(callId)) {
-            // 解析对应的Promise
-            var resolve = this.pendingCalls.get(callId).resolve;
-            this.pendingCalls.delete(callId);
-            resolve(((_a = message.result) === null || _a === void 0 ? void 0 : _a.content) ||
-                message.result || {
-                method: message.method,
-                params: message.params
-            });
-        }
+        if (!callId || !this.pendingCalls.has(callId))
+            return;
+        var resolve = this.pendingCalls.get(callId).resolve;
+        this.pendingCalls.delete(callId);
+        var result = (_c = (_b = (_a = message.result) === null || _a === void 0 ? void 0 : _a.content) !== null && _b !== void 0 ? _b : message.result) !== null && _c !== void 0 ? _c : {
+            method: message.method,
+            params: message.params
+        };
+        resolve(result);
+    };
+    // 添加类型安全的资源模板处理
+    MCPClient.prototype.processResourceTemplates = function (templates) {
+        var _this = this;
+        return templates.map(function (template) { return (__assign(__assign({}, template), { _variables: _this.getTemplateVariables(template), _expandUriByVariables: _this.expandUriByVariables })); });
     };
     // 获取工具列表
     MCPClient.prototype.getToolsList = function () {
+        var _a;
         return __awaiter(this, void 0, void 0, function () {
             var callId_2, resultPromise, error_5;
             var _this = this;
-            var _a;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -444,10 +494,10 @@ var MCPClient = /** @class */ (function () {
     };
     // 获取资源列表
     MCPClient.prototype.getResources = function () {
+        var _a;
         return __awaiter(this, void 0, void 0, function () {
             var callId_3, resultPromise, error_6;
             var _this = this;
-            var _a;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -484,10 +534,10 @@ var MCPClient = /** @class */ (function () {
     };
     // 获取资源列表
     MCPClient.prototype.getResourceTemplates = function () {
+        var _a;
         return __awaiter(this, void 0, void 0, function () {
             var callId_4, resultPromise, error_7;
             var _this = this;
-            var _a;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -548,10 +598,10 @@ var MCPClient = /** @class */ (function () {
     };
     // 读取特定资源
     MCPClient.prototype.readResource = function (uri) {
+        var _a;
         return __awaiter(this, void 0, void 0, function () {
             var callId_5, resultPromise, error_8;
             var _this = this;
-            var _a;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -584,10 +634,10 @@ var MCPClient = /** @class */ (function () {
     };
     // 获取提示列表
     MCPClient.prototype.getPromptsList = function () {
+        var _a;
         return __awaiter(this, void 0, void 0, function () {
             var callId_6, resultPromise, error_9;
             var _this = this;
-            var _a;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -619,12 +669,12 @@ var MCPClient = /** @class */ (function () {
         });
     };
     // 获取特定提示
-    MCPClient.prototype.getPrompt = function (name_2) {
-        return __awaiter(this, arguments, void 0, function (name, args) {
+    MCPClient.prototype.getPrompt = function (name, args) {
+        var _a;
+        if (args === void 0) { args = {}; }
+        return __awaiter(this, void 0, void 0, function () {
             var callId_7, resultPromise, error_10;
             var _this = this;
-            var _a;
-            if (args === void 0) { args = {}; }
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -689,90 +739,244 @@ var MCPClient = /** @class */ (function () {
     };
     return MCPClient;
 }());
-exports.MCPClient = MCPClient;
-var useMCP = function (_a) {
-    var _b = _a.url, url = _b === void 0 ? 'http://localhost:8000' : _b, onToolsReady = _a.onToolsReady, onToolResult = _a.onToolResult, onError = _a.onError, onReady = _a.onReady;
-    var mcpClientRef = (0, react_1.useRef)(null);
-    (0, react_1.useEffect)(function () {
-        mcpClientRef.current = new MCPClient({
-            url: url,
-            onToolsReady: onToolsReady,
-            onToolResult: onToolResult,
-            onError: onError
-        });
-        mcpClientRef.current.connect();
-        return function () {
-            var _a;
-            (_a = mcpClientRef.current) === null || _a === void 0 ? void 0 : _a.disconnect();
-        };
-    }, [url, onToolsReady, onToolResult, onError, onReady]);
-    return {
-        executeTool: (0, react_1.useCallback)(function (toolName, args) { return __awaiter(void 0, void 0, void 0, function () {
-            var _a;
-            return __generator(this, function (_b) {
-                return [2 /*return*/, (_a = mcpClientRef.current) === null || _a === void 0 ? void 0 : _a.executeTool(toolName, args)];
-            });
-        }); }, []),
-        reconnect: (0, react_1.useCallback)(function () {
-            var _a;
-            (_a = mcpClientRef.current) === null || _a === void 0 ? void 0 : _a.reconnect();
-        }, []),
-        getResources: (0, react_1.useCallback)(function () { return __awaiter(void 0, void 0, void 0, function () {
-            var _a;
-            return __generator(this, function (_b) {
-                return [2 /*return*/, (_a = mcpClientRef.current) === null || _a === void 0 ? void 0 : _a.getResources()];
-            });
-        }); }, []),
-        readResource: (0, react_1.useCallback)(function (uri) { return __awaiter(void 0, void 0, void 0, function () {
-            var _a;
-            return __generator(this, function (_b) {
-                return [2 /*return*/, (_a = mcpClientRef.current) === null || _a === void 0 ? void 0 : _a.readResource(uri)];
-            });
-        }); }, []),
-        getToolsList: (0, react_1.useCallback)(function () { return __awaiter(void 0, void 0, void 0, function () {
-            var _a;
-            return __generator(this, function (_b) {
-                return [2 /*return*/, (_a = mcpClientRef.current) === null || _a === void 0 ? void 0 : _a.getToolsList()];
-            });
-        }); }, []),
-        getPromptsList: (0, react_1.useCallback)(function () { return __awaiter(void 0, void 0, void 0, function () {
-            var _a;
-            return __generator(this, function (_b) {
-                return [2 /*return*/, (_a = mcpClientRef.current) === null || _a === void 0 ? void 0 : _a.getPromptsList()];
-            });
-        }); }, []),
-        getPrompt: (0, react_1.useCallback)(function (name_2) {
-            var args_1 = [];
-            for (var _i = 1; _i < arguments.length; _i++) {
-                args_1[_i - 1] = arguments[_i];
+
+var MCPContext = React.createContext({
+    mcpClient: null,
+    loading: false,
+    error: null,
+    reconnect: function () { return __awaiter(void 0, void 0, void 0, function () { return __generator(this, function (_a) {
+        return [2 /*return*/];
+    }); }); },
+    connect: function () { return __awaiter(void 0, void 0, void 0, function () { return __generator(this, function (_a) {
+        return [2 /*return*/];
+    }); }); },
+    tools: [],
+    resources: [],
+    resourceTemplates: [],
+    prompts: []
+});
+var useMCP = function () { return useContext(MCPContext); };
+function MCPProvider(_a) {
+    var _this = this;
+    var children = _a.children;
+    var _b = useState(null), mcpClient = _b[0], setMcpClient = _b[1];
+    var _c = useState(false), loading = _c[0], setLoading = _c[1];
+    var _d = useState(null), error = _d[0], setError = _d[1];
+    var _e = useState([]), tools = _e[0], setTools = _e[1];
+    var _f = useState([]), resources = _f[0], setResources = _f[1];
+    var _g = useState([]), resourceTemplates = _g[0], setResourceTemplates = _g[1];
+    var _h = useState([]), prompts = _h[0], setPrompts = _h[1];
+    var _j = useState(null), lastConnectedUrl = _j[0], setLastConnectedUrl = _j[1];
+    var _k = useState(""), lastResourceFilter = _k[0], setLastResourceFilter = _k[1];
+    // 创建MCP客户端的函数
+    var createClient = function (sseUrl, currentFilter) { return __awaiter(_this, void 0, void 0, function () {
+        var client, error_1, errorMessage;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    setLoading(true);
+                    setError(null);
+                    // 清空之前的数据
+                    setTools([]);
+                    setResources([]);
+                    setResourceTemplates([]);
+                    setPrompts([]);
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    client = new MCPClient({
+                        url: sseUrl,
+                        onToolsReady: function (toolsList) {
+                            console.log('获取到工具列表:', toolsList);
+                            setTools(Array.from(toolsList || [], function (t) {
+                                return __assign(__assign({}, t), { _type: 'tool' });
+                            }));
+                        },
+                        onResourcesReady: function (resourcesList) {
+                            console.log('获取到资源列表:', currentFilter, resourcesList);
+                            setResources(Array.from(resourcesList || [], function (r) {
+                                var _a;
+                                if (!currentFilter || ((_a = r.uri) === null || _a === void 0 ? void 0 : _a.startsWith(currentFilter))) {
+                                    return __assign(__assign({}, r), { _type: 'resource' });
+                                }
+                            }).filter(Boolean));
+                        },
+                        onResourceTemplatesReady: function (resourceTemplatesList) {
+                            console.log('获取到资源变量列表:', currentFilter, resourceTemplatesList);
+                            setResourceTemplates(Array.from(resourceTemplatesList || [], function (rt) {
+                                var _a;
+                                if (!currentFilter || ((_a = rt.uriTemplate) === null || _a === void 0 ? void 0 : _a.startsWith(currentFilter))) {
+                                    return __assign(__assign({}, rt), { _type: 'resourceTemplate' });
+                                }
+                            }).filter(Boolean));
+                        },
+                        onPromptsReady: function (promptsList) {
+                            console.log('获取到提示列表:', promptsList);
+                            setPrompts(Array.from(promptsList || [], function (p) {
+                                return __assign(__assign({}, p), { _type: 'prompt' });
+                            }).filter(Boolean));
+                        },
+                        onError: function (err) {
+                            var errorMessage = err.message || '未知错误';
+                            console.error('MCP客户端连接失败:', err);
+                            setError("\u8FDE\u63A5\u5931\u8D25: ".concat(errorMessage));
+                        },
+                        onReady: function (data) {
+                            console.log('MCP客户端连接成功', data);
+                        }
+                    });
+                    // 连接到服务器
+                    return [4 /*yield*/, client.connect()];
+                case 2:
+                    // 连接到服务器
+                    _a.sent();
+                    // @ts-ignore
+                    window.mcpClient = client;
+                    setMcpClient(client);
+                    setLoading(false);
+                    return [2 /*return*/, client];
+                case 3:
+                    error_1 = _a.sent();
+                    errorMessage = error_1 instanceof Error ? error_1.message : '未知错误';
+                    console.error('MCP客户端连接失败:', error_1);
+                    setError("\u8FDE\u63A5\u5931\u8D25: ".concat(errorMessage));
+                    setLoading(false);
+                    return [2 /*return*/, null];
+                case 4: return [2 /*return*/];
             }
-            return __awaiter(void 0, __spreadArray([name_2], args_1, true), void 0, function (name, args) {
-                var _a;
-                if (args === void 0) { args = {}; }
-                return __generator(this, function (_b) {
-                    return [2 /*return*/, (_a = mcpClientRef.current) === null || _a === void 0 ? void 0 : _a.getPrompt(name, args)];
-                });
-            });
-        }, []),
-        getResourceTemplates: (0, react_1.useCallback)(function () { return __awaiter(void 0, void 0, void 0, function () {
-            var _a;
-            return __generator(this, function (_b) {
-                return [2 /*return*/, (_a = mcpClientRef.current) === null || _a === void 0 ? void 0 : _a.getResourceTemplates()];
-            });
-        }); }, []),
-        expandUriByVariables: (0, react_1.useCallback)(function (template, variables) {
-            var _a;
-            return (_a = mcpClientRef.current) === null || _a === void 0 ? void 0 : _a.expandUriByVariables(template, variables);
-        }, []),
-        getTemplateVariables: (0, react_1.useCallback)(function (template) {
-            var _a;
-            return ((_a = mcpClientRef.current) === null || _a === void 0 ? void 0 : _a.getTemplateVariables(template)) || [];
-        }, [])
-    };
+        });
+    }); };
+    // 初始连接函数
+    var connect = function (sseUrl, resourceFilter) { return __awaiter(_this, void 0, void 0, function () {
+        var filter, client;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    console.log(mcpClient);
+                    if (mcpClient) {
+                        try {
+                            mcpClient.disconnect();
+                        }
+                        catch (e) {
+                            console.warn('关闭旧连接时出错:', e);
+                        }
+                    }
+                    filter = resourceFilter || "";
+                    console.log('正在连接MCP服务...');
+                    return [4 /*yield*/, createClient(sseUrl, filter)];
+                case 1:
+                    client = _a.sent();
+                    if (client) {
+                        setLastConnectedUrl(sseUrl);
+                        setLastResourceFilter(filter);
+                    }
+                    return [2 /*return*/];
+            }
+        });
+    }); };
+    // 重连函数
+    var reconnect = function (sseUrl, resourceFilter) { return __awaiter(_this, void 0, void 0, function () {
+        var connectionUrl, filter, client;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    connectionUrl = sseUrl || lastConnectedUrl || (mcpClient === null || mcpClient === void 0 ? void 0 : mcpClient.url) || 'http://127.0.0.1:8080';
+                    filter = resourceFilter !== undefined ? resourceFilter : lastResourceFilter;
+                    if (mcpClient) {
+                        try {
+                            mcpClient.disconnect();
+                        }
+                        catch (e) {
+                            console.warn('关闭旧连接时出错:', e);
+                        }
+                    }
+                    console.log('正在重新连接MCP服务...');
+                    return [4 /*yield*/, createClient(connectionUrl, filter)];
+                case 1:
+                    client = _a.sent();
+                    if (client && !sseUrl) {
+                        // 只有在使用保存的URL重连时才更新lastConnectedUrl
+                        setLastConnectedUrl(connectionUrl);
+                        setLastResourceFilter(filter);
+                    }
+                    return [2 /*return*/];
+            }
+        });
+    }); };
+    // 添加自动重连逻辑
+    useEffect(function () {
+        // 当连接出错时自动尝试重连
+        if (error && lastConnectedUrl) {
+            var timer_1 = setTimeout(function () {
+                console.log('检测到连接错误，尝试自动重连...');
+                reconnect();
+            }, 5000); // 5秒后尝试重连
+            return function () { return clearTimeout(timer_1); };
+        }
+    }, [error, lastConnectedUrl]);
+    // 组件卸载时清理连接
+    useEffect(function () {
+        return function () {
+            if (mcpClient) {
+                try {
+                    mcpClient.disconnect();
+                }
+                catch (e) {
+                    console.warn('关闭连接时出错:', e);
+                }
+            }
+        };
+    }, [mcpClient]);
+    return (React.createElement(MCPContext.Provider, { value: {
+            mcpClient: mcpClient,
+            loading: loading,
+            error: error,
+            reconnect: reconnect,
+            connect: connect,
+            tools: tools,
+            resources: resources,
+            resourceTemplates: resourceTemplates,
+            prompts: prompts
+        } }, children));
+}
+
+var MCPStatus = function (_a) {
+    var _b = _a.serverUrl, serverUrl = _b === void 0 ? 'http://localhost:8080' : _b, _c = _a.resourcePath, resourcePath = _c === void 0 ? '/my-resources' : _c, className = _a.className, style = _a.style;
+    var _d = useMCP(), connect = _d.connect, loading = _d.loading, error = _d.error, tools = _d.tools, resources = _d.resources, resourceTemplates = _d.resourceTemplates, prompts = _d.prompts;
+    useEffect(function () {
+        connect(serverUrl, resourcePath);
+    }, [serverUrl, resourcePath]);
+    if (loading) {
+        return React__default.createElement("div", { className: className, style: style }, "\u6B63\u5728\u8FDE\u63A5 MCP \u670D\u52A1...");
+    }
+    if (error) {
+        return React__default.createElement("div", { className: className, style: style },
+            "\u8FDE\u63A5\u9519\u8BEF: ",
+            error);
+    }
+    return (React__default.createElement("div", { className: className, style: style },
+        React__default.createElement("h2", null, "MCP \u8FDE\u63A5\u72B6\u6001"),
+        React__default.createElement("h3", null,
+            "\u5DE5\u5177\u5217\u8868 (",
+            tools.length,
+            ")"),
+        React__default.createElement("ul", null, tools.map(function (tool, index) { return (React__default.createElement("li", { key: index }, tool.name)); })),
+        React__default.createElement("h3", null,
+            "\u8D44\u6E90\u5217\u8868 (",
+            resources.length,
+            ")"),
+        React__default.createElement("ul", null, resources.map(function (resource, index) { return (React__default.createElement("li", { key: index }, resource.uri)); })),
+        React__default.createElement("h3", null,
+            "\u8D44\u6E90\u6A21\u677F (",
+            resourceTemplates.length,
+            ")"),
+        React__default.createElement("ul", null, resourceTemplates.map(function (template, index) { return (React__default.createElement("li", { key: index }, template.uriTemplate)); })),
+        React__default.createElement("h3", null,
+            "\u63D0\u793A\u5217\u8868 (",
+            prompts.length,
+            ")"),
+        React__default.createElement("ul", null, prompts.map(function (prompt, index) { return (React__default.createElement("li", { key: index }, prompt.name)); }))));
 };
-exports.useMCP = useMCP;
-var MCP = function (props) {
-    (0, exports.useMCP)(props);
-    return null; // 这是一个无渲染组件
-};
-exports.MCP = MCP;
+
+export { MCPProvider, MCPStatus };
+//# sourceMappingURL=index.esm.js.map

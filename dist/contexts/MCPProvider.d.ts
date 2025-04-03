@@ -1,7 +1,6 @@
-import React from 'react';
-import { ReactNode } from 'react';
-import { MCPClient } from '../hooks/useMCP';
-export interface MCPContextType {
+import * as React from 'react';
+import { MCPClient } from './MCP';
+interface MCPContextType {
     mcpClient: MCPClient | null;
     loading: boolean;
     error: string | null;
@@ -12,10 +11,8 @@ export interface MCPContextType {
     resourceTemplates: any[];
     prompts: any[];
 }
-export interface MCPProviderProps {
-    children: ReactNode;
-}
 export declare const useMCP: () => MCPContextType;
 export declare function MCPProvider({ children }: {
-    children: ReactNode;
+    children: React.ReactNode;
 }): React.JSX.Element;
+export {};
