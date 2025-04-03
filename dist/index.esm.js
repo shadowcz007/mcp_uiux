@@ -941,7 +941,7 @@ function MCPProvider(_a) {
 }
 
 var MCPStatus = function (_a) {
-    var _b = _a.serverUrl, serverUrl = _b === void 0 ? 'http://localhost:8080' : _b, _c = _a.resourcePath, resourcePath = _c === void 0 ? '/my-resources' : _c, className = _a.className, style = _a.style;
+    var _b = _a.serverUrl, serverUrl = _b === void 0 ? 'http://localhost:8080' : _b, _c = _a.resourcePath, resourcePath = _c === void 0 ? '' : _c, className = _a.className, style = _a.style;
     var _d = useMCP(), connect = _d.connect, loading = _d.loading, error = _d.error, tools = _d.tools, resources = _d.resources, resourceTemplates = _d.resourceTemplates, prompts = _d.prompts;
     useEffect(function () {
         connect(serverUrl, resourcePath);

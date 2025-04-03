@@ -1,5 +1,5 @@
 {
-  "name": "mcp-ui",
+  "name": "mcp-uiux",
   "version": "1.0.0",
   "description": "MCP 状态展示组件",
   "main": "dist/index.js",

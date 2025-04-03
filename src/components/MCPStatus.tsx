@@ -11,7 +11,7 @@ export interface MCPStatusProps {
 
 export const MCPStatus: React.FC<MCPStatusProps> = ({
   serverUrl = 'http://localhost:8080',
-  resourcePath = '/my-resources',
+  resourcePath = '',
   className,
   style
 }) => {
