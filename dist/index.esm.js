@@ -1,5 +1,5 @@
 import * as React from 'react';
-import React__default, { useState, useEffect, useContext } from 'react';
+import React__default, { useContext, useState, useEffect } from 'react';
 
 /******************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -965,12 +965,12 @@ var MCPStatus = function (_a) {
             "\u8D44\u6E90\u5217\u8868 (",
             resources.length,
             ")"),
-        React__default.createElement("ul", null, resources.map(function (resource, index) { return (React__default.createElement("li", { key: index }, resource.uri)); })),
+        React__default.createElement("ul", null, resources.map(function (resource, index) { return (React__default.createElement("li", { key: index }, decodeURIComponent(resource.uri))); })),
         React__default.createElement("h3", null,
             "\u8D44\u6E90\u6A21\u677F (",
             resourceTemplates.length,
             ")"),
-        React__default.createElement("ul", null, resourceTemplates.map(function (template, index) { return (React__default.createElement("li", { key: index }, template.uriTemplate)); })),
+        React__default.createElement("ul", null, resourceTemplates.map(function (template, index) { return (React__default.createElement("li", { key: index }, decodeURIComponent(template.uriTemplate))); })),
         React__default.createElement("h3", null,
             "\u63D0\u793A\u5217\u8868 (",
             prompts.length,
@@ -978,5 +978,5 @@ var MCPStatus = function (_a) {
         React__default.createElement("ul", null, prompts.map(function (prompt, index) { return (React__default.createElement("li", { key: index }, prompt.name)); }))));
 };
 
-export { MCPProvider, MCPStatus };
+export { MCPProvider, MCPStatus, useMCP };
 //# sourceMappingURL=index.esm.js.map

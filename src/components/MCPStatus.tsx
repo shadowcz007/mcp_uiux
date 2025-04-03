@@ -2,6 +2,7 @@ import React from 'react';
 import { useMCP } from '../contexts/MCPProvider';
 import { useEffect } from 'react';
 
+
 export interface MCPStatusProps {
   serverUrl?: string;
   resourcePath?: string;
@@ -51,14 +52,14 @@ export const MCPStatus: React.FC<MCPStatusProps> = ({
       <h3>资源列表 ({resources.length})</h3>
       <ul>
         {resources.map((resource, index) => (
-          <li key={index}>{resource.uri}</li>
+          <li key={index}>{decodeURIComponent(resource.uri)}</li>
         ))}
       </ul>
 
       <h3>资源模板 ({resourceTemplates.length})</h3>
       <ul>
         {resourceTemplates.map((template, index) => (
-          <li key={index}>{template.uriTemplate}</li>
+          <li key={index}>{decodeURIComponent(template.uriTemplate)}</li>
         ))}
       </ul>
 

@@ -991,12 +991,12 @@ var MCPStatus = function (_a) {
             "\u8D44\u6E90\u5217\u8868 (",
             resources.length,
             ")"),
-        React__default["default"].createElement("ul", null, resources.map(function (resource, index) { return (React__default["default"].createElement("li", { key: index }, resource.uri)); })),
+        React__default["default"].createElement("ul", null, resources.map(function (resource, index) { return (React__default["default"].createElement("li", { key: index }, decodeURIComponent(resource.uri))); })),
         React__default["default"].createElement("h3", null,
             "\u8D44\u6E90\u6A21\u677F (",
             resourceTemplates.length,
             ")"),
-        React__default["default"].createElement("ul", null, resourceTemplates.map(function (template, index) { return (React__default["default"].createElement("li", { key: index }, template.uriTemplate)); })),
+        React__default["default"].createElement("ul", null, resourceTemplates.map(function (template, index) { return (React__default["default"].createElement("li", { key: index }, decodeURIComponent(template.uriTemplate))); })),
         React__default["default"].createElement("h3", null,
             "\u63D0\u793A\u5217\u8868 (",
             prompts.length,
@@ -1006,4 +1006,5 @@ var MCPStatus = function (_a) {
 
 exports.MCPProvider = MCPProvider;
 exports.MCPStatus = MCPStatus;
+exports.useMCP = useMCP;
 //# sourceMappingURL=index.js.map
