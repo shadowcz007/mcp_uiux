@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import { MCPProvider, useMCP } from 'mcp-uiux';
 import './SciFiMCPStatus.css';
+
+
 const SciFiMCPStatus: React.FC<{
   loading: boolean;
   error: string | null;
@@ -133,6 +135,16 @@ const AppContent: React.FC = () => {
         </div>
       </div>
 
+
+      <SciFiMCPStatus
+        loading={loading}
+        error={error}
+        tools={tools}
+        resources={resources}
+        resourceTemplates={resourceTemplates}
+        prompts={prompts}
+      />
+
       <h3>工具列表 ({tools.length})</h3>
       <ul>
         {tools.map((tool, index) => (
@@ -147,14 +159,6 @@ const AppContent: React.FC = () => {
         ))}
       </ul>
 
-      <SciFiMCPStatus
-        loading={loading}
-        error={error}
-        tools={tools}
-        resources={resources}
-        resourceTemplates={resourceTemplates}
-        prompts={prompts}
-      />
     </div>
   );
 };
