@@ -940,6 +940,42 @@ function MCPProvider(_a) {
         } }, children));
 }
 
+var SciFiMCPStatus = function (_a) {
+    var loading = _a.loading, error = _a.error, tools = _a.tools, resources = _a.resources; _a.resourceTemplates; var prompts = _a.prompts;
+    return (React__default.createElement("div", { className: "sci-fi-container" },
+        React__default.createElement("div", { className: "hologram-title" },
+            React__default.createElement("h1", null, "MCP \u7CFB\u7EDF\u72B6\u6001\u76D1\u63A7"),
+            React__default.createElement("div", { className: "status-indicator" }, loading ? (React__default.createElement("span", { className: "pulse loading" }, "\u7CFB\u7EDF\u626B\u63CF\u4E2D...")) : error ? (React__default.createElement("span", { className: "pulse error" }, "\u8B66\u544A\uFF1A\u7CFB\u7EDF\u5F02\u5E38")) : (React__default.createElement("span", { className: "pulse active" }, "\u7CFB\u7EDF\u5728\u7EBF")))),
+        error && (React__default.createElement("div", { className: "error-panel" },
+            React__default.createElement("div", { className: "error-icon" }, "\u26A0"),
+            React__default.createElement("div", { className: "error-message" }, error))),
+        !loading && !error && (React__default.createElement("div", { className: "data-grid" },
+            React__default.createElement("div", { className: "module" },
+                React__default.createElement("div", { className: "module-header" },
+                    React__default.createElement("span", { className: "module-icon" }, "\u26A1"),
+                    React__default.createElement("h2", null, "\u7CFB\u7EDF\u5DE5\u5177\u5E93"),
+                    React__default.createElement("span", { className: "count" }, tools.length)),
+                React__default.createElement("div", { className: "scrollable-content" }, tools.map(function (tool, index) { return (React__default.createElement("div", { key: index, className: "item" },
+                    React__default.createElement("span", { className: "item-indicator" }),
+                    tool.name)); }))),
+            React__default.createElement("div", { className: "module" },
+                React__default.createElement("div", { className: "module-header" },
+                    React__default.createElement("span", { className: "module-icon" }, "\uD83D\uDCE6"),
+                    React__default.createElement("h2", null, "\u8D44\u6E90\u77E9\u9635"),
+                    React__default.createElement("span", { className: "count" }, resources.length)),
+                React__default.createElement("div", { className: "scrollable-content" }, resources.map(function (resource, index) { return (React__default.createElement("div", { key: index, className: "item" },
+                    React__default.createElement("span", { className: "item-indicator" }),
+                    decodeURIComponent(resource.uri))); }))),
+            React__default.createElement("div", { className: "module" },
+                React__default.createElement("div", { className: "module-header" },
+                    React__default.createElement("span", { className: "module-icon" }, "\uD83D\uDCA1"),
+                    React__default.createElement("h2", null, "AI \u63D0\u793A\u5E93"),
+                    React__default.createElement("span", { className: "count" }, prompts.length)),
+                React__default.createElement("div", { className: "scrollable-content" }, prompts.map(function (prompt, index) { return (React__default.createElement("div", { key: index, className: "item" },
+                    React__default.createElement("span", { className: "item-indicator" }),
+                    prompt.name)); })))))));
+};
+
 var MCPStatus = function (_a) {
     var _b = _a.serverUrl, serverUrl = _b === void 0 ? 'http://localhost:8080' : _b, _c = _a.resourcePath, resourcePath = _c === void 0 ? '' : _c, className = _a.className, style = _a.style, render = _a.render;
     var _d = useMCP(), connect = _d.connect, loading = _d.loading, error = _d.error, tools = _d.tools, resources = _d.resources, resourceTemplates = _d.resourceTemplates, prompts = _d.prompts;
@@ -949,36 +985,8 @@ var MCPStatus = function (_a) {
     if (render) {
         return render({ loading: loading, error: error, tools: tools, resources: resources, resourceTemplates: resourceTemplates, prompts: prompts });
     }
-    if (loading) {
-        return React__default.createElement("div", { className: className, style: style }, "\u6B63\u5728\u8FDE\u63A5 MCP \u670D\u52A1...");
-    }
-    if (error) {
-        return React__default.createElement("div", { className: className, style: style },
-            "\u8FDE\u63A5\u9519\u8BEF: ",
-            error);
-    }
     return (React__default.createElement("div", { className: className, style: style },
-        React__default.createElement("h2", null, "MCP \u8FDE\u63A5\u72B6\u6001"),
-        React__default.createElement("h3", null,
-            "\u5DE5\u5177\u5217\u8868 (",
-            tools.length,
-            ")"),
-        React__default.createElement("ul", null, tools.map(function (tool, index) { return (React__default.createElement("li", { key: index }, tool.name)); })),
-        React__default.createElement("h3", null,
-            "\u8D44\u6E90\u5217\u8868 (",
-            resources.length,
-            ")"),
-        React__default.createElement("ul", null, resources.map(function (resource, index) { return (React__default.createElement("li", { key: index }, decodeURIComponent(resource.uri))); })),
-        React__default.createElement("h3", null,
-            "\u8D44\u6E90\u6A21\u677F (",
-            resourceTemplates.length,
-            ")"),
-        React__default.createElement("ul", null, resourceTemplates.map(function (template, index) { return (React__default.createElement("li", { key: index }, decodeURIComponent(template.uriTemplate))); })),
-        React__default.createElement("h3", null,
-            "\u63D0\u793A\u5217\u8868 (",
-            prompts.length,
-            ")"),
-        React__default.createElement("ul", null, prompts.map(function (prompt, index) { return (React__default.createElement("li", { key: index }, prompt.name)); }))));
+        React__default.createElement(SciFiMCPStatus, { loading: loading, error: error, tools: tools, resources: resources, resourceTemplates: resourceTemplates, prompts: prompts })));
 };
 
 export { MCPProvider, MCPStatus, useMCP };
