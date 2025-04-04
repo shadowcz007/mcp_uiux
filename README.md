@@ -31,6 +31,74 @@ npm install mcp-uiux
 ## 使用示例
 
 ```typescript
+import React, { useEffect, useState } from 'react';
+import ReactDOM from 'react-dom/client';
+import { MCPProvider, useMCP, MCPStatus } from 'mcp-uiux';
+
+const AppContent: React.FC = () => {
+  const [serverUrl, setServerUrl] = useState('http://localhost:8080');
+  const [resourcePath, setResourcePath] = useState('');
+  const {
+    connect,
+    loading,
+    error,
+    tools,
+    resources,
+    resourceTemplates,
+    prompts
+  } = useMCP();
+
+  useEffect(() => {
+    connect(serverUrl, resourcePath);
+  }, [serverUrl, resourcePath]);
+
+  return (
+    <div style={{ padding: '20px' }}>
+      <h1>MCP UIUX 示例</h1>
+      <div style={{ marginBottom: '20px' }}>
+        <div>
+          <label>服务器地址：</label>
+          <input
+            type="text"
+            value={serverUrl}
+            onChange={(e) => setServerUrl(e.target.value)}
+            style={{ width: '300px', marginLeft: '10px' }}
+          />
+        </div>
+        <div style={{ marginTop: '10px' }}>
+          <label>资源路径过滤：</label>
+          <input
+            type="text"
+            value={resourcePath}
+            onChange={(e) => setResourcePath(e.target.value)}
+            style={{ width: '300px', marginLeft: '10px' }}
+          />
+        </div>
+      </div>
+      <MCPStatus
+        serverUrl={serverUrl}
+      />
+    </div>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <MCPProvider>
+      <AppContent />
+    </MCPProvider>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+
+```
+
+```typescript
 import React from 'react';
 import { MCPProvider, useMCP } from 'mcp-uiux';
 
