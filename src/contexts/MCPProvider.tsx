@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {  useContext, useEffect, ReactNode, useState } from 'react';
+import { useContext, useEffect, useState, useRef } from 'react';
 import { MCPClient } from './MCP';
 import { Tool, Resource, ResourceTemplate, Prompt, MCPClientConfig } from '../types';
 
@@ -30,7 +30,7 @@ const MCPContext = React.createContext<MCPContextType>({
 export const useMCP = () => useContext(MCPContext);
 
 export function MCPProvider({ children }: { children: React.ReactNode }) {
-    const [mcpClient, setMcpClient] = useState<MCPClient | null>(null);
+    const mcpClientRef = useRef<MCPClient | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [tools, setTools] = useState<any[]>([]);
@@ -40,11 +40,41 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
 
     const [lastConnectedUrl, setLastConnectedUrl] = useState<string | null>(null);
     const [lastResourceFilter, setLastResourceFilter] = useState<string>("");
+    
+    // 添加节流相关的状态和引用
+    const connectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const pendingConnectParamsRef = useRef<{url: string, filter: string} | null>(null);
+
+    // 断开连接函数
+    const disconnect = async () => {
+        if (mcpClientRef.current) {
+            try {
+                mcpClientRef.current.disconnect();
+                mcpClientRef.current = null;
+                // 清空所有状态数据
+                setTools([]);
+                setResources([]);
+                setResourceTemplates([]);
+                setPrompts([]);
+            } catch (e) {
+                console.warn('关闭连接时出错:', e);
+            }
+            // 返回一个Promise，延迟200ms后解析，确保连接完全关闭
+            return new Promise(resolve => setTimeout(resolve, 200));
+        }
+        return Promise.resolve(); // 如果没有客户端，立即返回已解析的Promise
+    };
 
     // 创建MCP客户端的函数
     const createClient = async (sseUrl: string, currentFilter: string) => {
         setLoading(true);
         setError(null);
+        
+        // 确保先断开任何现有连接
+        if (mcpClientRef.current) {
+            await disconnect();
+        }
+        
         // 清空之前的数据
         setTools([]);
         setResources([]);
@@ -113,7 +143,7 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
             // @ts-ignore
             window.mcpClient = client;
 
-            setMcpClient(client);
+            mcpClientRef.current = client;
             setLoading(false);
             return client;
         } catch (error) {
@@ -126,48 +156,82 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
-    // 初始连接函数
+    // 修改初始连接函数，添加节流逻辑
     const connect = async (sseUrl: string, resourceFilter?: string) => {
-        console.log(mcpClient);
-        if (mcpClient) {
-            try {
-                mcpClient.disconnect();
-            } catch (e) {
-                console.warn('关闭旧连接时出错:', e);
-            }
-        }
-
+        if (!(sseUrl && sseUrl.match('http'))) return;
+        
         const filter = resourceFilter || "";
-        console.log('正在连接MCP服务...');
-        const client = await createClient(sseUrl, filter);
-        if (client) {
-            setLastConnectedUrl(sseUrl);
-            setLastResourceFilter(filter);
+        
+        // 存储最新的连接参数
+        pendingConnectParamsRef.current = { url: sseUrl, filter };
+        
+        // 如果已经有一个定时器在等待，则清除它
+        if (connectTimeoutRef.current) {
+            clearTimeout(connectTimeoutRef.current);
         }
+        
+        // 设置一个新的定时器，300ms后执行实际的连接操作
+        connectTimeoutRef.current = setTimeout(async () => {
+            // 确保使用最新的连接参数
+            const params = pendingConnectParamsRef.current;
+            if (!params) return;
+            
+            // 重置待处理的连接参数
+            pendingConnectParamsRef.current = null;
+            
+            // 确保先断开现有连接
+            await disconnect();
+            
+            console.log('正在连接MCP服务...', params.url);
+            const client = await createClient(params.url, params.filter);
+            if (client) {
+                setLastConnectedUrl(params.url);
+                setLastResourceFilter(params.filter);
+            }
+            
+            // 清除定时器引用
+            connectTimeoutRef.current = null;
+        }, 300);
     };
 
-    // 重连函数
+    // 修改重连函数，也应用节流逻辑
     const reconnect = async (sseUrl?: string, resourceFilter?: string) => {
         // 使用提供的URL，或最后成功连接的URL，或当前客户端URL，或默认URL
-        const connectionUrl = sseUrl || lastConnectedUrl || mcpClient?.url || 'http://127.0.0.1:8080';
+        const connectionUrl = sseUrl || lastConnectedUrl || mcpClientRef.current?.url || 'http://127.0.0.1:8080';
         // 使用提供的过滤器或最后使用的过滤器
         const filter = resourceFilter !== undefined ? resourceFilter : lastResourceFilter;
-
-        if (mcpClient) {
-            try {
-                mcpClient.disconnect();
-            } catch (e) {
-                console.warn('关闭旧连接时出错:', e);
+        
+        // 存储最新的连接参数
+        pendingConnectParamsRef.current = { url: connectionUrl, filter };
+        
+        // 如果已经有一个定时器在等待，则清除它
+        if (connectTimeoutRef.current) {
+            clearTimeout(connectTimeoutRef.current);
+        }
+        
+        // 设置一个新的定时器，300ms后执行实际的重连操作
+        connectTimeoutRef.current = setTimeout(async () => {
+            // 确保使用最新的连接参数
+            const params = pendingConnectParamsRef.current;
+            if (!params) return;
+            
+            // 重置待处理的连接参数
+            pendingConnectParamsRef.current = null;
+            
+            // 确保先断开现有连接
+            await disconnect();
+            
+            console.log('正在重新连接MCP服务...', params.url);
+            const client = await createClient(params.url, params.filter);
+            if (client && !sseUrl) {
+                // 只有在使用保存的URL重连时才更新lastConnectedUrl
+                setLastConnectedUrl(params.url);
+                setLastResourceFilter(params.filter);
             }
-        }
-
-        console.log('正在重新连接MCP服务...');
-        const client = await createClient(connectionUrl, filter);
-        if (client && !sseUrl) {
-            // 只有在使用保存的URL重连时才更新lastConnectedUrl
-            setLastConnectedUrl(connectionUrl);
-            setLastResourceFilter(filter);
-        }
+            
+            // 清除定时器引用
+            connectTimeoutRef.current = null;
+        }, 300);
     };
 
     // 添加自动重连逻辑
@@ -183,23 +247,27 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
         }
     }, [error, lastConnectedUrl]);
 
-    // 组件卸载时清理连接
+    // 组件卸载时清理连接和定时器
     useEffect(() => {
         return () => {
-            if (mcpClient) {
+            if (mcpClientRef.current) {
                 try {
-                    mcpClient.disconnect();
+                    mcpClientRef.current.disconnect();
                 } catch (e) {
                     console.warn('关闭连接时出错:', e);
                 }
             }
+            
+            // 清理可能存在的定时器
+            if (connectTimeoutRef.current) {
+                clearTimeout(connectTimeoutRef.current);
+            }
         };
-    }, [mcpClient]);
-
+    }, []);
 
     return (
         <MCPContext.Provider value={{
-            mcpClient,
+            mcpClient: mcpClientRef.current,
             loading,
             error,
             reconnect,
