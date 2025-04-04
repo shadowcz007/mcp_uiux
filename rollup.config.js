@@ -1,34 +1,48 @@
 import typescript from 'rollup-plugin-typescript2';
-import pkg from './package.json';
+import { terser } from 'rollup-plugin-terser';
+import resolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
+ 
 
-export default {
-  input: 'src/index.ts',
-  output: [
-    {
-      file: pkg.main,
-      format: 'cjs',
-      exports: 'named',
-      sourcemap: true,
+export default [
+  // CommonJS
+  {
+    input: 'src/index.ts',
+    output: {
+      file: 'dist/index.js',
+      format: 'cjs'
     },
-    {
-      file: pkg.module,
-      format: 'es',
-      exports: 'named',
-      sourcemap: true,
+    external: ['react', 'react-dom'],
+    plugins: [typescript()]
+  },
+  // ES Module
+  {
+    input: 'src/index.ts', 
+    output: {
+      file: 'dist/index.esm.js',
+      format: 'es'
     },
-  ],
-  external: [...Object.keys(pkg.peerDependencies || {})],
-  plugins: [
-    typescript({
-      typescript: require('typescript'),
-      clean: true,
-      tsconfig: 'tsconfig.json',
-      tsconfigOverride: {
-        compilerOptions: {
-          module: 'esnext',
-          jsx: 'react'
-        }
+    external: ['react', 'react-dom'],
+    plugins: [typescript()]
+  },
+  // UMD
+  {
+    input: 'src/index.ts',
+    output: {
+      file: 'dist/mcp-uiux.umd.js',
+      format: 'umd',
+      name: 'MCPUiux',
+      globals: {
+        react: 'React',
+        'react-dom': 'ReactDOM'
       }
-    }),
-  ],
-};
+    },
+    external: ['react', 'react-dom'],
+    plugins: [
+      typescript(),
+      resolve(),
+      commonjs(),
+      terser()
+    ]
+  }
+];

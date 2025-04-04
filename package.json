@@ -1,9 +1,10 @@
 {
   "name": "mcp-uiux",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "MCP client and uiux",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
+  "unpkg": "dist/mcp-uiux.umd.js",
   "types": "dist/index.d.ts",
   "author": "shadow",
   "license": "MIT",
@@ -23,9 +24,12 @@
     "react-dom": ">=16.8.0"
   },
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^28.0.3",
+    "@rollup/plugin-node-resolve": "^16.0.1",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "rollup": "^2.79.1",
+    "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-typescript2": "^0.31.2",
     "typescript": "^4.9.5"
   }

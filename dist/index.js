@@ -765,6 +765,85 @@ var MCPClient = /** @class */ (function () {
     };
     return MCPClient;
 }());
+// 优化后的 useMCP hook
+var useMCP$1 = function (_a) {
+    var _b = _a.url, url = _b === void 0 ? 'http://localhost:8000' : _b, onToolsReady = _a.onToolsReady, onToolResult = _a.onToolResult, onError = _a.onError, onReady = _a.onReady;
+    var mcpClientRef = React.useRef(null);
+    React.useEffect(function () {
+        mcpClientRef.current = new MCPClient({
+            url: url,
+            onToolsReady: onToolsReady,
+            onToolResult: onToolResult,
+            onError: onError,
+            onReady: onReady
+        });
+        mcpClientRef.current.connect();
+        return function () {
+            var _a;
+            (_a = mcpClientRef.current) === null || _a === void 0 ? void 0 : _a.disconnect();
+        };
+    }, [url, onToolsReady, onToolResult, onError, onReady]);
+    return {
+        executeTool: React.useCallback(function (toolName, args) { return __awaiter(void 0, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                if (!mcpClientRef.current)
+                    throw new MCPError('MCP客户端未初始化');
+                return [2 /*return*/, mcpClientRef.current.executeTool(toolName, args)];
+            });
+        }); }, []),
+        reconnect: React.useCallback(function () {
+            var _a;
+            (_a = mcpClientRef.current) === null || _a === void 0 ? void 0 : _a.reconnect();
+        }, []),
+        getResources: React.useCallback(function () { return __awaiter(void 0, void 0, void 0, function () {
+            var _a;
+            return __generator(this, function (_b) {
+                return [2 /*return*/, (_a = mcpClientRef.current) === null || _a === void 0 ? void 0 : _a.getResources()];
+            });
+        }); }, []),
+        readResource: React.useCallback(function (uri) { return __awaiter(void 0, void 0, void 0, function () {
+            var _a;
+            return __generator(this, function (_b) {
+                return [2 /*return*/, (_a = mcpClientRef.current) === null || _a === void 0 ? void 0 : _a.readResource(uri)];
+            });
+        }); }, []),
+        getToolsList: React.useCallback(function () { return __awaiter(void 0, void 0, void 0, function () {
+            var _a;
+            return __generator(this, function (_b) {
+                return [2 /*return*/, (_a = mcpClientRef.current) === null || _a === void 0 ? void 0 : _a.getToolsList()];
+            });
+        }); }, []),
+        getPromptsList: React.useCallback(function () { return __awaiter(void 0, void 0, void 0, function () {
+            var _a;
+            return __generator(this, function (_b) {
+                return [2 /*return*/, (_a = mcpClientRef.current) === null || _a === void 0 ? void 0 : _a.getPromptsList()];
+            });
+        }); }, []),
+        getPrompt: React.useCallback(function (name, args) {
+            if (args === void 0) { args = {}; }
+            return __awaiter(void 0, void 0, void 0, function () {
+                var _a;
+                return __generator(this, function (_b) {
+                    return [2 /*return*/, (_a = mcpClientRef.current) === null || _a === void 0 ? void 0 : _a.getPrompt(name, args)];
+                });
+            });
+        }, []),
+        getResourceTemplates: React.useCallback(function () { return __awaiter(void 0, void 0, void 0, function () {
+            var _a;
+            return __generator(this, function (_b) {
+                return [2 /*return*/, (_a = mcpClientRef.current) === null || _a === void 0 ? void 0 : _a.getResourceTemplates()];
+            });
+        }); }, []),
+        expandUriByVariables: React.useCallback(function (template, variables) {
+            var _a;
+            return (_a = mcpClientRef.current) === null || _a === void 0 ? void 0 : _a.expandUriByVariables(template, variables);
+        }, []),
+        getTemplateVariables: React.useCallback(function (template) {
+            var _a;
+            return ((_a = mcpClientRef.current) === null || _a === void 0 ? void 0 : _a.getTemplateVariables(template)) || [];
+        }, [])
+    };
+};
 
 var MCPContext = React__namespace.createContext({
     mcpClient: null,
@@ -1017,5 +1096,4 @@ var MCPStatus = function (_a) {
 
 exports.MCPProvider = MCPProvider;
 exports.MCPStatus = MCPStatus;
-exports.useMCP = useMCP;
-//# sourceMappingURL=index.js.map
+exports.useMCP = useMCP$1;
