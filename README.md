@@ -189,5 +189,40 @@ MIT
 
 欢迎提交 Issue 和 Pull Request！
 
+## UMD 使用方式
+
+除了通过 npm 安装使用外，MCP UIUX 也支持通过 UMD 方式在浏览器中直接使用：
+
+### 通过 CDN 引入
+
+```html
+<!-- 引入 React 和 ReactDOM -->
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+<!-- 引入 MCP UIUX -->
+<script src="https://unpkg.com/mcp-uiux@latest/dist/index.umd.min.js"></script>
+```
+
+### 基本使用
+
+```html
+<script>
+  // 使用全局变量 MCPUIUX
+  const { MCPProvider, useMCP, MCPStatus } = MCPUIUX;
+  
+  // 在你的 React 组件中使用
+  const App = () => {
+    return (
+      <MCPProvider>
+        {/* 你的应用内容 */}
+      </MCPProvider>
+    );
+  };
+</script>
+```
+
+完整示例请参考 [umd-example.html](./example/umd-example.html)
+
 
 
