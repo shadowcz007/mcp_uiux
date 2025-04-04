@@ -779,7 +779,8 @@
         tools: [],
         resources: [],
         resourceTemplates: [],
-        prompts: []
+        prompts: [],
+        serverInfo: null
     });
     var useMCP = function () { return React.useContext(MCPContext); };
     function MCPProvider(_a) {
@@ -792,8 +793,9 @@
         var _e = React.useState([]), resources = _e[0], setResources = _e[1];
         var _f = React.useState([]), resourceTemplates = _f[0], setResourceTemplates = _f[1];
         var _g = React.useState([]), prompts = _g[0], setPrompts = _g[1];
-        var _h = React.useState(null), lastConnectedUrl = _h[0], setLastConnectedUrl = _h[1];
-        var _j = React.useState(""), lastResourceFilter = _j[0], setLastResourceFilter = _j[1];
+        var _h = React.useState(null), serverInfo = _h[0], setServerInfo = _h[1];
+        var _j = React.useState(null), lastConnectedUrl = _j[0], setLastConnectedUrl = _j[1];
+        var _k = React.useState(""), lastResourceFilter = _k[0], setLastResourceFilter = _k[1];
         // 添加节流相关的状态和引用
         var connectTimeoutRef = React.useRef(null);
         var pendingConnectParamsRef = React.useRef(null);
@@ -809,6 +811,7 @@
                         setResources([]);
                         setResourceTemplates([]);
                         setPrompts([]);
+                        setServerInfo(null);
                     }
                     catch (e) {
                         console.warn('关闭连接时出错:', e);
@@ -838,6 +841,7 @@
                         setResources([]);
                         setResourceTemplates([]);
                         setPrompts([]);
+                        setServerInfo(null);
                         _a.label = 3;
                     case 3:
                         _a.trys.push([3, 5, , 6]);
@@ -880,6 +884,8 @@
                             },
                             onReady: function (data) {
                                 console.log('MCP客户端连接成功', data);
+                                // 保存 serverInfo
+                                setServerInfo(data);
                             }
                         });
                         // 连接到服务器
@@ -1035,7 +1041,8 @@
                 tools: tools,
                 resources: resources,
                 resourceTemplates: resourceTemplates,
-                prompts: prompts
+                prompts: prompts,
+                serverInfo: serverInfo
             } }, children));
     }
 
@@ -1070,15 +1077,17 @@
     styleInject(css_248z,{"insertAt":"top"});
 
     var SciFiMCPStatus = function (_a) {
-        var loading = _a.loading, error = _a.error, tools = _a.tools, resources = _a.resources; _a.resourceTemplates; var prompts = _a.prompts;
+        var serverInfo = _a.serverInfo, loading = _a.loading, error = _a.error, tools = _a.tools, resources = _a.resources; _a.resourceTemplates; var prompts = _a.prompts;
         return (React__default["default"].createElement("div", { className: "sci-fi-container" },
             React__default["default"].createElement("div", { className: "hologram-title" },
                 React__default["default"].createElement("h1", null, "MCP \u7CFB\u7EDF\u72B6\u6001\u76D1\u63A7"),
-                React__default["default"].createElement("div", { className: "status-indicator" }, loading ? (React__default["default"].createElement("span", { className: "pulse loading" }, "\u7CFB\u7EDF\u626B\u63CF\u4E2D...")) : error ? (React__default["default"].createElement("span", { className: "pulse error" }, "\u8B66\u544A\uFF1A\u7CFB\u7EDF\u5F02\u5E38")) : (React__default["default"].createElement("span", { className: "pulse active" }, "\u7CFB\u7EDF\u5728\u7EBF")))),
+                React__default["default"].createElement("div", { className: "status-indicator" }, loading ? (React__default["default"].createElement("span", { className: "pulse loading" }, "\u7CFB\u7EDF\u626B\u63CF\u4E2D...")) : error ? (React__default["default"].createElement("span", { className: "pulse error" }, "\u8B66\u544A\uFF1A\u7CFB\u7EDF\u5F02\u5E38")) : (React__default["default"].createElement("span", { className: "pulse active" },
+                    "\u7CFB\u7EDF\u5728\u7EBF ",
+                    (serverInfo === null || serverInfo === void 0 ? void 0 : serverInfo.name) && "- ".concat(serverInfo.name))))),
             error && (React__default["default"].createElement("div", { className: "error-panel" },
                 React__default["default"].createElement("div", { className: "error-icon" }, "\u26A0"),
                 React__default["default"].createElement("div", { className: "error-message" }, error))),
-            !loading && !error && (React__default["default"].createElement("div", { className: "data-grid" },
+            !loading && !error && tools.length > 0 && (React__default["default"].createElement("div", { className: "data-grid" },
                 React__default["default"].createElement("div", { className: "module" },
                     React__default["default"].createElement("div", { className: "module-header" },
                         React__default["default"].createElement("span", { className: "module-icon" }, "\u26A1"),
@@ -1087,7 +1096,7 @@
                     React__default["default"].createElement("div", { className: "scrollable-content" }, tools.map(function (tool, index) { return (React__default["default"].createElement("div", { key: index, className: "item" },
                         React__default["default"].createElement("span", { className: "item-indicator" }),
                         tool.name)); }))),
-                React__default["default"].createElement("div", { className: "module" },
+                resources.length > 0 && React__default["default"].createElement("div", { className: "module" },
                     React__default["default"].createElement("div", { className: "module-header" },
                         React__default["default"].createElement("span", { className: "module-icon" }, "\uD83D\uDCE6"),
                         React__default["default"].createElement("h2", null, "\u8D44\u6E90\u77E9\u9635"),
@@ -1095,7 +1104,7 @@
                     React__default["default"].createElement("div", { className: "scrollable-content" }, resources.map(function (resource, index) { return (React__default["default"].createElement("div", { key: index, className: "item" },
                         React__default["default"].createElement("span", { className: "item-indicator" }),
                         decodeURIComponent(resource.uri))); }))),
-                React__default["default"].createElement("div", { className: "module" },
+                prompts.length > 0 && React__default["default"].createElement("div", { className: "module" },
                     React__default["default"].createElement("div", { className: "module-header" },
                         React__default["default"].createElement("span", { className: "module-icon" }, "\uD83D\uDCA1"),
                         React__default["default"].createElement("h2", null, "AI \u63D0\u793A\u5E93"),
@@ -1107,7 +1116,7 @@
 
     var MCPStatus = function (_a) {
         var _b = _a.serverUrl, serverUrl = _b === void 0 ? 'http://localhost:8080' : _b, _c = _a.resourcePath, resourcePath = _c === void 0 ? '' : _c, className = _a.className, style = _a.style, render = _a.render;
-        var _d = useMCP(), connect = _d.connect, loading = _d.loading, error = _d.error, tools = _d.tools, resources = _d.resources, resourceTemplates = _d.resourceTemplates, prompts = _d.prompts;
+        var _d = useMCP(), connect = _d.connect, loading = _d.loading, error = _d.error, tools = _d.tools, resources = _d.resources, resourceTemplates = _d.resourceTemplates, prompts = _d.prompts, serverInfo = _d.serverInfo;
         React.useEffect(function () {
             connect(serverUrl, resourcePath);
         }, [serverUrl, resourcePath]);
@@ -1115,7 +1124,7 @@
             return render({ loading: loading, error: error, tools: tools, resources: resources, resourceTemplates: resourceTemplates, prompts: prompts });
         }
         return (React__default["default"].createElement("div", { className: className, style: style },
-            React__default["default"].createElement(SciFiMCPStatus, { loading: loading, error: error, tools: tools, resources: resources, resourceTemplates: resourceTemplates, prompts: prompts })));
+            React__default["default"].createElement(SciFiMCPStatus, { serverInfo: serverInfo, loading: loading, error: error, tools: tools, resources: resources, resourceTemplates: resourceTemplates, prompts: prompts })));
     };
 
     exports.MCPProvider = MCPProvider;

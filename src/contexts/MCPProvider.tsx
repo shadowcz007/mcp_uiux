@@ -13,6 +13,7 @@ interface MCPContextType {
     resources: any[];
     resourceTemplates: any[];
     prompts: any[];
+    serverInfo: any | null;
 }
 
 const MCPContext = React.createContext<MCPContextType>({
@@ -24,7 +25,8 @@ const MCPContext = React.createContext<MCPContextType>({
     tools: [],
     resources: [],
     resourceTemplates: [],
-    prompts: []
+    prompts: [],
+    serverInfo: null
 });
 
 export const useMCP = () => useContext(MCPContext);
@@ -37,6 +39,7 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
     const [resources, setResources] = useState<any[]>([]);
     const [resourceTemplates, setResourceTemplates] = useState<any[]>([]);
     const [prompts, setPrompts] = useState<any[]>([]);
+    const [serverInfo, setServerInfo] = useState<any | null>(null);
 
     const [lastConnectedUrl, setLastConnectedUrl] = useState<string | null>(null);
     const [lastResourceFilter, setLastResourceFilter] = useState<string>("");
@@ -56,6 +59,7 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
                 setResources([]);
                 setResourceTemplates([]);
                 setPrompts([]);
+                setServerInfo(null);
             } catch (e) {
                 console.warn('关闭连接时出错:', e);
             }
@@ -80,6 +84,7 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
         setResources([]);
         setResourceTemplates([]);
         setPrompts([]);
+        setServerInfo(null);
 
         try {
             const client = new MCPClient({
@@ -134,6 +139,8 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
                 },
                 onReady: (data) => {
                     console.log('MCP客户端连接成功', data);
+                    // 保存 serverInfo
+                    setServerInfo(data);
                 }
             });
 
@@ -275,7 +282,8 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
             tools,
             resources,
             resourceTemplates,
-            prompts
+            prompts,
+            serverInfo
         }}>
             {children}
         </MCPContext.Provider>

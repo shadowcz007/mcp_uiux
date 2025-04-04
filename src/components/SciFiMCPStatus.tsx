@@ -1,13 +1,14 @@
 import React from 'react';
 import './SciFiMCPStatus.css'
 export const SciFiMCPStatus: React.FC<{
+    serverInfo: any | null;
     loading: boolean;
     error: string | null;
     tools: any[];
     resources: any[];
     resourceTemplates: any[];
     prompts: any[];
-}> = ({ loading, error, tools, resources, resourceTemplates, prompts }) => {
+}> = ({ serverInfo, loading, error, tools, resources, resourceTemplates, prompts }) => {
     return (
         <div className="sci-fi-container">
             {/* 全息投影效果的标题 */}
@@ -19,7 +20,7 @@ export const SciFiMCPStatus: React.FC<{
                     ) : error ? (
                         <span className="pulse error">警告：系统异常</span>
                     ) : (
-                        <span className="pulse active">系统在线</span>
+                        <span className="pulse active">系统在线 {serverInfo?.name && `- ${serverInfo.name}`}</span>
                     )}
                 </div>
             </div>
@@ -31,7 +32,7 @@ export const SciFiMCPStatus: React.FC<{
                 </div>
             )}
 
-            {!loading && !error && (
+            {!loading && !error && tools.length > 0 && (
                 <div className="data-grid">
                     {/* 工具模块 */}
                     <div className="module">
@@ -51,7 +52,7 @@ export const SciFiMCPStatus: React.FC<{
                     </div>
 
                     {/* 资源模块 */}
-                    <div className="module">
+                    {resources.length > 0 && <div className="module">
                         <div className="module-header">
                             <span className="module-icon">📦</span>
                             <h2>资源矩阵</h2>
@@ -65,10 +66,10 @@ export const SciFiMCPStatus: React.FC<{
                                 </div>
                             ))}
                         </div>
-                    </div>
+                    </div>}
 
                     {/* 提示模块 */}
-                    <div className="module">
+                    {prompts.length > 0 && <div className="module">
                         <div className="module-header">
                             <span className="module-icon">💡</span>
                             <h2>AI 提示库</h2>
@@ -82,7 +83,7 @@ export const SciFiMCPStatus: React.FC<{
                                 </div>
                             ))}
                         </div>
-                    </div>
+                    </div>}
                 </div>
             )}
         </div>

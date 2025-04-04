@@ -1,6 +1,7 @@
 import React from 'react';
 import './SciFiMCPStatus.css';
 export declare const SciFiMCPStatus: React.FC<{
+    serverInfo: any | null;
     loading: boolean;
     error: string | null;
     tools: any[];

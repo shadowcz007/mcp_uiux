@@ -32,7 +32,8 @@ export const MCPStatus: React.FC<MCPStatusProps> = ({
     tools, 
     resources, 
     resourceTemplates, 
-    prompts 
+    prompts,
+    serverInfo
   } = useMCP();
 
   useEffect(() => {
@@ -46,6 +47,7 @@ export const MCPStatus: React.FC<MCPStatusProps> = ({
   return (
     <div className={className} style={style}>
       <SciFiMCPStatus
+        serverInfo={serverInfo}
         loading={loading}
         error={error}
         tools={tools}

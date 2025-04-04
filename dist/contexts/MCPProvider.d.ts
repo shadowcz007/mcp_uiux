@@ -10,6 +10,7 @@ interface MCPContextType {
     resources: any[];
     resourceTemplates: any[];
     prompts: any[];
+    serverInfo: any | null;
 }
 export declare const useMCP: () => MCPContextType;
 export declare function MCPProvider({ children }: {
