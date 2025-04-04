@@ -1,5 +1,6 @@
 import typescript from 'rollup-plugin-typescript2';
 import pkg from './package.json';
+import postcss from 'rollup-plugin-postcss';
 
 export default {
   input: 'src/index.ts',
@@ -28,6 +29,13 @@ export default {
           module: 'esnext',
           jsx: 'react'
         }
+      }
+    }),
+    postcss({
+      extensions: ['.css'],
+      minimize: true,
+      inject: {
+        insertAt: 'top'
       }
     }),
   ],

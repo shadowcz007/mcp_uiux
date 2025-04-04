@@ -1,5 +1,5 @@
 import React from 'react';
-
+import './SciFiMCPStatus.css'
 export const SciFiMCPStatus: React.FC<{
     loading: boolean;
     error: string | null;
