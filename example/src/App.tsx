@@ -13,7 +13,7 @@ const AppContent: React.FC = () => {
     tools,
     resources,
     resourceTemplates,
-    prompts
+    prompts, 
   } = useMCP();
 
   useEffect(() => {

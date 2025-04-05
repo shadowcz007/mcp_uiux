@@ -304,7 +304,7 @@
                     }); });
                     // 处理 message 事件
                     this.eventSource.addEventListener('message', function (event) { return __awaiter(_this, void 0, void 0, function () {
-                        var message, _a, name_1, version, capabilities, toolsWithExecute, resourceTemplates, index, uri, error_3;
+                        var message, _a, name_1, version, capabilities, resourceTemplates, index, uri, error_3;
                         var _this = this;
                         var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
                         return __generator(this, function (_q) {
@@ -335,8 +335,9 @@
                                 case 2:
                                     if ((_c = message.result) === null || _c === void 0 ? void 0 : _c.tools) {
                                         console.log('获取到工具列表:', this.sessionId, message.result.tools);
-                                        toolsWithExecute = message.result.tools.map(function (tool) { return (__assign(__assign({}, tool), { fromServerName: _this.serverName, execute: function (args) { return _this.executeTool(tool.name, args); } })); });
-                                        (_d = this.onToolsReady) === null || _d === void 0 ? void 0 : _d.call(this, toolsWithExecute);
+                                        // 为每个工具添加执行方法
+                                        message.result.tools = message.result.tools.map(function (tool) { return (__assign(__assign({}, tool), { fromServerName: _this.serverName, execute: function (args) { return _this.executeTool(tool.name, args); } })); });
+                                        (_d = this.onToolsReady) === null || _d === void 0 ? void 0 : _d.call(this, message.result.tools);
                                         this.handleCallback(message);
                                     }
                                     else if ((_e = message.result) === null || _e === void 0 ? void 0 : _e.resources) {
@@ -363,6 +364,14 @@
                                     }
                                     else if ((_j = message.result) === null || _j === void 0 ? void 0 : _j.prompts) {
                                         console.log('获取到提示列表:', message.result.prompts);
+                                        // 为每个提示添加执行方法
+                                        message.result.prompts = message.result.prompts.map(function (prompt) {
+                                            var np = __assign(__assign({}, prompt), { fromServerName: _this.serverName });
+                                            if (prompt.arguments) {
+                                                np.execute = function (args) { return _this.getPrompt(prompt.name, args); };
+                                            }
+                                            return np;
+                                        });
                                         (_k = this.onPromptsReady) === null || _k === void 0 ? void 0 : _k.call(this, message.result.prompts);
                                         this.handleCallback(message);
                                     }

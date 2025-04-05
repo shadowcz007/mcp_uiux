@@ -28,7 +28,10 @@ export interface ResourceTemplate {
   uri?: string
   uriTemplate?: string
   _variables?: string[]
-  _expandUriByVariables?: (uri: string, variables: Record<string, string>) => string
+  _expandUriByVariables?: (
+    uri: string,
+    variables: Record<string, string>
+  ) => string
   [key: string]: any
 }
 
@@ -51,7 +54,7 @@ interface PendingCall {
 
 // MCPClient 类的错误类型
 export class MCPError extends Error {
-  constructor(message: string, public code?: string) {
+  constructor (message: string, public code?: string) {
     super(message)
     this.name = 'MCPError'
   }
@@ -63,7 +66,9 @@ export class MCPClient {
   private onToolResult?: (content: any, isError: boolean) => void
   private onError?: (error: Error) => void
   private onResourcesReady?: (resources: Resource[]) => void
-  private onResourceTemplatesReady?: (resourceTemplates: ResourceTemplate[]) => void
+  private onResourceTemplatesReady?: (
+    resourceTemplates: ResourceTemplate[]
+  ) => void
   private onPromptsReady?: (prompts: Prompt[]) => void
   private onReady?: (data: ServerInfo) => void
   private sessionId: string | null = null
@@ -135,12 +140,11 @@ export class MCPClient {
   }
 
   // 添加错误处理的辅助方法
-  private handleError(error: unknown, customMessage: string): never {
-    const mcpError = error instanceof MCPError 
-      ? error 
-      : new MCPError(
-          error instanceof Error ? error.message : customMessage
-        )
+  private handleError (error: unknown, customMessage: string): never {
+    const mcpError =
+      error instanceof MCPError
+        ? error
+        : new MCPError(error instanceof Error ? error.message : customMessage)
     this.onError?.(mcpError)
     throw mcpError
   }
@@ -288,12 +292,12 @@ export class MCPClient {
           else if (message.result?.tools) {
             console.log('获取到工具列表:', this.sessionId, message.result.tools)
             // 为每个工具添加执行方法
-            const toolsWithExecute = message.result.tools.map((tool: any) => ({
+            message.result.tools = message.result.tools.map((tool: any) => ({
               ...tool,
               fromServerName: this.serverName,
               execute: (args: any) => this.executeTool(tool.name, args)
             }))
-            this.onToolsReady?.(toolsWithExecute)
+            this.onToolsReady?.(message.result.tools)
 
             this.handleCallback(message)
           } else if (message.result?.resources) {
@@ -327,11 +331,28 @@ export class MCPClient {
               )
             }
 
-            this.onResourceTemplatesReady?.(this.processResourceTemplates(resourceTemplates))
+            this.onResourceTemplatesReady?.(
+              this.processResourceTemplates(resourceTemplates)
+            )
 
             this.handleCallback(message)
           } else if (message.result?.prompts) {
             console.log('获取到提示列表:', message.result.prompts)
+
+            // 为每个提示添加执行方法
+            message.result.prompts = message.result.prompts.map(
+              (prompt: any) => {
+                let np = {
+                  ...prompt,
+                  fromServerName: this.serverName
+                }
+                if (prompt.arguments) {
+                  np.execute = (args: any) => this.getPrompt(prompt.name, args)
+                }
+                return np
+              }
+            )
+
             this.onPromptsReady?.(message.result.prompts)
             this.handleCallback(message)
           }
@@ -408,23 +429,26 @@ export class MCPClient {
   }
 
   // 添加类型安全的回调处理
-  private handleCallback(message: any) {
+  private handleCallback (message: any) {
     const callId = message.id
     if (!callId || !this.pendingCalls.has(callId)) return
 
     const { resolve } = this.pendingCalls.get(callId) as PendingCall
     this.pendingCalls.delete(callId)
 
-    const result = message.result?.content ?? message.result ?? {
-      method: message.method,
-      params: message.params
-    }
+    const result = message.result?.content ??
+      message.result ?? {
+        method: message.method,
+        params: message.params
+      }
 
     resolve(result)
   }
 
   // 添加类型安全的资源模板处理
-  private processResourceTemplates(templates: ResourceTemplate[]): ResourceTemplate[] {
+  private processResourceTemplates (
+    templates: ResourceTemplate[]
+  ): ResourceTemplate[] {
     return templates.map(template => ({
       ...template,
       _variables: this.getTemplateVariables(template),
@@ -693,7 +717,10 @@ export interface MCPHookResult {
   getPromptsList: () => Promise<Prompt[]>
   getPrompt: (name: string, args?: any) => Promise<any>
   getResourceTemplates: () => Promise<ResourceTemplate[]>
-  expandUriByVariables: (template: string, variables: Record<string, string>) => string | undefined
+  expandUriByVariables: (
+    template: string,
+    variables: Record<string, string>
+  ) => string | undefined
   getTemplateVariables: (template: any) => string[]
 }
 
