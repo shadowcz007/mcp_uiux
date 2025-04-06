@@ -1092,7 +1092,12 @@ var SciFiMCPStatus = function (_a) {
                     React__default.createElement("span", { className: "module-icon" }, "\uD83D\uDCA1"),
                     React__default.createElement("h2", null, "AI \u63D0\u793A\u5E93"),
                     React__default.createElement("span", { className: "count" }, prompts.length)),
-                React__default.createElement("div", { className: "scrollable-content" }, prompts.map(function (prompt, index) { return (React__default.createElement("div", { key: index, className: "item" },
+                React__default.createElement("div", { className: "scrollable-content" }, prompts.map(function (prompt, index) { return (React__default.createElement("div", { key: index, className: "item", onClick: function () {
+                        prompt.execute({
+                            name: prompt.name,
+                            arguments: prompt.arguments
+                        });
+                    } },
                     React__default.createElement("span", { className: "item-indicator" }),
                     prompt.name)); })))))));
 };
