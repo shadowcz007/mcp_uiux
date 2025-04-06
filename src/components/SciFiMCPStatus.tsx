@@ -77,13 +77,7 @@ export const SciFiMCPStatus: React.FC<{
                         </div>
                         <div className="scrollable-content">
                             {prompts.map((prompt, index) => (
-                                <div key={index} className="item"
-                                    onClick={() => {
-                                        prompt.execute({
-                                            name: prompt.name,
-                                            arguments: prompt.arguments
-                                        })
-                                    }}
+                                <div key={index} className="item" 
                                 >
                                     <span className="item-indicator"></span>
                                     {prompt.name}
