@@ -1,5 +1,8 @@
 import * as React from 'react';
 import React__default, { useContext, useRef, useState, useEffect } from 'react';
+import { Survey } from 'survey-react-ui';
+import { Model } from 'survey-core';
+import 'survey-core/survey-core.min.css';
 
 /******************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -1111,5 +1114,178 @@ var MCPStatus = function (_a) {
         React__default.createElement(SciFiMCPStatus, { serverInfo: serverInfo, loading: loading, error: error, tools: tools, resources: resources, resourceTemplates: resourceTemplates, prompts: prompts })));
 };
 
-export { MCPProvider, MCPStatus, useMCP };
+// 将 JSON Schema 转换为 SurveyJS 元素
+var convertSchemaToSurveyElement = function (schema, name, title) {
+    if (name === void 0) { name = ''; }
+    if (title === void 0) { title = ''; }
+    if (!schema)
+        return null;
+    // 使用传入的名称或生成一个默认名称
+    var elementName = name || 'field_' + Math.random().toString(36).substr(2, 9);
+    // 使用传入的标题或将名称转换为更可读的形式
+    var elementTitle = title || (name === null || name === void 0 ? void 0 : name.replace(/_/g, ' ')) || elementName;
+    switch (schema.type) {
+        case 'string':
+            return {
+                type: 'text',
+                name: elementName,
+                title: elementTitle,
+                isRequired: schema.required || false
+            };
+        case 'number':
+        case 'integer':
+            return {
+                type: 'number',
+                name: elementName,
+                title: elementTitle,
+                isRequired: schema.required || false
+            };
+        case 'boolean':
+            return {
+                type: 'boolean',
+                name: elementName,
+                title: elementTitle,
+                isRequired: schema.required || false
+            };
+        case 'array':
+            if (schema.items.type === 'string' || schema.items.type === 'number' || schema.items.type === 'integer') {
+                return {
+                    type: 'matrixdynamic',
+                    name: elementName,
+                    title: elementTitle,
+                    columns: [
+                        {
+                            cellType: schema.items.type === 'number' || schema.items.type === 'integer' ? 'number' : 'text',
+                            name: "value",
+                            title: ' '
+                        }
+                    ],
+                    rowCount: 1,
+                    minRowCount: 0,
+                    addRowText: "\u6DFB\u52A0".concat(elementTitle),
+                    removeRowText: '删除',
+                    isRequired: schema.required || false,
+                    showHeader: false,
+                    confirmDelete: false
+                };
+            }
+            else {
+                // 复杂类型的数组保持原来的 paneldynamic 处理方式
+                return {
+                    type: 'paneldynamic',
+                    name: elementName,
+                    title: elementTitle,
+                    templateElements: [convertSchemaToSurveyElement(schema.items, 'item')],
+                    panelCount: 1,
+                    minPanelCount: 1,
+                    addPanelText: "\u6DFB\u52A0".concat(elementTitle),
+                    removePanelText: '删除',
+                    isRequired: schema.required || false
+                };
+            }
+        case 'object':
+            var elements = Object.entries(schema.properties || {}).map(function (_a) {
+                var propName = _a[0], propSchema = _a[1];
+                return convertSchemaToSurveyElement(propSchema, propName);
+            }).filter(Boolean);
+            if (name) {
+                // 如果是嵌套对象，使用 panel
+                return {
+                    type: 'panel',
+                    name: elementName,
+                    title: elementTitle,
+                    elements: elements,
+                    isRequired: schema.required || false
+                };
+            }
+            else {
+                // 如果是根对象，直接返回元素数组
+                return elements;
+            }
+        default:
+            console.warn("Unsupported schema type: ".concat(schema.type));
+            return null;
+    }
+};
+// 将工具参数转换为SurveyJS格式
+var mapToolParamsToSurveyJson = function (tool) {
+    if (!tool || !tool.inputSchema)
+        return { elements: [] };
+    console.log('tool.inputSchema', tool.inputSchema);
+    // 检查是否为空对象 schema
+    if (tool.inputSchema.type === 'object' &&
+        (!tool.inputSchema.properties || Object.keys(tool.inputSchema.properties).length === 0)) {
+        return {
+            elements: [{
+                    type: 'text',
+                    name: '_',
+                    title: '_',
+                    isRequired: false
+                }],
+            showQuestionNumbers: false,
+            showNavigationButtons: true,
+            completeText: "执行",
+            pageNextText: "下一步",
+            pagePrevText: "上一步"
+        };
+    }
+    var elements = convertSchemaToSurveyElement(tool.inputSchema);
+    return {
+        elements: Array.isArray(elements) ? elements : [elements],
+        showQuestionNumbers: false,
+        completeText: "执行",
+        pageNextText: "下一步",
+        pagePrevText: "上一步"
+    };
+};
+// 工具表单组件
+var InputSchemaForm = function (_a) {
+    var tool = _a.tool, onComplete = _a.onComplete;
+    var _b = useState(null), survey = _b[0], setSurvey = _b[1];
+    // console.log('InputSchemaForm', tool);
+    useEffect(function () {
+        if (!tool)
+            return;
+        var surveyJson = mapToolParamsToSurveyJson(tool);
+        var surveyModel = new Model(surveyJson);
+        // 设置完成事件
+        surveyModel.onComplete.add(function (sender) { return __awaiter(void 0, void 0, void 0, function () {
+            var data_1, result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!onComplete) return [3 /*break*/, 2];
+                        data_1 = __assign({}, sender.data);
+                        // 处理数组格式
+                        if (tool.inputSchema && tool.inputSchema.type === 'object' && tool.inputSchema.properties) {
+                            Object.entries(tool.inputSchema.properties).forEach(function (_a) {
+                                var key = _a[0], prop = _a[1];
+                                if (prop.type === 'array' &&
+                                    (prop.items.type === 'string' || prop.items.type === 'number' || prop.items.type === 'integer') &&
+                                    Array.isArray(data_1[key])) {
+                                    // 将 [{value: 'a'}, {value: 'b'}] 转换为 ['a', 'b']
+                                    data_1[key] = data_1[key].map(function (item) { return item.value; });
+                                }
+                            });
+                        }
+                        return [4 /*yield*/, tool.execute(data_1)];
+                    case 1:
+                        result = _a.sent();
+                        onComplete({
+                            input: data_1,
+                            output: result
+                        });
+                        _a.label = 2;
+                    case 2: return [2 /*return*/];
+                }
+            });
+        }); });
+        setSurvey(surveyModel);
+    }, [tool, onComplete]);
+    if (!survey)
+        return null;
+    return React__default.createElement(Survey, { model: survey });
+};
+
+export { InputSchemaForm, MCPProvider, MCPStatus, useMCP };
 //# sourceMappingURL=index.esm.js.map

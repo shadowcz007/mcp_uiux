@@ -135,7 +135,7 @@ const mapToolParamsToSurveyJson = (tool: any) => {
 };
 
 // 工具表单组件
-const InputSchemaForm = ({ tool, onComplete }) => {
+const InputSchemaForm = ({ tool, onComplete }:any) => {
   const [survey, setSurvey] = useState(null);
   // console.log('InputSchemaForm', tool);
   useEffect(() => {
@@ -146,9 +146,9 @@ const InputSchemaForm = ({ tool, onComplete }) => {
     const surveyModel: any = new Model(surveyJson);
 
     // 设置完成事件
-    surveyModel.onComplete.add(async (sender) => {
+    surveyModel.onComplete.add(async (sender:any) => {
       if (onComplete) {
-        const data = { ...sender.data };
+        const data:any = { ...sender.data };
 
         // 处理数组格式
         if (tool.inputSchema && tool.inputSchema.type === 'object' && tool.inputSchema.properties) {
@@ -157,7 +157,7 @@ const InputSchemaForm = ({ tool, onComplete }) => {
               (prop.items.type === 'string' || prop.items.type === 'number' || prop.items.type === 'integer') &&
               Array.isArray(data[key])) {
               // 将 [{value: 'a'}, {value: 'b'}] 转换为 ['a', 'b']
-              data[key] = data[key].map(item => item.value);
+              data[key] = data[key].map((item:any) => item.value);
             }
           });
         }

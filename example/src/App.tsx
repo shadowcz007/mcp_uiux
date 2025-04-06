@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
-import { MCPProvider, useMCP, MCPStatus } from 'mcp-uiux';
-import InputSchemaForm from './InputSchemaForm';
+import { MCPProvider, useMCP, MCPStatus, InputSchemaForm } from 'mcp-uiux';
 const AppContent: React.FC = () => {
   const [serverUrl, setServerUrl] = useState('');
   const [resourcePath, setResourcePath] = useState('');

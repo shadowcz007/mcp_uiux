@@ -5,9 +5,7 @@
   "dependencies": {
     "mcp-uiux": "file:..",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "survey-core": "^2.0.3",
-    "survey-react-ui": "^2.0.3"
+    "react-dom": "^18.2.0" 
   },
   "devDependencies": {
     "@types/react": "^18.0.0",
