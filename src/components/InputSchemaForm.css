@@ -1,6 +1,5 @@
 .sd-container-modern{
-  margin: 18px;
-
+  margin: 18px; 
 }
 .sd-btn {
   border-radius: 5px;
@@ -9,7 +8,7 @@
   width: 88px;
   background: rgba(0, 255, 255, .05);
   border: none;
-  margin: 12px;
+  margin: 12px 0;
   cursor: pointer;
   }
 

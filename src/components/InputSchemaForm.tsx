@@ -161,7 +161,7 @@ const InputSchemaForm = ({ tool, onComplete }: any) => {
             }
           });
         }
-
+        setSurvey(null)
         // console.log('sender.data', data);
         const result = await tool.execute(data);
         onComplete({

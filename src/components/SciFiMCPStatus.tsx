@@ -50,14 +50,15 @@ export const SciFiMCPStatus: React.FC<{
                 </div>
             )}
 
-            {
-                Object.keys(notifications).map((key, index) => (
-                    <div key={index}>
-                        {key}: {notifications[key]}
-                    </div>
-                ))
-            }
-
+            {Object.keys(notifications).length > 0 && <div className='module' style={{ margin: 20 }}>
+                {
+                    Object.keys(notifications).map((key, index) => (
+                        <div key={index}>
+                            {key}: {notifications[key]}
+                        </div>
+                    ))
+                }
+            </div>}
             {!loading && !error && (<div style={{ display: 'flex' }}>
                 <div className="data-grid">
                     {/* 工具模块 */}
@@ -114,8 +115,10 @@ export const SciFiMCPStatus: React.FC<{
                         </div>
                     </div>}
                 </div>
-                {selectedItem && <InputSchemaForm tool={selectedItem} onComplete={handleFormComplete} />}
-                {formData && <div>
+                {selectedItem && <div className='module' style={{}}>
+                    <InputSchemaForm tool={selectedItem} onComplete={handleFormComplete} />
+                </div>}
+                {formData && <div className='module' style={{ margin: 20 }}>
                     <h4>数据</h4>
                     <pre>{JSON.stringify(formData, null, 2)}</pre>
                 </div>}

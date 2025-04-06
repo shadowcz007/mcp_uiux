@@ -1100,7 +1100,7 @@
     var css_248z$1 = ".sci-fi-container{background:#0a0a1f;border-radius:10px;box-shadow:0 0 20px rgba(0,255,255,.2);color:#0ff;padding:2rem}.hologram-title{margin-bottom:2rem;position:relative;text-align:center}.hologram-title h1{color:#0ff;font-size:2.5rem;letter-spacing:3px;text-shadow:0 0 10px rgba(0,255,255,.5);text-transform:uppercase}.status-indicator{margin-top:1rem}.pulse{animation:pulse 2s infinite;border-radius:4px;font-size:.9rem;padding:.5rem 1rem}.pulse.loading{background:#f90;color:#000}.pulse.error{background:#f03;color:#fff}.pulse.active{background:#0f9;color:#000}.data-grid{display:grid;gap:2rem;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}.module{background:rgba(0,255,255,.05);border:1px solid rgba(0,255,255,.2);border-radius:8px;padding:1rem}.module-header{align-items:center;border-bottom:1px solid rgba(0,255,255,.2);display:flex;margin-bottom:1rem;padding-bottom:.5rem}.module-icon{font-size:1.2rem;margin-right:.5rem}.count{background:rgba(0,255,255,.2);border-radius:12px;font-size:.8rem;margin-left:auto;padding:.2rem .6rem}.scrollable-content{max-height:300px;overflow-y:auto;padding-right:.5rem}.item{align-items:center;background:rgba(0,255,255,.05);border-radius:4px;display:flex;margin:.3rem 0;padding:.5rem;transition:all .3s ease}.item:hover{background:rgba(0,255,255,.1);transform:translateX(5px)}.item-indicator{animation:glow 1.5s infinite alternate;background:#0ff;border-radius:50%;height:8px;margin-right:.8rem;width:8px}.error-panel{align-items:center;background:rgba(255,0,0,.1);border:1px solid rgba(255,0,0,.3);border-radius:8px;display:flex;margin:1rem 0;padding:1rem}.error-icon{color:#f03;font-size:2rem;margin-right:1rem}@keyframes pulse{0%{opacity:1}50%{opacity:.5}to{opacity:1}}@keyframes glow{0%{box-shadow:0 0 5px #0ff}to{box-shadow:0 0 15px #0ff}}.scrollable-content::-webkit-scrollbar{width:6px}.scrollable-content::-webkit-scrollbar-track{background:rgba(0,255,255,.1)}.scrollable-content::-webkit-scrollbar-thumb{background:rgba(0,255,255,.3);border-radius:3px}";
     styleInject(css_248z$1,{"insertAt":"top"});
 
-    var css_248z = ".sd-container-modern{margin:18px}.sd-btn{background:rgba(0,255,255,.05);border:none;border-radius:5px;color:#0ff;cursor:pointer;height:32px;margin:12px;width:88px}.sd-btn:hover{background:rgba(28,73,73,.1)}.sd-btn:active{background:rgba(2,18,18,.2)}.sd-input{background:rgba(0,255,255,.05);border:none;border-radius:5px;color:#0ff;height:32px;width:88px}";
+    var css_248z = ".sd-container-modern{margin:18px}.sd-btn{background:rgba(0,255,255,.05);border:none;border-radius:5px;color:#0ff;cursor:pointer;height:32px;margin:12px 0;width:88px}.sd-btn:hover{background:rgba(28,73,73,.1)}.sd-btn:active{background:rgba(2,18,18,.2)}.sd-input{background:rgba(0,255,255,.05);border:none;border-radius:5px;color:#0ff;height:32px;width:88px}";
     styleInject(css_248z,{"insertAt":"top"});
 
     // 将 JSON Schema 转换为 SurveyJS 元素
@@ -1257,6 +1257,7 @@
                                     }
                                 });
                             }
+                            setSurvey(null);
                             return [4 /*yield*/, tool.execute(data_1)];
                         case 1:
                             result = _a.sent();
@@ -1303,10 +1304,10 @@
             error && (React__default["default"].createElement("div", { className: "error-panel" },
                 React__default["default"].createElement("div", { className: "error-icon" }, "\u26A0"),
                 React__default["default"].createElement("div", { className: "error-message" }, error))),
-            Object.keys(notifications).map(function (key, index) { return (React__default["default"].createElement("div", { key: index },
+            Object.keys(notifications).length > 0 && React__default["default"].createElement("div", { className: 'module', style: { margin: 20 } }, Object.keys(notifications).map(function (key, index) { return (React__default["default"].createElement("div", { key: index },
                 key,
                 ": ",
-                notifications[key])); }),
+                notifications[key])); })),
             !loading && !error && (React__default["default"].createElement("div", { style: { display: 'flex' } },
                 React__default["default"].createElement("div", { className: "data-grid" },
                     tools.length > 0 && React__default["default"].createElement("div", { className: "module" },
@@ -1333,8 +1334,9 @@
                         React__default["default"].createElement("div", { className: "scrollable-content" }, prompts.map(function (prompt, index) { return (React__default["default"].createElement("div", { key: index, className: "item" },
                             React__default["default"].createElement("span", { className: "item-indicator" }),
                             prompt.name)); })))),
-                selectedItem && React__default["default"].createElement(InputSchemaForm, { tool: selectedItem, onComplete: handleFormComplete }),
-                formData && React__default["default"].createElement("div", null,
+                selectedItem && React__default["default"].createElement("div", { className: 'module', style: {} },
+                    React__default["default"].createElement(InputSchemaForm, { tool: selectedItem, onComplete: handleFormComplete })),
+                formData && React__default["default"].createElement("div", { className: 'module', style: { margin: 20 } },
                     React__default["default"].createElement("h4", null, "\u6570\u636E"),
                     React__default["default"].createElement("pre", null, JSON.stringify(formData, null, 2)))))));
     };
