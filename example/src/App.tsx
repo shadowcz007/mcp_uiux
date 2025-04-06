@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
-import { MCPProvider, useMCP, MCPStatus } from 'mcp-uiux';
-
-
+import { MCPProvider, useMCP, MCPStatus, InputSchemaForm } from 'mcp-uiux';
 const AppContent: React.FC = () => {
   const [serverUrl, setServerUrl] = useState('');
   const [resourcePath, setResourcePath] = useState('');
+  const [selectedTool, setSelectedTool] = useState<any>(null);
+  const [formData, setFormData] = useState<any>(null);
+
   const {
     connect,
     loading,
@@ -14,6 +15,7 @@ const AppContent: React.FC = () => {
     resources,
     resourceTemplates,
     prompts,
+    notifications
   } = useMCP();
 
   useEffect(() => {
@@ -31,6 +33,18 @@ const AppContent: React.FC = () => {
     connect(serverUrl, resourcePath);
   }, [serverUrl, resourcePath]);
 
+  const handleToolSelect = (tool: any) => {
+    setSelectedTool(tool);
+    setFormData(null);
+  };
+
+  const handleFormComplete = (data: any) => {
+    setFormData(data);
+    setSelectedTool(null);
+    // console.log('表单数据：', data);
+    // 这里可以添加调用工具的逻辑
+  };
+
   return (
     <div style={{ padding: '20px' }}>
       <h1>MCP UIUX 示例</h1>
@@ -43,8 +57,7 @@ const AppContent: React.FC = () => {
             value={serverUrl}
             onChange={(e) => {
               setServerUrl(e.target.value);
-              localStorage.setItem('mcp-uiux-serverUrl', e.target.value); 
-
+              localStorage.setItem('mcp-uiux-serverUrl', e.target.value);
             }}
             style={{ width: '300px', marginLeft: '10px' }}
           />
@@ -55,34 +68,73 @@ const AppContent: React.FC = () => {
             type="text"
             value={resourcePath}
             onChange={(e) => {
-              setResourcePath(e.target.value); 
-              localStorage.setItem('mcp-uiux-resourcePath', e.target.value); 
+              setResourcePath(e.target.value);
+              localStorage.setItem('mcp-uiux-resourcePath', e.target.value);
             }}
             style={{ width: '300px', marginLeft: '10px' }}
           />
         </div>
       </div>
 
+      {
+        Object.keys(notifications).map((key, index) => (
+          <div key={index}>
+            {key}: {notifications[key]}
+          </div>
+        ))
+      }
 
-      <h3>工具列表 ({tools.length})</h3>
-      <ul>
-        {tools.map((tool, index) => (
-          <li key={index}>{tool.name}</li>
-        ))}
-      </ul>
+      <div style={{ display: 'flex' }}>
+        {tools.length > 0 && <div style={{ flex: '1', marginRight: '20px' }}>
+          <h3>工具列表 ({tools.length})</h3>
+          <ul style={{ cursor: 'pointer' }}>
+            {tools.map((tool, index) => (
+              <li
+                key={index}
+                onClick={() => handleToolSelect(tool)}
+                style={{
+                  padding: '8px',
+                  backgroundColor: selectedTool && selectedTool.name === tool.name ? '#e6f7ff' : 'transparent',
+                  borderRadius: '4px'
+                }}
+              >
+                {tool.name}
+              </li>
+            ))}
+          </ul>
+        </div>}
 
-      <h3>资源列表 ({resources.length})</h3>
-      <ul>
-        {resources.map((resource, index) => (
-          <li key={index}>{decodeURIComponent(resource.uri)}</li>
-        ))}
-      </ul>
+        <div style={{ flex: '2' }}>
+          {selectedTool && (
+            <div>
+              <h3>工具：{selectedTool.name}</h3>
+              <div style={{ marginBottom: '20px' }}>
+                <InputSchemaForm tool={selectedTool}
+                  onComplete={handleFormComplete} />
+              </div>
+            </div>
+          )}
+          {formData && (
+            <div>
+              <h4>表单数据</h4>
+              <pre>{JSON.stringify(formData, null, 2)}</pre>
+            </div>
+          )}
+        </div>
+      </div>
 
+      {resources.length > 0 && <div>
+        <h3>资源列表 ({resources.length})</h3>
+        <ul>
+          {resources.map((resource, index) => (
+            <li key={index}>{decodeURIComponent(resource.uri)}</li>
+          ))}
+        </ul>
+      </div>}
 
       <MCPStatus
         serverUrl={serverUrl}
       />
-
     </div>
   );
 };

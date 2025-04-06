@@ -14,6 +14,7 @@ interface MCPContextType {
     resourceTemplates: any[];
     prompts: any[];
     serverInfo: any | null;
+    notifications: any[];
 }
 
 const MCPContext = React.createContext<MCPContextType>({
@@ -26,7 +27,8 @@ const MCPContext = React.createContext<MCPContextType>({
     resources: [],
     resourceTemplates: [],
     prompts: [],
-    serverInfo: null
+    serverInfo: null,
+    notifications: []
 });
 
 export const useMCP = () => useContext(MCPContext);
@@ -35,6 +37,7 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
     const mcpClientRef = useRef<MCPClient | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+    const [notifications, setNotifications] = useState<any>({});
     const [tools, setTools] = useState<any[]>([]);
     const [resources, setResources] = useState<any[]>([]);
     const [resourceTemplates, setResourceTemplates] = useState<any[]>([]);
@@ -141,6 +144,10 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
                     console.log('MCP客户端连接成功', data);
                     // 保存 serverInfo
                     setServerInfo(data);
+                },
+                onNotifications: (data) => {
+                    console.log('收到通知消息:', data);
+                    setNotifications(data);
                 }
             });
 
@@ -283,7 +290,8 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
             resources,
             resourceTemplates,
             prompts,
-            serverInfo
+            serverInfo,
+            notifications
         }}>
             {children}
         </MCPContext.Provider>

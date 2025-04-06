@@ -8,6 +8,7 @@ export interface MCPProps {
     onResourceTemplatesReady?: (resourceTemplates: ResourceTemplate[]) => void;
     onPromptsReady?: (prompts: Prompt[]) => void;
     onReady?: (data: ServerInfo) => void;
+    onNotifications?: (data: any) => void;
 }
 export interface Tool {
     name: string;
@@ -49,6 +50,7 @@ export declare class MCPClient {
     private onResourceTemplatesReady?;
     private onPromptsReady?;
     private onReady?;
+    private onNotifications?;
     private sessionId;
     private messageEndpoint;
     private eventSource;
@@ -61,7 +63,7 @@ export declare class MCPClient {
     serverName?: string | null;
     protocolVersion?: string | null;
     capabilities?: any;
-    constructor({ url, onToolsReady, onToolResult, onError, onResourcesReady, onResourceTemplatesReady, onPromptsReady, onReady }: MCPProps);
+    constructor({ url, onToolsReady, onToolResult, onError, onResourcesReady, onResourceTemplatesReady, onPromptsReady, onReady, onNotifications }: MCPProps);
     private sendJsonRpcRequest;
     private handleError;
     executeTool(toolName: string, args: any): Promise<any>;
@@ -93,5 +95,5 @@ export interface MCPHookResult {
     expandUriByVariables: (template: string, variables: Record<string, string>) => string | undefined;
     getTemplateVariables: (template: any) => string[];
 }
-export declare const useMCP: ({ url, onToolsReady, onToolResult, onError, onReady }: MCPProps) => MCPHookResult;
+export declare const useMCP: ({ url, onToolsReady, onToolResult, onError, onReady, onNotifications }: MCPProps) => MCPHookResult;
 export declare const MCP: React.FC<MCPProps>;

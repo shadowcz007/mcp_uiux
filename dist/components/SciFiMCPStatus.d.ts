@@ -8,4 +8,5 @@ export declare const SciFiMCPStatus: React.FC<{
     resources: any[];
     resourceTemplates: any[];
     prompts: any[];
+    notifications: any;
 }>;

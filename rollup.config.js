@@ -42,7 +42,7 @@ export default {
       sourcemap: true,
     }
   ],
-  external: [...Object.keys(pkg.peerDependencies || {})],
+  external: [...Object.keys(pkg.peerDependencies || {}),...Object.keys(pkg.dependencies || {})],
   plugins: [
     typescript({
       typescript: require('typescript'),

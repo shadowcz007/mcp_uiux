@@ -1,8 +1,8 @@
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('react')) :
-    typeof define === 'function' && define.amd ? define(['exports', 'react'], factory) :
-    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.MCPUIUX = {}, global.React));
-})(this, (function (exports, React) { 'use strict';
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('react'), require('survey-react-ui'), require('survey-core')) :
+    typeof define === 'function' && define.amd ? define(['exports', 'react', 'survey-react-ui', 'survey-core'], factory) :
+    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.MCPUIUX = {}, global.React, global.surveyReactUi, global.surveyCore));
+})(this, (function (exports, React, surveyReactUi, surveyCore) { 'use strict';
 
     function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -125,7 +125,7 @@
     }(Error));
     var MCPClient = /** @class */ (function () {
         function MCPClient(_a) {
-            var _b = _a.url, url = _b === void 0 ? 'http://localhost:8000' : _b, onToolsReady = _a.onToolsReady, onToolResult = _a.onToolResult, onError = _a.onError, onResourcesReady = _a.onResourcesReady, onResourceTemplatesReady = _a.onResourceTemplatesReady, onPromptsReady = _a.onPromptsReady, onReady = _a.onReady;
+            var _b = _a.url, url = _b === void 0 ? 'http://localhost:8000' : _b, onToolsReady = _a.onToolsReady, onToolResult = _a.onToolResult, onError = _a.onError, onResourcesReady = _a.onResourcesReady, onResourceTemplatesReady = _a.onResourceTemplatesReady, onPromptsReady = _a.onPromptsReady, onReady = _a.onReady, onNotifications = _a.onNotifications;
             this.sessionId = null;
             this.messageEndpoint = null;
             this.eventSource = null;
@@ -146,6 +146,7 @@
             this.onResourceTemplatesReady = onResourceTemplatesReady;
             this.onPromptsReady = onPromptsReady;
             this.onReady = onReady;
+            this.onNotifications = onNotifications;
         }
         // 发送 JSON-RPC 请求
         MCPClient.prototype.sendJsonRpcRequest = function (method, params, id) {
@@ -306,11 +307,11 @@
                     this.eventSource.addEventListener('message', function (event) { return __awaiter(_this, void 0, void 0, function () {
                         var message, _a, name_1, version, capabilities, resourceTemplates, index, uri, error_3;
                         var _this = this;
-                        var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
-                        return __generator(this, function (_q) {
-                            switch (_q.label) {
+                        var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
+                        return __generator(this, function (_r) {
+                            switch (_r.label) {
                                 case 0:
-                                    _q.trys.push([0, 4, , 5]);
+                                    _r.trys.push([0, 4, , 5]);
                                     message = JSON.parse(event.data);
                                     console.log('收到消息:', message);
                                     if (!(message.jsonrpc === '2.0')) return [3 /*break*/, 3];
@@ -321,10 +322,10 @@
                                     this.serverName = name_1;
                                     this.protocolVersion = message.result.protocolVersion;
                                     this.capabilities = capabilities;
-                                    console.log('MCP capabilities:', capabilities);
                                     return [4 /*yield*/, this.handleInitialized(toolsRequested)];
                                 case 1:
-                                    toolsRequested = _q.sent();
+                                    // console.log('MCP capabilities:', capabilities)
+                                    toolsRequested = _r.sent();
                                     (_b = this.onReady) === null || _b === void 0 ? void 0 : _b.call(this, {
                                         name: name_1,
                                         protocolVersion: this.protocolVersion || '',
@@ -334,19 +335,18 @@
                                     return [3 /*break*/, 3];
                                 case 2:
                                     if ((_c = message.result) === null || _c === void 0 ? void 0 : _c.tools) {
-                                        console.log('获取到工具列表:', this.sessionId, message.result.tools);
+                                        // console.log('获取到工具列表:', this.sessionId, message.result.tools)
                                         // 为每个工具添加执行方法
                                         message.result.tools = message.result.tools.map(function (tool) { return (__assign(__assign({}, tool), { fromServerName: _this.serverName, execute: function (args) { return _this.executeTool(tool.name, args); } })); });
                                         (_d = this.onToolsReady) === null || _d === void 0 ? void 0 : _d.call(this, message.result.tools);
                                         this.handleCallback(message);
                                     }
                                     else if ((_e = message.result) === null || _e === void 0 ? void 0 : _e.resources) {
-                                        console.log('获取到资源列表:', message.result.resources);
+                                        // console.log('获取到资源列表:', message.result.resources)
                                         (_f = this.onResourcesReady) === null || _f === void 0 ? void 0 : _f.call(this, message.result.resources);
                                         this.handleCallback(message);
                                     }
                                     else if ((_g = message.result) === null || _g === void 0 ? void 0 : _g.resourceTemplates) {
-                                        console.log('获取到资源模板列表:', message.result.resourceTemplates);
                                         resourceTemplates = message.result.resourceTemplates;
                                         if (resourceTemplates && Array.isArray(resourceTemplates)) {
                                             for (index = 0; index < resourceTemplates.length; index++) {
@@ -357,13 +357,16 @@
                                             if (this.capabilities && !this.capabilities.resourceTemplates) {
                                                 this.capabilities.resourceTemplates = resourceTemplates;
                                             }
-                                            console.log('缓存资源模板到capabilities:', this.capabilities.resourceTemplates);
+                                            // console.log(
+                                            //   '缓存资源模板到capabilities:',
+                                            //   this.capabilities.resourceTemplates
+                                            // )
                                         }
                                         (_h = this.onResourceTemplatesReady) === null || _h === void 0 ? void 0 : _h.call(this, this.processResourceTemplates(resourceTemplates));
                                         this.handleCallback(message);
                                     }
                                     else if ((_j = message.result) === null || _j === void 0 ? void 0 : _j.prompts) {
-                                        console.log('获取到提示列表:', message.result.prompts);
+                                        // console.log('获取到提示列表:', message.result.prompts)
                                         // 为每个提示添加执行方法
                                         message.result.prompts = message.result.prompts.map(function (prompt) {
                                             var np = __assign(__assign({}, prompt), { fromServerName: _this.serverName });
@@ -391,16 +394,21 @@
                                             this.handleCallback(message);
                                         }
                                     }
+                                    else if (message.method == 'notifications/message' &&
+                                        message.params) {
+                                        console.log('notifications/message:', message.params);
+                                        (_q = this.onNotifications) === null || _q === void 0 ? void 0 : _q.call(this, message.params);
+                                    }
                                     // 添加这个部分：处理任何其他类型的响应
                                     else if (message.id != undefined) {
                                         // 确保任何带有 ID 的响应都能触发回调
                                         console.log('#callback:', message);
                                         this.handleCallback(message);
                                     }
-                                    _q.label = 3;
+                                    _r.label = 3;
                                 case 3: return [3 /*break*/, 5];
                                 case 4:
-                                    error_3 = _q.sent();
+                                    error_3 = _r.sent();
                                     console.error('解析消息失败:', error_3);
                                     return [3 /*break*/, 5];
                                 case 5: return [2 /*return*/];
@@ -789,7 +797,8 @@
         resources: [],
         resourceTemplates: [],
         prompts: [],
-        serverInfo: null
+        serverInfo: null,
+        notifications: []
     });
     var useMCP = function () { return React.useContext(MCPContext); };
     function MCPProvider(_a) {
@@ -798,13 +807,14 @@
         var mcpClientRef = React.useRef(null);
         var _b = React.useState(false), loading = _b[0], setLoading = _b[1];
         var _c = React.useState(null), error = _c[0], setError = _c[1];
-        var _d = React.useState([]), tools = _d[0], setTools = _d[1];
-        var _e = React.useState([]), resources = _e[0], setResources = _e[1];
-        var _f = React.useState([]), resourceTemplates = _f[0], setResourceTemplates = _f[1];
-        var _g = React.useState([]), prompts = _g[0], setPrompts = _g[1];
-        var _h = React.useState(null), serverInfo = _h[0], setServerInfo = _h[1];
-        var _j = React.useState(null), lastConnectedUrl = _j[0], setLastConnectedUrl = _j[1];
-        var _k = React.useState(""), lastResourceFilter = _k[0], setLastResourceFilter = _k[1];
+        var _d = React.useState({}), notifications = _d[0], setNotifications = _d[1];
+        var _e = React.useState([]), tools = _e[0], setTools = _e[1];
+        var _f = React.useState([]), resources = _f[0], setResources = _f[1];
+        var _g = React.useState([]), resourceTemplates = _g[0], setResourceTemplates = _g[1];
+        var _h = React.useState([]), prompts = _h[0], setPrompts = _h[1];
+        var _j = React.useState(null), serverInfo = _j[0], setServerInfo = _j[1];
+        var _k = React.useState(null), lastConnectedUrl = _k[0], setLastConnectedUrl = _k[1];
+        var _l = React.useState(""), lastResourceFilter = _l[0], setLastResourceFilter = _l[1];
         // 添加节流相关的状态和引用
         var connectTimeoutRef = React.useRef(null);
         var pendingConnectParamsRef = React.useRef(null);
@@ -895,6 +905,10 @@
                                 console.log('MCP客户端连接成功', data);
                                 // 保存 serverInfo
                                 setServerInfo(data);
+                            },
+                            onNotifications: function (data) {
+                                console.log('收到通知消息:', data);
+                                setNotifications(data);
                             }
                         });
                         // 连接到服务器
@@ -1051,7 +1065,8 @@
                 resources: resources,
                 resourceTemplates: resourceTemplates,
                 prompts: prompts,
-                serverInfo: serverInfo
+                serverInfo: serverInfo,
+                notifications: notifications
             } }, children));
     }
 
@@ -1082,11 +1097,204 @@
       }
     }
 
-    var css_248z = ".sci-fi-container{background:#0a0a1f;border-radius:10px;box-shadow:0 0 20px rgba(0,255,255,.2);color:#0ff;padding:2rem}.hologram-title{margin-bottom:2rem;position:relative;text-align:center}.hologram-title h1{color:#0ff;font-size:2.5rem;letter-spacing:3px;text-shadow:0 0 10px rgba(0,255,255,.5);text-transform:uppercase}.status-indicator{margin-top:1rem}.pulse{animation:pulse 2s infinite;border-radius:4px;font-size:.9rem;padding:.5rem 1rem}.pulse.loading{background:#f90;color:#000}.pulse.error{background:#f03;color:#fff}.pulse.active{background:#0f9;color:#000}.data-grid{display:grid;gap:2rem;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}.module{background:rgba(0,255,255,.05);border:1px solid rgba(0,255,255,.2);border-radius:8px;padding:1rem}.module-header{align-items:center;border-bottom:1px solid rgba(0,255,255,.2);display:flex;margin-bottom:1rem;padding-bottom:.5rem}.module-icon{font-size:1.2rem;margin-right:.5rem}.count{background:rgba(0,255,255,.2);border-radius:12px;font-size:.8rem;margin-left:auto;padding:.2rem .6rem}.scrollable-content{max-height:300px;overflow-y:auto;padding-right:.5rem}.item{align-items:center;background:rgba(0,255,255,.05);border-radius:4px;display:flex;margin:.3rem 0;padding:.5rem;transition:all .3s ease}.item:hover{background:rgba(0,255,255,.1);transform:translateX(5px)}.item-indicator{animation:glow 1.5s infinite alternate;background:#0ff;border-radius:50%;height:8px;margin-right:.8rem;width:8px}.error-panel{align-items:center;background:rgba(255,0,0,.1);border:1px solid rgba(255,0,0,.3);border-radius:8px;display:flex;margin:1rem 0;padding:1rem}.error-icon{color:#f03;font-size:2rem;margin-right:1rem}@keyframes pulse{0%{opacity:1}50%{opacity:.5}to{opacity:1}}@keyframes glow{0%{box-shadow:0 0 5px #0ff}to{box-shadow:0 0 15px #0ff}}.scrollable-content::-webkit-scrollbar{width:6px}.scrollable-content::-webkit-scrollbar-track{background:rgba(0,255,255,.1)}.scrollable-content::-webkit-scrollbar-thumb{background:rgba(0,255,255,.3);border-radius:3px}";
+    var css_248z$1 = ".sci-fi-container{background:#0a0a1f;border-radius:10px;box-shadow:0 0 20px rgba(0,255,255,.2);color:#0ff;padding:2rem}.hologram-title{margin-bottom:2rem;position:relative;text-align:center}.hologram-title h1{color:#0ff;font-size:2.5rem;letter-spacing:3px;text-shadow:0 0 10px rgba(0,255,255,.5);text-transform:uppercase}.status-indicator{margin-top:1rem}.pulse{animation:pulse 2s infinite;border-radius:4px;font-size:.9rem;padding:.5rem 1rem}.pulse.loading{background:#f90;color:#000}.pulse.error{background:#f03;color:#fff}.pulse.active{background:#0f9;color:#000}.data-grid{display:grid;gap:2rem;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}.module{background:rgba(0,255,255,.05);border:1px solid rgba(0,255,255,.2);border-radius:8px;padding:1rem}.module-header{align-items:center;border-bottom:1px solid rgba(0,255,255,.2);display:flex;margin-bottom:1rem;padding-bottom:.5rem}.module-icon{font-size:1.2rem;margin-right:.5rem}.count{background:rgba(0,255,255,.2);border-radius:12px;font-size:.8rem;margin-left:auto;padding:.2rem .6rem}.scrollable-content{max-height:300px;overflow-y:auto;padding-right:.5rem}.item{align-items:center;background:rgba(0,255,255,.05);border-radius:4px;display:flex;margin:.3rem 0;padding:.5rem;transition:all .3s ease}.item:hover{background:rgba(0,255,255,.1);transform:translateX(5px)}.item-indicator{animation:glow 1.5s infinite alternate;background:#0ff;border-radius:50%;height:8px;margin-right:.8rem;width:8px}.error-panel{align-items:center;background:rgba(255,0,0,.1);border:1px solid rgba(255,0,0,.3);border-radius:8px;display:flex;margin:1rem 0;padding:1rem}.error-icon{color:#f03;font-size:2rem;margin-right:1rem}@keyframes pulse{0%{opacity:1}50%{opacity:.5}to{opacity:1}}@keyframes glow{0%{box-shadow:0 0 5px #0ff}to{box-shadow:0 0 15px #0ff}}.scrollable-content::-webkit-scrollbar{width:6px}.scrollable-content::-webkit-scrollbar-track{background:rgba(0,255,255,.1)}.scrollable-content::-webkit-scrollbar-thumb{background:rgba(0,255,255,.3);border-radius:3px}";
+    styleInject(css_248z$1,{"insertAt":"top"});
+
+    var css_248z = ".sd-container-modern{margin:18px}.sd-btn{background:rgba(0,255,255,.05);border:none;border-radius:5px;color:#0ff;cursor:pointer;height:32px;margin:12px 0;width:88px}.sd-btn:hover{background:rgba(28,73,73,.1)}.sd-btn:active{background:rgba(2,18,18,.2)}.sd-input{background:rgba(0,255,255,.05);border:none;border-radius:5px;color:#0ff;height:32px;width:88px}";
     styleInject(css_248z,{"insertAt":"top"});
 
+    // 将 JSON Schema 转换为 SurveyJS 元素
+    var convertSchemaToSurveyElement = function (schema, name, title) {
+        if (name === void 0) { name = ''; }
+        if (title === void 0) { title = ''; }
+        if (!schema)
+            return null;
+        // 使用传入的名称或生成一个默认名称
+        var elementName = name || 'field_' + Math.random().toString(36).substr(2, 9);
+        // 使用传入的标题或将名称转换为更可读的形式
+        var elementTitle = title || (name === null || name === void 0 ? void 0 : name.replace(/_/g, ' ')) || elementName;
+        switch (schema.type) {
+            case 'string':
+                return {
+                    type: 'text',
+                    name: elementName,
+                    title: elementTitle,
+                    isRequired: schema.required || false
+                };
+            case 'number':
+            case 'integer':
+                return {
+                    type: 'number',
+                    name: elementName,
+                    title: elementTitle,
+                    isRequired: schema.required || false
+                };
+            case 'boolean':
+                return {
+                    type: 'boolean',
+                    name: elementName,
+                    title: elementTitle,
+                    isRequired: schema.required || false
+                };
+            case 'array':
+                if (schema.items.type === 'string' || schema.items.type === 'number' || schema.items.type === 'integer') {
+                    return {
+                        type: 'matrixdynamic',
+                        name: elementName,
+                        title: elementTitle,
+                        columns: [
+                            {
+                                cellType: schema.items.type === 'number' || schema.items.type === 'integer' ? 'number' : 'text',
+                                name: "value",
+                                title: ' '
+                            }
+                        ],
+                        rowCount: 1,
+                        minRowCount: 0,
+                        addRowText: "\u6DFB\u52A0".concat(elementTitle),
+                        removeRowText: '删除',
+                        isRequired: schema.required || false,
+                        showHeader: false,
+                        confirmDelete: false
+                    };
+                }
+                else {
+                    // 复杂类型的数组保持原来的 paneldynamic 处理方式
+                    return {
+                        type: 'paneldynamic',
+                        name: elementName,
+                        title: elementTitle,
+                        templateElements: [convertSchemaToSurveyElement(schema.items, 'item')],
+                        panelCount: 1,
+                        minPanelCount: 1,
+                        addPanelText: "\u6DFB\u52A0".concat(elementTitle),
+                        removePanelText: '删除',
+                        isRequired: schema.required || false
+                    };
+                }
+            case 'object':
+                var elements = Object.entries(schema.properties || {}).map(function (_a) {
+                    var propName = _a[0], propSchema = _a[1];
+                    return convertSchemaToSurveyElement(propSchema, propName);
+                }).filter(Boolean);
+                if (name) {
+                    // 如果是嵌套对象，使用 panel
+                    return {
+                        type: 'panel',
+                        name: elementName,
+                        title: elementTitle,
+                        elements: elements,
+                        isRequired: schema.required || false
+                    };
+                }
+                else {
+                    // 如果是根对象，直接返回元素数组
+                    return elements;
+                }
+            default:
+                console.warn("Unsupported schema type: ".concat(schema.type));
+                return null;
+        }
+    };
+    // 将工具参数转换为SurveyJS格式
+    var mapToolParamsToSurveyJson = function (tool) {
+        if (!tool || !tool.inputSchema)
+            return { elements: [] };
+        // console.log('tool.inputSchema', tool.inputSchema);
+        // 检查是否为空对象 schema
+        if (tool.inputSchema.type === 'object' &&
+            (!tool.inputSchema.properties || Object.keys(tool.inputSchema.properties).length === 0)) {
+            return {
+                elements: [{
+                        type: 'text',
+                        name: '_',
+                        title: '_',
+                        isRequired: false
+                    }],
+                showQuestionNumbers: false,
+                showNavigationButtons: true,
+                completeText: "执行",
+                pageNextText: "下一步",
+                pagePrevText: "上一步"
+            };
+        }
+        var elements = convertSchemaToSurveyElement(tool.inputSchema);
+        return {
+            elements: Array.isArray(elements) ? elements : [elements],
+            showQuestionNumbers: false,
+            completeText: "执行",
+            pageNextText: "下一步",
+            pagePrevText: "上一步"
+        };
+    };
+    // 工具表单组件
+    var InputSchemaForm = function (_a) {
+        var tool = _a.tool, onComplete = _a.onComplete;
+        var _b = React.useState(null), survey = _b[0], setSurvey = _b[1];
+        // console.log('InputSchemaForm', tool);
+        React.useEffect(function () {
+            if (!tool)
+                return;
+            var surveyJson = mapToolParamsToSurveyJson(tool);
+            var surveyModel = new surveyCore.Model(surveyJson);
+            // 设置完成事件
+            surveyModel.onComplete.add(function (sender) { return __awaiter(void 0, void 0, void 0, function () {
+                var data_1, result;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            if (!onComplete) return [3 /*break*/, 2];
+                            data_1 = __assign({}, sender.data);
+                            // 处理数组格式
+                            if (tool.inputSchema && tool.inputSchema.type === 'object' && tool.inputSchema.properties) {
+                                Object.entries(tool.inputSchema.properties).forEach(function (_a) {
+                                    var key = _a[0], prop = _a[1];
+                                    if (prop.type === 'array' &&
+                                        (prop.items.type === 'string' || prop.items.type === 'number' || prop.items.type === 'integer') &&
+                                        Array.isArray(data_1[key])) {
+                                        // 将 [{value: 'a'}, {value: 'b'}] 转换为 ['a', 'b']
+                                        data_1[key] = data_1[key].map(function (item) { return item.value; });
+                                    }
+                                });
+                            }
+                            setSurvey(null);
+                            return [4 /*yield*/, tool.execute(data_1)];
+                        case 1:
+                            result = _a.sent();
+                            onComplete({
+                                input: data_1,
+                                output: result
+                            });
+                            _a.label = 2;
+                        case 2: return [2 /*return*/];
+                    }
+                });
+            }); });
+            // 设置 CSS 变量
+            surveyModel.cssVariables = {
+                '--sjs-primary-backcolor': '#0a0a1f',
+                '--sjs-font-size': '16px',
+                '--sjs-border-radius': '8px', // 圆角
+            };
+            setSurvey(surveyModel);
+        }, [tool, onComplete]);
+        if (!survey)
+            return null;
+        return React__default["default"].createElement(surveyReactUi.Survey, { model: survey, rootNodeClassName: "mcp-uiux-input-schema-form" });
+    };
+
     var SciFiMCPStatus = function (_a) {
-        var serverInfo = _a.serverInfo, loading = _a.loading, error = _a.error, tools = _a.tools, resources = _a.resources; _a.resourceTemplates; var prompts = _a.prompts;
+        var serverInfo = _a.serverInfo, loading = _a.loading, error = _a.error, tools = _a.tools, resources = _a.resources; _a.resourceTemplates; var prompts = _a.prompts, notifications = _a.notifications;
+        var _b = React.useState(null), selectedItem = _b[0], setSelectedItem = _b[1];
+        var _c = React.useState(null), formData = _c[0], setFormData = _c[1];
+        var handleItemSelect = function (item) {
+            setSelectedItem(item);
+            setFormData(null);
+        };
+        var handleFormComplete = function (data) {
+            setFormData(data);
+            setSelectedItem(null);
+        };
         return (React__default["default"].createElement("div", { className: "sci-fi-container" },
             React__default["default"].createElement("div", { className: "hologram-title" },
                 React__default["default"].createElement("h1", null, "MCP \u7CFB\u7EDF\u72B6\u6001\u76D1\u63A7"),
@@ -1096,51 +1304,57 @@
             error && (React__default["default"].createElement("div", { className: "error-panel" },
                 React__default["default"].createElement("div", { className: "error-icon" }, "\u26A0"),
                 React__default["default"].createElement("div", { className: "error-message" }, error))),
-            !loading && !error && tools.length > 0 && (React__default["default"].createElement("div", { className: "data-grid" },
-                React__default["default"].createElement("div", { className: "module" },
-                    React__default["default"].createElement("div", { className: "module-header" },
-                        React__default["default"].createElement("span", { className: "module-icon" }, "\u26A1"),
-                        React__default["default"].createElement("h2", null, "\u7CFB\u7EDF\u5DE5\u5177\u5E93"),
-                        React__default["default"].createElement("span", { className: "count" }, tools.length)),
-                    React__default["default"].createElement("div", { className: "scrollable-content" }, tools.map(function (tool, index) { return (React__default["default"].createElement("div", { key: index, className: "item" },
-                        React__default["default"].createElement("span", { className: "item-indicator" }),
-                        tool.name)); }))),
-                resources.length > 0 && React__default["default"].createElement("div", { className: "module" },
-                    React__default["default"].createElement("div", { className: "module-header" },
-                        React__default["default"].createElement("span", { className: "module-icon" }, "\uD83D\uDCE6"),
-                        React__default["default"].createElement("h2", null, "\u8D44\u6E90\u77E9\u9635"),
-                        React__default["default"].createElement("span", { className: "count" }, resources.length)),
-                    React__default["default"].createElement("div", { className: "scrollable-content" }, resources.map(function (resource, index) { return (React__default["default"].createElement("div", { key: index, className: "item" },
-                        React__default["default"].createElement("span", { className: "item-indicator" }),
-                        decodeURIComponent(resource.uri))); }))),
-                prompts.length > 0 && React__default["default"].createElement("div", { className: "module" },
-                    React__default["default"].createElement("div", { className: "module-header" },
-                        React__default["default"].createElement("span", { className: "module-icon" }, "\uD83D\uDCA1"),
-                        React__default["default"].createElement("h2", null, "AI \u63D0\u793A\u5E93"),
-                        React__default["default"].createElement("span", { className: "count" }, prompts.length)),
-                    React__default["default"].createElement("div", { className: "scrollable-content" }, prompts.map(function (prompt, index) { return (React__default["default"].createElement("div", { key: index, className: "item", onClick: function () {
-                            prompt.execute({
-                                name: prompt.name,
-                                arguments: prompt.arguments
-                            });
-                        } },
-                        React__default["default"].createElement("span", { className: "item-indicator" }),
-                        prompt.name)); })))))));
+            Object.keys(notifications).length > 0 && React__default["default"].createElement("div", { className: 'module', style: { margin: 20 } }, Object.keys(notifications).map(function (key, index) { return (React__default["default"].createElement("div", { key: index },
+                key,
+                ": ",
+                notifications[key])); })),
+            !loading && !error && (React__default["default"].createElement("div", { style: { display: 'flex' } },
+                React__default["default"].createElement("div", { className: "data-grid" },
+                    tools.length > 0 && React__default["default"].createElement("div", { className: "module" },
+                        React__default["default"].createElement("div", { className: "module-header" },
+                            React__default["default"].createElement("span", { className: "module-icon" }, "\u26A1"),
+                            React__default["default"].createElement("h2", null, "\u7CFB\u7EDF\u5DE5\u5177\u5E93"),
+                            React__default["default"].createElement("span", { className: "count" }, tools.length)),
+                        React__default["default"].createElement("div", { className: "scrollable-content" }, tools.map(function (tool, index) { return (React__default["default"].createElement("div", { key: index, className: "item", onClick: function () { return handleItemSelect(tool); } },
+                            React__default["default"].createElement("span", { className: "item-indicator" }),
+                            tool.name)); }))),
+                    resources.length > 0 && React__default["default"].createElement("div", { className: "module" },
+                        React__default["default"].createElement("div", { className: "module-header" },
+                            React__default["default"].createElement("span", { className: "module-icon" }, "\uD83D\uDCE6"),
+                            React__default["default"].createElement("h2", null, "\u8D44\u6E90\u77E9\u9635"),
+                            React__default["default"].createElement("span", { className: "count" }, resources.length)),
+                        React__default["default"].createElement("div", { className: "scrollable-content" }, resources.map(function (resource, index) { return (React__default["default"].createElement("div", { key: index, className: "item" },
+                            React__default["default"].createElement("span", { className: "item-indicator" }),
+                            decodeURIComponent(resource.uri))); }))),
+                    prompts.length > 0 && React__default["default"].createElement("div", { className: "module" },
+                        React__default["default"].createElement("div", { className: "module-header" },
+                            React__default["default"].createElement("span", { className: "module-icon" }, "\uD83D\uDCA1"),
+                            React__default["default"].createElement("h2", null, "AI \u63D0\u793A\u5E93"),
+                            React__default["default"].createElement("span", { className: "count" }, prompts.length)),
+                        React__default["default"].createElement("div", { className: "scrollable-content" }, prompts.map(function (prompt, index) { return (React__default["default"].createElement("div", { key: index, className: "item" },
+                            React__default["default"].createElement("span", { className: "item-indicator" }),
+                            prompt.name)); })))),
+                selectedItem && React__default["default"].createElement("div", { className: 'module', style: {} },
+                    React__default["default"].createElement(InputSchemaForm, { tool: selectedItem, onComplete: handleFormComplete })),
+                formData && React__default["default"].createElement("div", { className: 'module', style: { margin: 20 } },
+                    React__default["default"].createElement("h4", null, "\u6570\u636E"),
+                    React__default["default"].createElement("pre", null, JSON.stringify(formData, null, 2)))))));
     };
 
     var MCPStatus = function (_a) {
         var _b = _a.serverUrl, serverUrl = _b === void 0 ? 'http://localhost:8080' : _b, _c = _a.resourcePath, resourcePath = _c === void 0 ? '' : _c, className = _a.className, style = _a.style, render = _a.render;
-        var _d = useMCP(), connect = _d.connect, loading = _d.loading, error = _d.error, tools = _d.tools, resources = _d.resources, resourceTemplates = _d.resourceTemplates, prompts = _d.prompts, serverInfo = _d.serverInfo;
+        var _d = useMCP(), connect = _d.connect, loading = _d.loading, error = _d.error, tools = _d.tools, resources = _d.resources, resourceTemplates = _d.resourceTemplates, prompts = _d.prompts, serverInfo = _d.serverInfo, notifications = _d.notifications;
         React.useEffect(function () {
             connect(serverUrl, resourcePath);
         }, [serverUrl, resourcePath]);
         if (render) {
-            return render({ loading: loading, error: error, tools: tools, resources: resources, resourceTemplates: resourceTemplates, prompts: prompts });
+            return render({ loading: loading, error: error, tools: tools, resources: resources, resourceTemplates: resourceTemplates, prompts: prompts, notifications: notifications });
         }
         return (React__default["default"].createElement("div", { className: className, style: style },
-            React__default["default"].createElement(SciFiMCPStatus, { serverInfo: serverInfo, loading: loading, error: error, tools: tools, resources: resources, resourceTemplates: resourceTemplates, prompts: prompts })));
+            React__default["default"].createElement(SciFiMCPStatus, { serverInfo: serverInfo, loading: loading, error: error, tools: tools, resources: resources, resourceTemplates: resourceTemplates, prompts: prompts, notifications: notifications })));
     };
 
+    exports.InputSchemaForm = InputSchemaForm;
     exports.MCPProvider = MCPProvider;
     exports.MCPStatus = MCPStatus;
     exports.useMCP = useMCP;

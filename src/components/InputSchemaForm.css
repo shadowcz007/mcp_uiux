@@ -1,0 +1,32 @@
+.sd-container-modern{
+  margin: 18px; 
+}
+.sd-btn {
+  border-radius: 5px;
+  color: #0ff;
+  height: 32px;
+  width: 88px;
+  background: rgba(0, 255, 255, .05);
+  border: none;
+  margin: 12px 0;
+  cursor: pointer;
+  }
+
+.sd-btn:hover {
+  background: rgba(28, 73, 73, 0.1);
+}
+
+.sd-btn:active {
+  background: rgba(2, 18, 18, 0.2);
+}
+
+
+.sd-input{
+  border-radius: 5px;
+  color: #0ff;
+  height: 32px;
+  width: 88px;
+  background: rgba(0, 255, 255, .05);
+  border: none;
+  /* margin: 12px;  */
+}
