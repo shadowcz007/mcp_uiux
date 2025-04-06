@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Survey } from 'survey-react-ui';
 import { Model } from 'survey-core';
-import 'survey-core/survey-core.min.css';
-
+// import 'survey-core/survey-core.min.css';
+import './InputSchemaForm.css';
 // 将 JSON Schema 转换为 SurveyJS 元素
 const convertSchemaToSurveyElement = (schema: any, name: string = '', title: string = ''): any => {
   if (!schema) return null;
@@ -103,7 +103,7 @@ const convertSchemaToSurveyElement = (schema: any, name: string = '', title: str
 const mapToolParamsToSurveyJson = (tool: any) => {
   if (!tool || !tool.inputSchema) return { elements: [] };
 
-  console.log('tool.inputSchema', tool.inputSchema);
+  // console.log('tool.inputSchema', tool.inputSchema);
 
   // 检查是否为空对象 schema
   if (tool.inputSchema.type === 'object' &&
@@ -135,7 +135,7 @@ const mapToolParamsToSurveyJson = (tool: any) => {
 };
 
 // 工具表单组件
-const InputSchemaForm = ({ tool, onComplete }:any) => {
+const InputSchemaForm = ({ tool, onComplete }: any) => {
   const [survey, setSurvey] = useState(null);
   // console.log('InputSchemaForm', tool);
   useEffect(() => {
@@ -146,9 +146,9 @@ const InputSchemaForm = ({ tool, onComplete }:any) => {
     const surveyModel: any = new Model(surveyJson);
 
     // 设置完成事件
-    surveyModel.onComplete.add(async (sender:any) => {
+    surveyModel.onComplete.add(async (sender: any) => {
       if (onComplete) {
-        const data:any = { ...sender.data };
+        const data: any = { ...sender.data };
 
         // 处理数组格式
         if (tool.inputSchema && tool.inputSchema.type === 'object' && tool.inputSchema.properties) {
@@ -157,7 +157,7 @@ const InputSchemaForm = ({ tool, onComplete }:any) => {
               (prop.items.type === 'string' || prop.items.type === 'number' || prop.items.type === 'integer') &&
               Array.isArray(data[key])) {
               // 将 [{value: 'a'}, {value: 'b'}] 转换为 ['a', 'b']
-              data[key] = data[key].map((item:any) => item.value);
+              data[key] = data[key].map((item: any) => item.value);
             }
           });
         }
@@ -171,12 +171,22 @@ const InputSchemaForm = ({ tool, onComplete }:any) => {
       }
     });
 
+
+    // 设置 CSS 变量
+    surveyModel.cssVariables = {
+      '--sjs-primary-backcolor': '#0a0a1f', // 主色调
+      '--sjs-font-size': '16px', // 字体大小
+      '--sjs-border-radius': '8px', // 圆角
+    };
+
     setSurvey(surveyModel);
   }, [tool, onComplete]);
 
   if (!survey) return null;
 
-  return <Survey model={survey} />;
+  return <Survey model={survey}
+    rootNodeClassName="mcp-uiux-input-schema-form"
+  />;
 };
 
 export default InputSchemaForm;

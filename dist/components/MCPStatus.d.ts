@@ -11,6 +11,7 @@ export interface MCPStatusProps {
         resources: any[];
         resourceTemplates: any[];
         prompts: any[];
+        notifications: any;
     }) => React.ReactNode;
 }
 export declare const MCPStatus: React.FC<MCPStatusProps>;

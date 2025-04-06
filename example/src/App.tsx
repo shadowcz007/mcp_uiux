@@ -15,6 +15,7 @@ const AppContent: React.FC = () => {
     resources,
     resourceTemplates,
     prompts,
+    notifications
   } = useMCP();
 
   useEffect(() => {
@@ -75,8 +76,16 @@ const AppContent: React.FC = () => {
         </div>
       </div>
 
+      {
+        Object.keys(notifications).map((key, index) => (
+          <div key={index}>
+            {key}: {notifications[key]}
+          </div>
+        ))
+      }
+
       <div style={{ display: 'flex' }}>
-        <div style={{ flex: '1', marginRight: '20px' }}>
+        {tools.length > 0 && <div style={{ flex: '1', marginRight: '20px' }}>
           <h3>工具列表 ({tools.length})</h3>
           <ul style={{ cursor: 'pointer' }}>
             {tools.map((tool, index) => (
@@ -93,7 +102,7 @@ const AppContent: React.FC = () => {
               </li>
             ))}
           </ul>
-        </div>
+        </div>}
 
         <div style={{ flex: '2' }}>
           {selectedTool && (
@@ -114,12 +123,14 @@ const AppContent: React.FC = () => {
         </div>
       </div>
 
-      <h3>资源列表 ({resources.length})</h3>
-      <ul>
-        {resources.map((resource, index) => (
-          <li key={index}>{decodeURIComponent(resource.uri)}</li>
-        ))}
-      </ul>
+      {resources.length > 0 && <div>
+        <h3>资源列表 ({resources.length})</h3>
+        <ul>
+          {resources.map((resource, index) => (
+            <li key={index}>{decodeURIComponent(resource.uri)}</li>
+          ))}
+        </ul>
+      </div>}
 
       <MCPStatus
         serverUrl={serverUrl}

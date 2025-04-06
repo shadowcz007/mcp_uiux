@@ -10,6 +10,7 @@ export interface MCPProps {
   onResourceTemplatesReady?: (resourceTemplates: ResourceTemplate[]) => void
   onPromptsReady?: (prompts: Prompt[]) => void
   onReady?: (data: ServerInfo) => void
+  onNotifications?: (data: any) => void
 }
 
 export interface Tool {
@@ -71,6 +72,7 @@ export class MCPClient {
   ) => void
   private onPromptsReady?: (prompts: Prompt[]) => void
   private onReady?: (data: ServerInfo) => void
+  private onNotifications?: (data: any) => void
   private sessionId: string | null = null
   private messageEndpoint: string | null = null
   private eventSource: EventSource | null = null
@@ -95,7 +97,8 @@ export class MCPClient {
     onResourcesReady,
     onResourceTemplatesReady,
     onPromptsReady,
-    onReady
+    onReady,
+    onNotifications
   }: MCPProps) {
     this.url = url
     this.onToolsReady = onToolsReady
@@ -105,6 +108,7 @@ export class MCPClient {
     this.onResourceTemplatesReady = onResourceTemplatesReady
     this.onPromptsReady = onPromptsReady
     this.onReady = onReady
+    this.onNotifications = onNotifications
   }
 
   // 发送 JSON-RPC 请求
@@ -266,7 +270,7 @@ export class MCPClient {
     this.eventSource.addEventListener('message', async event => {
       try {
         const message = JSON.parse(event.data)
-        // console.log('收到消息:', message)
+        console.log('收到消息:', message)
 
         if (message.jsonrpc === '2.0') {
           // 处理初始化完成
@@ -373,6 +377,12 @@ export class MCPClient {
               console.log('fix收到采样消息:', message)
               this.handleCallback(message)
             }
+          } else if (
+            message.method == 'notifications/message' &&
+            message.params
+          ) {
+            console.log('notifications/message:', message.params)
+            this.onNotifications?.(message.params)
           }
 
           // 添加这个部分：处理任何其他类型的响应
@@ -730,7 +740,8 @@ export const useMCP = ({
   onToolsReady,
   onToolResult,
   onError,
-  onReady
+  onReady,
+  onNotifications
 }: MCPProps): MCPHookResult => {
   const mcpClientRef = useRef<MCPClient | null>(null)
 
@@ -740,14 +751,15 @@ export const useMCP = ({
       onToolsReady,
       onToolResult,
       onError,
-      onReady
+      onReady,
+      onNotifications
     })
     mcpClientRef.current.connect()
 
     return () => {
       mcpClientRef.current?.disconnect()
     }
-  }, [url, onToolsReady, onToolResult, onError, onReady])
+  }, [url, onToolsReady, onToolResult, onError, onReady, onNotifications])
 
   return {
     executeTool: useCallback(async (toolName: string, args: any) => {
