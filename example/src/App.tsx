@@ -42,23 +42,27 @@ const convertSchemaToSurveyElement = (schema: any, name: string = '', title: str
 
     case 'array':
       if (schema.items.type === 'string' || schema.items.type === 'number' || schema.items.type === 'integer') {
-        // 简单类型的数组使用 matrixdynamic
         return {
           type: 'matrixdynamic',
           name: elementName,
           title: elementTitle,
-          columns: [{
-            name: 'value',
-            title: '值',
-            cellType: schema.items.type === 'string' ? 'text' : 'number'
-          }],
+          columns: [
+            {
+              cellType: schema.items.type === 'number' || schema.items.type === 'integer' ? 'number' : 'text',
+              name: "value",
+              title: ' '
+            }
+          ],
           rowCount: 1,
-          addRowText: '添加项',
+          minRowCount: 0,
+          addRowText: `添加${elementTitle}`,
           removeRowText: '删除',
-          isRequired: schema.required || false
+          isRequired: schema.required || false,
+          showHeader: false,
+          confirmDelete: false
         };
       } else {
-        // 复杂类型的数组使用 paneldynamic
+        // 复杂类型的数组保持原来的 paneldynamic 处理方式
         return {
           type: 'paneldynamic',
           name: elementName,
@@ -135,7 +139,7 @@ const mapToolParamsToSurveyJson = (tool: any) => {
 // 工具表单组件
 const ToolSurveyForm = ({ tool, onComplete }) => {
   const [survey, setSurvey] = useState(null);
-  console.log('ToolSurveyForm', tool);
+  // console.log('ToolSurveyForm', tool);
   useEffect(() => {
     if (!tool) return;
 
@@ -146,9 +150,24 @@ const ToolSurveyForm = ({ tool, onComplete }) => {
     // 设置完成事件
     surveyModel.onComplete.add(async (sender) => {
       if (onComplete) {
-        const result = await tool.execute(sender.data);
+        const data = { ...sender.data };
+
+        // 处理数组格式
+        if (tool.inputSchema && tool.inputSchema.type === 'object' && tool.inputSchema.properties) {
+          Object.entries(tool.inputSchema.properties).forEach(([key, prop]: [string, any]) => {
+            if (prop.type === 'array' &&
+              (prop.items.type === 'string' || prop.items.type === 'number' || prop.items.type === 'integer') &&
+              Array.isArray(data[key])) {
+              // 将 [{value: 'a'}, {value: 'b'}] 转换为 ['a', 'b']
+              data[key] = data[key].map(item => item.value);
+            }
+          });
+        }
+
+        // console.log('sender.data', data);
+        const result = await tool.execute(data);
         onComplete({
-          input: sender.data,
+          input: data,
           output: result
         });
       }
@@ -161,6 +180,8 @@ const ToolSurveyForm = ({ tool, onComplete }) => {
 
   return <Survey model={survey} />;
 };
+
+
 
 const AppContent: React.FC = () => {
   const [serverUrl, setServerUrl] = useState('');
@@ -200,7 +221,8 @@ const AppContent: React.FC = () => {
 
   const handleFormComplete = (data: any) => {
     setFormData(data);
-    console.log('表单数据：', data);
+    setSelectedTool(null);
+    // console.log('表单数据：', data);
     // 这里可以添加调用工具的逻辑
   };
 
@@ -263,13 +285,12 @@ const AppContent: React.FC = () => {
                 <ToolSurveyForm tool={selectedTool}
                   onComplete={handleFormComplete} />
               </div>
-
-              {formData && (
-                <div>
-                  <h4>表单数据</h4>
-                  <pre>{JSON.stringify(formData, null, 2)}</pre>
-                </div>
-              )}
+            </div>
+          )}
+          {formData && (
+            <div>
+              <h4>表单数据</h4>
+              <pre>{JSON.stringify(formData, null, 2)}</pre>
             </div>
           )}
         </div>

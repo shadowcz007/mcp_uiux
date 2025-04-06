@@ -312,7 +312,6 @@
                                 case 0:
                                     _q.trys.push([0, 4, , 5]);
                                     message = JSON.parse(event.data);
-                                    console.log('收到消息:', message);
                                     if (!(message.jsonrpc === '2.0')) return [3 /*break*/, 3];
                                     if (!(message.id === 1 && message.result && !initialized)) return [3 /*break*/, 2];
                                     initialized = true;
@@ -321,9 +320,9 @@
                                     this.serverName = name_1;
                                     this.protocolVersion = message.result.protocolVersion;
                                     this.capabilities = capabilities;
-                                    console.log('MCP capabilities:', capabilities);
                                     return [4 /*yield*/, this.handleInitialized(toolsRequested)];
                                 case 1:
+                                    // console.log('MCP capabilities:', capabilities)
                                     toolsRequested = _q.sent();
                                     (_b = this.onReady) === null || _b === void 0 ? void 0 : _b.call(this, {
                                         name: name_1,
@@ -334,19 +333,18 @@
                                     return [3 /*break*/, 3];
                                 case 2:
                                     if ((_c = message.result) === null || _c === void 0 ? void 0 : _c.tools) {
-                                        console.log('获取到工具列表:', this.sessionId, message.result.tools);
+                                        // console.log('获取到工具列表:', this.sessionId, message.result.tools)
                                         // 为每个工具添加执行方法
                                         message.result.tools = message.result.tools.map(function (tool) { return (__assign(__assign({}, tool), { fromServerName: _this.serverName, execute: function (args) { return _this.executeTool(tool.name, args); } })); });
                                         (_d = this.onToolsReady) === null || _d === void 0 ? void 0 : _d.call(this, message.result.tools);
                                         this.handleCallback(message);
                                     }
                                     else if ((_e = message.result) === null || _e === void 0 ? void 0 : _e.resources) {
-                                        console.log('获取到资源列表:', message.result.resources);
+                                        // console.log('获取到资源列表:', message.result.resources)
                                         (_f = this.onResourcesReady) === null || _f === void 0 ? void 0 : _f.call(this, message.result.resources);
                                         this.handleCallback(message);
                                     }
                                     else if ((_g = message.result) === null || _g === void 0 ? void 0 : _g.resourceTemplates) {
-                                        console.log('获取到资源模板列表:', message.result.resourceTemplates);
                                         resourceTemplates = message.result.resourceTemplates;
                                         if (resourceTemplates && Array.isArray(resourceTemplates)) {
                                             for (index = 0; index < resourceTemplates.length; index++) {
@@ -357,13 +355,16 @@
                                             if (this.capabilities && !this.capabilities.resourceTemplates) {
                                                 this.capabilities.resourceTemplates = resourceTemplates;
                                             }
-                                            console.log('缓存资源模板到capabilities:', this.capabilities.resourceTemplates);
+                                            // console.log(
+                                            //   '缓存资源模板到capabilities:',
+                                            //   this.capabilities.resourceTemplates
+                                            // )
                                         }
                                         (_h = this.onResourceTemplatesReady) === null || _h === void 0 ? void 0 : _h.call(this, this.processResourceTemplates(resourceTemplates));
                                         this.handleCallback(message);
                                     }
                                     else if ((_j = message.result) === null || _j === void 0 ? void 0 : _j.prompts) {
-                                        console.log('获取到提示列表:', message.result.prompts);
+                                        // console.log('获取到提示列表:', message.result.prompts)
                                         // 为每个提示添加执行方法
                                         message.result.prompts = message.result.prompts.map(function (prompt) {
                                             var np = __assign(__assign({}, prompt), { fromServerName: _this.serverName });
