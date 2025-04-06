@@ -4,7 +4,7 @@ import { MCPProvider, useMCP, MCPStatus } from 'mcp-uiux';
 
 
 const AppContent: React.FC = () => {
-  const [serverUrl, setServerUrl] = useState('http://localhost:8080');
+  const [serverUrl, setServerUrl] = useState('');
   const [resourcePath, setResourcePath] = useState('');
   const {
     connect,
@@ -13,8 +13,19 @@ const AppContent: React.FC = () => {
     tools,
     resources,
     resourceTemplates,
-    prompts, 
+    prompts,
   } = useMCP();
+
+  useEffect(() => {
+    if (localStorage.getItem('mcp-uiux-serverUrl')) {
+      setServerUrl(localStorage.getItem('mcp-uiux-serverUrl') || 'http://localhost:8080');
+    } else {
+      setServerUrl('http://localhost:8080');
+    }
+    if (localStorage.getItem('mcp-uiux-resourcePath')) {
+      setResourcePath(localStorage.getItem('mcp-uiux-resourcePath') || '');
+    }
+  }, [])
 
   useEffect(() => {
     connect(serverUrl, resourcePath);
@@ -30,7 +41,11 @@ const AppContent: React.FC = () => {
           <input
             type="text"
             value={serverUrl}
-            onChange={(e) => setServerUrl(e.target.value)}
+            onChange={(e) => {
+              setServerUrl(e.target.value);
+              localStorage.setItem('mcp-uiux-serverUrl', e.target.value); 
+
+            }}
             style={{ width: '300px', marginLeft: '10px' }}
           />
         </div>
@@ -39,7 +54,10 @@ const AppContent: React.FC = () => {
           <input
             type="text"
             value={resourcePath}
-            onChange={(e) => setResourcePath(e.target.value)}
+            onChange={(e) => {
+              setResourcePath(e.target.value); 
+              localStorage.setItem('mcp-uiux-resourcePath', e.target.value); 
+            }}
             style={{ width: '300px', marginLeft: '10px' }}
           />
         </div>
