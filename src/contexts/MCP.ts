@@ -266,7 +266,7 @@ export class MCPClient {
     this.eventSource.addEventListener('message', async event => {
       try {
         const message = JSON.parse(event.data)
-        console.log('收到消息:', message)
+        // console.log('收到消息:', message)
 
         if (message.jsonrpc === '2.0') {
           // 处理初始化完成
@@ -278,7 +278,7 @@ export class MCPClient {
             this.serverName = name
             this.protocolVersion = message.result.protocolVersion
             this.capabilities = capabilities
-            console.log('MCP capabilities:', capabilities)
+            // console.log('MCP capabilities:', capabilities)
             toolsRequested = await this.handleInitialized(toolsRequested)
 
             this.onReady?.({
@@ -290,7 +290,7 @@ export class MCPClient {
           }
           // 处理工具列表
           else if (message.result?.tools) {
-            console.log('获取到工具列表:', this.sessionId, message.result.tools)
+            // console.log('获取到工具列表:', this.sessionId, message.result.tools)
             // 为每个工具添加执行方法
             message.result.tools = message.result.tools.map((tool: any) => ({
               ...tool,
@@ -301,11 +301,11 @@ export class MCPClient {
 
             this.handleCallback(message)
           } else if (message.result?.resources) {
-            console.log('获取到资源列表:', message.result.resources)
+            // console.log('获取到资源列表:', message.result.resources)
             this.onResourcesReady?.(message.result.resources)
             this.handleCallback(message)
           } else if (message.result?.resourceTemplates) {
-            console.log('获取到资源模板列表:', message.result.resourceTemplates)
+            // console.log('获取到资源模板列表:', message.result.resourceTemplates)
             let resourceTemplates = message.result.resourceTemplates
 
             if (resourceTemplates && Array.isArray(resourceTemplates)) {
@@ -325,10 +325,10 @@ export class MCPClient {
                 this.capabilities.resourceTemplates = resourceTemplates
               }
 
-              console.log(
-                '缓存资源模板到capabilities:',
-                this.capabilities.resourceTemplates
-              )
+              // console.log(
+              //   '缓存资源模板到capabilities:',
+              //   this.capabilities.resourceTemplates
+              // )
             }
 
             this.onResourceTemplatesReady?.(
@@ -337,7 +337,7 @@ export class MCPClient {
 
             this.handleCallback(message)
           } else if (message.result?.prompts) {
-            console.log('获取到提示列表:', message.result.prompts)
+            // console.log('获取到提示列表:', message.result.prompts)
 
             // 为每个提示添加执行方法
             message.result.prompts = message.result.prompts.map(
