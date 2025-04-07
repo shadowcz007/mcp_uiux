@@ -8,6 +8,10 @@ MCP UIUX 是一个 React 组件库，专门用于实现模型上下文协议(Mod
 
 [关注 https://codenow.wiki/ 获得更多](https://codenow.wiki/)
 
+
+![1744007468429](https://github.com/user-attachments/assets/ae64c933-7f27-49f0-a60e-f550093d3e0b)
+
+
 ## 主要功能
 
 - Tools 工具管理：集成和调用 MCP 服务器提供的各类工具
