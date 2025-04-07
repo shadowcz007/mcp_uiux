@@ -4,6 +4,8 @@ Use and manage MCP with elegance and precision.
 
 MCP UIUX 是一个 React 组件库，专门用于实现模型上下文协议(Model Context Protocol)中的工具(Tools)、提示(Prompts)和资源(Resources)管理。它提供了直观的界面来连接和展示 MCP 服务器的状态和数据。
 
+[在线使用](https://shadowcz007.github.io/mcp_uiux/)
+
 [关注 https://codenow.wiki/ 获得更多](https://codenow.wiki/)
 
 ## 主要功能
