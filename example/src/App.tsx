@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
-import { MCPProvider, useMCP, MCPStatus, InputSchemaForm } from 'mcp-uiux';
+import { MCPProvider, useMCP, MCPStatus, InputSchemaForm, ReactJson } from 'mcp-uiux';
 const AppContent: React.FC = () => {
   const [serverUrl, setServerUrl] = useState('');
   const [resourcePath, setResourcePath] = useState('');
   const [selectedTool, setSelectedTool] = useState<any>(null);
   const [formData, setFormData] = useState<any>(null);
+  const [debug, setDebug] = useState(false);
 
   const {
     connect,
@@ -47,44 +48,17 @@ const AppContent: React.FC = () => {
 
   return (
     <div style={{ padding: '20px' }}>
-      <h1>MCP UIUX 示例</h1>
-
-      <div style={{ marginBottom: '20px' }}>
-        <div>
-          <label>服务器地址：</label>
-          <input
-            type="text"
-            value={serverUrl}
-            onChange={(e) => {
-              setServerUrl(e.target.value);
-              localStorage.setItem('mcp-uiux-serverUrl', e.target.value);
-            }}
-            style={{ width: '300px', marginLeft: '10px' }}
-          />
-        </div>
-        <div style={{ marginTop: '10px' }}>
-          <label>资源路径过滤：</label>
-          <input
-            type="text"
-            value={resourcePath}
-            onChange={(e) => {
-              setResourcePath(e.target.value);
-              localStorage.setItem('mcp-uiux-resourcePath', e.target.value);
-            }}
-            style={{ width: '300px', marginLeft: '10px' }}
-          />
-        </div>
-      </div>
+      <h1>MCP UIUX 示例 <button onClick={()=>setDebug(!debug)}>测试</button></h1>
 
       {
-        Object.keys(notifications).map((key, index) => (
+       debug&& Object.keys(notifications).map((key, index) => (
           <div key={index}>
             {key}: {notifications[key]}
           </div>
         ))
       }
 
-      <div style={{ display: 'flex' }}>
+      {debug&& <div style={{ display: 'flex' }}>
         {tools.length > 0 && <div style={{ flex: '1', marginRight: '20px' }}>
           <h3>工具列表 ({tools.length})</h3>
           <ul style={{ cursor: 'pointer' }}>
@@ -117,13 +91,14 @@ const AppContent: React.FC = () => {
           {formData && (
             <div>
               <h4>表单数据</h4>
-              <pre>{JSON.stringify(formData, null, 2)}</pre>
+              <ReactJson src={formData} />
+              {/* <pre>{JSON.stringify(formData, null, 2)}</pre> */}
             </div>
           )}
         </div>
-      </div>
+      </div>}
 
-      {resources.length > 0 && <div>
+      {debug&& resources.length > 0 && <div>
         <h3>资源列表 ({resources.length})</h3>
         <ul>
           {resources.map((resource, index) => (
@@ -134,6 +109,7 @@ const AppContent: React.FC = () => {
 
       <MCPStatus
         serverUrl={serverUrl}
+        showSettings={true}
       />
     </div>
   );

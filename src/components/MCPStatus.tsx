@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useMCP } from '../contexts/MCPProvider';
 import { useEffect } from 'react';
 import { SciFiMCPStatus } from './SciFiMCPStatus';
+import { MCPSettings } from './MCPSettings';
 
 export interface MCPStatusProps {
   serverUrl?: string;
   resourcePath?: string;
   className?: string;
   style?: React.CSSProperties;
+  showSettings?: boolean;
   render?: (props: {
     loading: boolean;
     error: string | null;
@@ -20,19 +22,29 @@ export interface MCPStatusProps {
 }
 
 export const MCPStatus: React.FC<MCPStatusProps> = ({
-  serverUrl = 'http://localhost:8080',
-  resourcePath = '',
+  serverUrl: initialServerUrl = 'http://localhost:8080',
+  resourcePath: initialResourcePath = '',
   className,
   style,
+  showSettings: initialShowSettings = false,
   render
 }) => {
-  const { 
-    connect, 
-    loading, 
-    error, 
-    tools, 
-    resources, 
-    resourceTemplates, 
+  const [serverUrl, setServerUrl] = useState(initialServerUrl);
+  const [resourcePath, setResourcePath] = useState(initialResourcePath);
+  const [showSettings, setShowSettings] = useState(initialShowSettings);
+
+  useEffect(() => {
+    setServerUrl(localStorage.getItem('mcp-uiux-serverUrl') || initialServerUrl);
+    setResourcePath(localStorage.getItem('mcp-uiux-resourcePath') || initialResourcePath);
+  }, []);
+
+  const {
+    connect,
+    loading,
+    error,
+    tools,
+    resources,
+    resourceTemplates,
     prompts,
     serverInfo,
     notifications
@@ -48,6 +60,15 @@ export const MCPStatus: React.FC<MCPStatusProps> = ({
 
   return (
     <div className={className} style={style}>
+      {showSettings && (
+        <MCPSettings
+          serverUrl={serverUrl}
+          resourcePath={resourcePath}
+          onServerUrlChange={(url: string) => { setServerUrl(url); localStorage.setItem('mcp-uiux-serverUrl', url) }}
+          onResourcePathChange={(path: string) => { setResourcePath(path); localStorage.setItem('mcp-uiux-resourcePath', path) }}
+          style={{ marginBottom: '20px' }}
+        />
+      )}
       <SciFiMCPStatus
         serverInfo={serverInfo}
         loading={loading}
@@ -57,6 +78,7 @@ export const MCPStatus: React.FC<MCPStatusProps> = ({
         resourceTemplates={resourceTemplates}
         prompts={prompts}
         notifications={notifications}
+        onSettingsOpen={() => setShowSettings(!showSettings)}
       />
     </div>
   );

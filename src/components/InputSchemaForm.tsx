@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Survey } from 'survey-react-ui';
 import { Model } from 'survey-core';
-// import 'survey-core/survey-core.min.css';
-import './InputSchemaForm.css';
+import { SharpDark } from "survey-core/themes";
+import 'survey-core/survey-core.min.css';
 // 将 JSON Schema 转换为 SurveyJS 元素
 const convertSchemaToSurveyElement = (schema: any, name: string = '', title: string = ''): any => {
   if (!schema) return null;
@@ -163,7 +163,27 @@ const InputSchemaForm = ({ tool, onComplete }: any) => {
         }
         setSurvey(null)
         // console.log('sender.data', data);
-        const result = await tool.execute(data);
+        let result = await tool.execute(data);
+        if (Array.isArray(result) && result[0]?.type === 'text') {
+          result = result.map((item: any) => {
+            if (item.type == 'text') {
+              let json = null;
+              try {
+                json = JSON.parse(item.text);
+              } catch (error) {
+                console.log(error)
+              }
+              if (json) {
+                item.type = 'json';
+                item.json = json;
+                delete item.text
+              }
+            }
+            return {
+              ...item
+            }
+          })
+        }
         onComplete({
           input: data,
           output: result
@@ -171,13 +191,13 @@ const InputSchemaForm = ({ tool, onComplete }: any) => {
       }
     });
 
-
+    surveyModel.applyTheme(SharpDark);
     // 设置 CSS 变量
-    surveyModel.cssVariables = {
-      '--sjs-primary-backcolor': '#0a0a1f', // 主色调
-      '--sjs-font-size': '16px', // 字体大小
-      '--sjs-border-radius': '8px', // 圆角
-    };
+    // surveyModel.cssVariables = {
+    //   '--sjs-primary-backcolor': '#0a0a1f', // 主色调
+    //   '--sjs-font-size': '16px', // 字体大小
+    //   '--sjs-border-radius': '8px', // 圆角
+    // };
 
     setSurvey(surveyModel);
   }, [tool, onComplete]);

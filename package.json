@@ -1,6 +1,6 @@
 {
   "name": "mcp-uiux",
-  "version": "1.2.0",
+  "version": "1.4.1",
   "description": "MCP client and uiux",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -24,11 +24,14 @@
     "react": ">=16.8.0",
     "react-dom": ">=16.8.0"
   },
-  "dependencies": { 
+  "dependencies": {
+    "react-json-view": "^1.21.3",
     "survey-core": "^2.0.3",
     "survey-react-ui": "^2.0.3"
   },
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^28.0.3",
+    "@rollup/plugin-node-resolve": "^16.0.1",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "rollup": "^2.79.1",
