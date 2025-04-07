@@ -76,32 +76,9 @@
 
       return (
         <div>
-          <h1>MCP UIUX UMD 示例</h1>
-
-          <div style={{ marginBottom: '20px' }}>
-            <div>
-              <label>服务器地址：</label>
-              <input
-                type="text"
-                value={serverUrl}
-                onChange={(e) => setServerUrl(e.target.value)}
-                style={{ width: '300px', marginLeft: '10px' }}
-              />
-            </div>
-            <div style={{ marginTop: '10px' }}>
-              <label>资源路径过滤：</label>
-              <input
-                type="text"
-                value={resourcePath}
-                onChange={(e) => setResourcePath(e.target.value)}
-                style={{ width: '300px', marginLeft: '10px' }}
-              />
-            </div>
-          </div>
-
+          <h1>MCP UIUX UMD 示例</h1> 
           {loading && <div>正在加载...</div>}
-          {error && <div style={{ color: 'red' }}>错误: {error}</div>}
-
+          {error && <div style={{ color: 'red' }}>错误: {error}</div>} 
           <MCPStatus serverUrl={serverUrl} />
         </div>
       );
