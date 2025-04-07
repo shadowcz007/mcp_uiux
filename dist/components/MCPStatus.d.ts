@@ -4,6 +4,7 @@ export interface MCPStatusProps {
     resourcePath?: string;
     className?: string;
     style?: React.CSSProperties;
+    showSettings?: boolean;
     render?: (props: {
         loading: boolean;
         error: string | null;

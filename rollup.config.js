@@ -1,7 +1,9 @@
-import typescript from 'rollup-plugin-typescript2';
-import pkg from './package.json';
-import postcss from 'rollup-plugin-postcss';
-import { terser } from 'rollup-plugin-terser';
+import typescript from 'rollup-plugin-typescript2'
+import pkg from './package.json'
+import postcss from 'rollup-plugin-postcss'
+import { terser } from 'rollup-plugin-terser'
+import resolve from '@rollup/plugin-node-resolve'
+import commonjs from '@rollup/plugin-commonjs'
 
 export default {
   input: 'src/index.ts',
@@ -10,13 +12,13 @@ export default {
       file: pkg.main,
       format: 'cjs',
       exports: 'named',
-      sourcemap: true,
+      sourcemap: true
     },
     {
       file: pkg.module,
       format: 'es',
       exports: 'named',
-      sourcemap: true,
+      sourcemap: true
     },
     {
       file: 'dist/index.umd.js',
@@ -27,7 +29,7 @@ export default {
         'react-dom': 'ReactDOM'
       },
       exports: 'named',
-      sourcemap: true,
+      sourcemap: true
     },
     {
       file: 'dist/index.umd.min.js',
@@ -39,11 +41,18 @@ export default {
       },
       exports: 'named',
       plugins: [terser()],
-      sourcemap: true,
+      sourcemap: true
     }
   ],
-  external: [...Object.keys(pkg.peerDependencies || {}),...Object.keys(pkg.dependencies || {})],
+  external: [...Object.keys(pkg.peerDependencies || {})],
   plugins: [
+    resolve({
+      browser: true, // 因为这是要在浏览器中运行的
+      preferBuiltins: false
+    }),
+    commonjs({
+      include: /node_modules/
+    }),
     typescript({
       typescript: require('typescript'),
       clean: true,
@@ -61,6 +70,6 @@ export default {
       inject: {
         insertAt: 'top'
       }
-    }),
-  ],
-};
+    })
+  ]
+}

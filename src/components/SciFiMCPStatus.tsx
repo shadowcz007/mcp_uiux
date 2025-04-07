@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ReactJson from 'react-json-view'
 import './SciFiMCPStatus.css'
 
 import InputSchemaForm from './InputSchemaForm';
@@ -12,7 +13,8 @@ export const SciFiMCPStatus: React.FC<{
     resourceTemplates: any[];
     prompts: any[];
     notifications: any;
-}> = ({ serverInfo, loading, error, tools, resources, resourceTemplates, prompts, notifications }) => {
+    onSettingsOpen?: () => void;
+}> = ({ serverInfo, loading, error, tools, resources, resourceTemplates, prompts, notifications, onSettingsOpen }) => {
 
     const [selectedItem, setSelectedItem] = useState<any>(null);
     const [formData, setFormData] = useState<any>(null);
@@ -31,8 +33,15 @@ export const SciFiMCPStatus: React.FC<{
         <div className="sci-fi-container">
             {/* 全息投影效果的标题 */}
             <div className="hologram-title">
-                <h1>MCP 系统状态监控</h1>
-                <div className="status-indicator">
+                <h1 style={{ display: 'flex', alignItems: 'center' }}>MCP 系统状态监控 {onSettingsOpen && <button
+                    onClick={() => onSettingsOpen()} className='item'
+                    style={{
+                        fontSize: 12, marginLeft: 10, color: 'white',
+                        border: 'none',
+                    }}
+                >设置</button>}</h1>
+
+                <div className="status-indicator" style={{ display: 'flex', alignItems: 'center' }}>
                     {loading ? (
                         <span className="pulse loading">系统扫描中...</span>
                     ) : error ? (
@@ -115,12 +124,13 @@ export const SciFiMCPStatus: React.FC<{
                         </div>
                     </div>}
                 </div>
-                {selectedItem && <div className='module' style={{}}>
+                {selectedItem && <div className='module' style={{ width: '100%' }}>
                     <InputSchemaForm tool={selectedItem} onComplete={handleFormComplete} />
                 </div>}
-                {formData && <div className='module' style={{ margin: 20 }}>
+                {formData && <div className='module' style={{ margin: '0 20px' }}>
                     <h4>数据</h4>
-                    <pre>{JSON.stringify(formData, null, 2)}</pre>
+                    <ReactJson src={formData} theme="colors" />
+                    {/* <pre>{JSON.stringify(formData, null, 2)}</pre> */}
                 </div>}
             </div>
             )}

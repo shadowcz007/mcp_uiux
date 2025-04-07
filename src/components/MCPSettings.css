@@ -1,0 +1,60 @@
+.mcp-settings-container {
+  background: #0a0a1f;
+  color: #00ffff;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+}
+
+.settings-group {
+  background: rgba(0, 255, 255, 0.05);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.settings-field {
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.settings-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #00ffff;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.settings-input {
+  width: 100%;
+  padding: 0.8rem;
+  background: rgba(0, 255, 255, 0.05);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  border-radius: 4px;
+  color: #00ffff;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.settings-input:focus {
+  outline: none;
+  border-color: #00ffff;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+.settings-input:hover {
+  background: rgba(0, 255, 255, 0.1);
+}
+
+.settings-field::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.5), transparent);
+} 

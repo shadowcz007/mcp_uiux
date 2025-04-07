@@ -9,4 +9,5 @@ export declare const SciFiMCPStatus: React.FC<{
     resourceTemplates: any[];
     prompts: any[];
     notifications: any;
+    onSettingsOpen?: () => void;
 }>;
