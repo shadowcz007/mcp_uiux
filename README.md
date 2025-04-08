@@ -103,35 +103,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 
 参考示例代码：[example](./example)
 
-## API 参考
-
-### useMCP Hook
-
-返回值：
-- `connect`: 连接服务器的函数
-- `loading`: 加载状态
-- `error`: 错误信息
-- `tools`: 工具列表
-- `resources`: 资源列表
-- `resourceTemplates`: 资源模板
-- `prompts`: AI 提示列表
-
-### SciFiMCPStatus 组件
-
-科幻风格的状态展示组件，包含：
-- 系统状态监控
-- 工具库展示
-- 资源矩阵
-- AI 提示库
-
-## 许可证
-
-MIT
-
-## 贡献
-
-欢迎提交 Issue 和 Pull Request！
-
 ## UMD 使用方式
 
 除了通过 npm 安装使用外，MCP UIUX 也支持通过 UMD 方式在浏览器中直接使用：
@@ -166,6 +137,37 @@ MIT
 ```
 
 完整示例请参考 [umd-example.html](./example/umd-example.html)
+
+
+
+## API 参考
+
+### useMCP Hook
+
+返回值：
+- `connect`: 连接服务器的函数
+- `loading`: 加载状态
+- `error`: 错误信息
+- `tools`: 工具列表
+- `resources`: 资源列表
+- `resourceTemplates`: 资源模板
+- `prompts`: AI 提示列表
+
+### SciFiMCPStatus 组件
+
+科幻风格的状态展示组件，包含：
+- 系统状态监控
+- 工具库展示
+- 资源矩阵
+- AI 提示库
+
+## 许可证
+
+MIT
+
+## 贡献
+
+欢迎提交 Issue 和 Pull Request！
 
 
 
