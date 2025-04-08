@@ -57,7 +57,42 @@ const convertSchemaToSurveyElement = (schema: any, name: string = '', title: str
           removeRowText: '删除',
           isRequired: schema.required || false,
           showHeader: false,
-          confirmDelete: false
+          confirmDelete: false,
+          description: schema.description || ''
+        };
+      } else if (schema.items.type === 'object') {
+        // 处理对象数组
+        const objectProperties = schema.items.properties || {};
+        const columns = Object.entries(objectProperties).map(([propName, propSchema]: [string, any]) => ({
+          name: propName,
+          title: propName,
+          cellType: propSchema.type === 'number' || propSchema.type === 'integer' ? 'number' : 'text'
+        }));
+
+        return {
+          type: 'matrixdynamic',
+          name: elementName,
+          title: elementTitle,
+          columns: columns.length > 0 ? columns : [
+            {
+              name: "key",
+              title: "键",
+              cellType: "text"
+            },
+            {
+              name: "value",
+              title: "值",
+              cellType: "text"
+            }
+          ],
+          rowCount: 1,
+          minRowCount: 0,
+          addRowText: `添加${elementTitle}`,
+          removeRowText: '删除',
+          isRequired: schema.required || false,
+          showHeader: true,
+          confirmDelete: false,
+          description: schema.description || ''
         };
       } else {
         // 复杂类型的数组保持原来的 paneldynamic 处理方式
@@ -158,6 +193,12 @@ const InputSchemaForm = ({ tool, onComplete }: any) => {
               Array.isArray(data[key])) {
               // 将 [{value: 'a'}, {value: 'b'}] 转换为 ['a', 'b']
               data[key] = data[key].map((item: any) => item.value);
+            }
+            if (prop.type === 'array' &&
+              prop.items.type === 'object' &&
+              Array.isArray(data[key])) {
+              // console.log('object data[key]', data[key]);
+              data[key] = data[key].filter((item: any) => Object.keys(item).length > 0)
             }
           });
         }

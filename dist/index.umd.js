@@ -67863,7 +67863,45 @@
                         removeRowText: '删除',
                         isRequired: schema.required || false,
                         showHeader: false,
-                        confirmDelete: false
+                        confirmDelete: false,
+                        description: schema.description || ''
+                    };
+                }
+                else if (schema.items.type === 'object') {
+                    // 处理对象数组
+                    var objectProperties = schema.items.properties || {};
+                    var columns = Object.entries(objectProperties).map(function (_a) {
+                        var propName = _a[0], propSchema = _a[1];
+                        return ({
+                            name: propName,
+                            title: propName,
+                            cellType: propSchema.type === 'number' || propSchema.type === 'integer' ? 'number' : 'text'
+                        });
+                    });
+                    return {
+                        type: 'matrixdynamic',
+                        name: elementName,
+                        title: elementTitle,
+                        columns: columns.length > 0 ? columns : [
+                            {
+                                name: "key",
+                                title: "键",
+                                cellType: "text"
+                            },
+                            {
+                                name: "value",
+                                title: "值",
+                                cellType: "text"
+                            }
+                        ],
+                        rowCount: 1,
+                        minRowCount: 0,
+                        addRowText: "\u6DFB\u52A0".concat(elementTitle),
+                        removeRowText: '删除',
+                        isRequired: schema.required || false,
+                        showHeader: true,
+                        confirmDelete: false,
+                        description: schema.description || ''
                     };
                 }
                 else {
@@ -67963,6 +68001,12 @@
                                         Array.isArray(data_1[key])) {
                                         // 将 [{value: 'a'}, {value: 'b'}] 转换为 ['a', 'b']
                                         data_1[key] = data_1[key].map(function (item) { return item.value; });
+                                    }
+                                    if (prop.type === 'array' &&
+                                        prop.items.type === 'object' &&
+                                        Array.isArray(data_1[key])) {
+                                        // console.log('object data[key]', data[key]);
+                                        data_1[key] = data_1[key].filter(function (item) { return Object.keys(item).length > 0; });
                                     }
                                 });
                             }
