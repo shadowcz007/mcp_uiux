@@ -89,54 +89,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 ```
 
 
-```typescript
-import React from 'react';
-import { MCPProvider, useMCP } from 'mcp-uiux';
-
-const App = () => {
-  const {
-    connect,
-    loading,
-    error,
-    tools,
-    resources,
-    resourceTemplates,
-    prompts
-  } = useMCP();
-
-  useEffect(() => {
-    // 连接到 MCP 服务器
-    connect('http://localhost:8080', '');
-  }, []);
-
-  return (
-    <div>
-      {loading && <div>加载中...</div>}
-      {error && <div>错误：{error}</div>}
-      
-      <div>
-        <h3>工具列表 ({tools.length})</h3>
-        <ul>
-          {tools.map((tool, index) => (
-            <li key={index}>{tool.name}</li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  );
-};
-
-// 使用 MCPProvider 包装应用
-const Root = () => {
-  return (
-    <MCPProvider>
-      <App />
-    </MCPProvider>
-  );
-};
-
-export default Root;
-```
 
 ## 配置参数
 
