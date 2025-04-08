@@ -59,32 +59,16 @@ const AppContent: React.FC = () => {
   }, [serverUrl, resourcePath]);
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>MCP UIUX 示例</h1>
-      <div style={{ marginBottom: '20px' }}>
-        <div>
-          <label>服务器地址：</label>
-          <input
-            type="text"
-            value={serverUrl}
-            onChange={(e) => setServerUrl(e.target.value)}
-            style={{ width: '300px', marginLeft: '10px' }}
-          />
-        </div>
-        <div style={{ marginTop: '10px' }}>
-          <label>资源路径过滤：</label>
-          <input
-            type="text"
-            value={resourcePath}
-            onChange={(e) => setResourcePath(e.target.value)}
-            style={{ width: '300px', marginLeft: '10px' }}
-          />
-        </div>
-      </div>
-      <MCPStatus
+  <div>
+      <button onClick={()=>{
+        // 工具调用
+        tools[0].excute({});
+    }}></button>
+
+     <MCPStatus
         serverUrl={serverUrl}
       />
-    </div>
+  </div>
   );
 };
 
@@ -103,6 +87,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 );
 
 ```
+
 
 ```typescript
 import React from 'react';
