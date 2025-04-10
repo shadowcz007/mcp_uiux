@@ -36,6 +36,45 @@ npm install mcp-uiux
 
 ## 使用示例
 
+- [nodejs](./example/index.js)
+
+```javascript
+const { prepareTools } = require('mcp-uiux/dist/MCPClient.js')
+
+(async() => {
+    // 使用memory mcp测试
+    // win  -  https://github.com/shadowcz007/aio_mcp_exe/releases/download/0.1/mcp_server_memory.exe
+    // mac  -  https://github.com/shadowcz007/aio_mcp_exe/releases/download/0.1/mcp_server_memory
+
+    const url = "http://127.0.0.1:8080";
+
+    let { mcpClient, tools, toolsFunctionCall } = await prepareTools(url);
+
+    const knowledgeTools = toolsFunctionCall.filter(t => [
+        'create_relations',
+        'create_entities'
+    ].includes(t.function.name))
+
+    console.log(knowledgeTools);
+    console.log("---------------")
+
+    // 调用函数
+    let toolsResult = await callOpenAIFunctionAndProcessToolCalls(knowledgeTools);
+    console.log(JSON.stringify(toolsResult, null, 2));
+
+    for (const item of toolsResult) {
+        let tool = tools.find(t => t.name == item.name)
+        let result = await tool.execute(item.arguments)
+        console.log("工具执行结果", item.name, result)
+    }
+
+    await mcpClient.disconnect();
+})()
+
+```
+
+- [react](./example/src/App.tsx)
+
 ```typescript
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
@@ -88,26 +127,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 
 ```
 
+- UMD 使用方式
 
-
-## 配置参数
-
-- `serverUrl`: MCP 服务器地址，默认为 `http://localhost:8080`
-- `resourcePath`: 资源路径过滤器，默认为空字符串 `""`
-
-## 配套服务器
-
-本组件库可以与 [Memory MCP Server](https://github.com/shadowcz007/memory_mcp) 配合使用。
-
-## 完整示例
-
-参考示例代码：[example](./example)
-
-## UMD 使用方式
-
-除了通过 npm 安装使用外，MCP UIUX 也支持通过 UMD 方式在浏览器中直接使用：
-
-### 通过 CDN 引入
+除了通过 npm 安装使用外，MCP UIUX 也支持通过 UMD 方式在浏览器中直接使用。通过 CDN 引入
 
 ```html
 <!-- 引入 React 和 ReactDOM -->
@@ -116,11 +138,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 
 <!-- 引入 MCP UIUX -->
 <script src="https://unpkg.com/mcp-uiux@latest/dist/index.umd.min.js"></script>
-```
 
-### 基本使用
-
-```html
 <script>
   // 使用全局变量 MCPUIUX
   const { MCPProvider, useMCP, MCPStatus } = MCPUIUX;
@@ -139,6 +157,19 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 完整示例请参考 [umd-example.html](./example/umd-example.html)
 
 
+
+## 配置参数
+
+- `serverUrl`: MCP 服务器地址，默认为 `http://localhost:8080`
+- `resourcePath`: 资源路径过滤器，默认为空字符串 `""`
+
+## 配套服务器
+
+本组件库可以与 [Memory MCP Server](https://github.com/shadowcz007/memory_mcp) 配合使用。
+
+## 完整示例
+
+参考示例代码：[example](./example)
 
 ## API 参考
 
