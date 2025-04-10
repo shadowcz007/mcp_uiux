@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { MCPClient } from './MCP';
+import { MCPClient } from '../MCPClient';
 interface MCPContextType {
     mcpClient: MCPClient | null;
     loading: boolean;
