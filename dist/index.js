@@ -1156,7 +1156,7 @@ var MCPClient = /** @class */ (function () {
     MCPClient.prototype.transformToolsToOpenAIFunctions = function (tools) {
         if (tools === void 0) { tools = []; }
         return tools.map(function (tool) { return ({
-            type: "function",
+            type: 'function',
             function: {
                 name: tool.name,
                 description: tool.description,
@@ -68571,4 +68571,3 @@ exports.MCPStatus = MCPStatus;
 exports.ReactJson = ReactJson;
 exports.SurveyModel = SurveyModel;
 exports.useMCP = useMCP;
-//# sourceMappingURL=index.js.map

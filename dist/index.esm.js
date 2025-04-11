@@ -1130,7 +1130,7 @@ var MCPClient = /** @class */ (function () {
     MCPClient.prototype.transformToolsToOpenAIFunctions = function (tools) {
         if (tools === void 0) { tools = []; }
         return tools.map(function (tool) { return ({
-            type: "function",
+            type: 'function',
             function: {
                 name: tool.name,
                 description: tool.description,
@@ -68539,4 +68539,3 @@ var MCPStatus = function (_a) {
 };
 
 export { InputSchemaForm, MCPClient, MCPProvider, MCPStatus, ReactJson, SurveyModel, useMCP };
-//# sourceMappingURL=index.esm.js.map

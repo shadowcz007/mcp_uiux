@@ -1155,7 +1155,7 @@
         MCPClient.prototype.transformToolsToOpenAIFunctions = function (tools) {
             if (tools === void 0) { tools = []; }
             return tools.map(function (tool) { return ({
-                type: "function",
+                type: 'function',
                 function: {
                     name: tool.name,
                     description: tool.description,
@@ -68574,4 +68574,3 @@
     Object.defineProperty(exports, '__esModule', { value: true });
 
 }));
-//# sourceMappingURL=index.umd.js.map

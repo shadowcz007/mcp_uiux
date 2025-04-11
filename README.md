@@ -48,18 +48,28 @@ const { prepareTools } = require('mcp-uiux/dist/MCPClient.js')
 
     const url = "http://127.0.0.1:8080";
 
-    let { mcpClient, tools, toolsFunctionCall } = await prepareTools(url);
+    let { mcpClient, tools, toolsFunctionCall, systemPrompts } = await prepareTools(url)
 
-    const knowledgeTools = toolsFunctionCall.filter(t => [
-        'create_relations',
-        'create_entities'
-    ].includes(t.function.name))
+    const knowledgeExtractorPrompt = systemPrompts.find(
+      s => s.name === 'knowledge_extractor'
+    )
 
-    console.log(knowledgeTools);
-    console.log("---------------")
+    const knowledgeTools = toolsFunctionCall.filter(t =>
+      ['create_relations', 'create_entities'].includes(t.function.name)
+    )
+
+    console.log(knowledgeTools)
+    console.log(
+      '---------------',
+      knowledgeExtractorPrompt?.systemPrompt,
+      '---------------'
+    )
 
     // 调用函数
-    let toolsResult = await callOpenAIFunctionAndProcessToolCalls(knowledgeTools);
+    let toolsResult = await callOpenAIFunctionAndProcessToolCalls(
+      knowledgeExtractorPrompt?.systemPrompt,
+      knowledgeTools
+    );
     console.log(JSON.stringify(toolsResult, null, 2));
 
     for (const item of toolsResult) {

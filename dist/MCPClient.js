@@ -1125,7 +1125,7 @@ var MCPClient = /** @class */ (function () {
     MCPClient.prototype.transformToolsToOpenAIFunctions = function (tools) {
         if (tools === void 0) { tools = []; }
         return tools.map(function (tool) { return ({
-            type: "function",
+            type: 'function',
             function: {
                 name: tool.name,
                 description: tool.description,
@@ -1171,13 +1171,25 @@ var prepareTools = function (url, timeout) {
         try {
             mcpClient = new MCPClient({
                 url: url,
-                onToolsReady: function (tools) {
-                    if (mcpClient) {
-                        cleanup();
-                        var toolsFunctionCall = mcpClient.transformToolsToOpenAIFunctions(tools);
-                        resolve({ tools: tools, mcpClient: mcpClient, toolsFunctionCall: toolsFunctionCall });
-                    }
-                },
+                onToolsReady: function (tools) { return __awaiter(void 0, void 0, void 0, function () {
+                    var prompts, systemPrompts, toolsFunctionCall;
+                    var _a;
+                    return __generator(this, function (_b) {
+                        switch (_b.label) {
+                            case 0:
+                                if (!mcpClient) return [3 /*break*/, 2];
+                                cleanup();
+                                return [4 /*yield*/, mcpClient.getPromptsList()];
+                            case 1:
+                                prompts = (_a = (_b.sent())) === null || _a === void 0 ? void 0 : _a.prompts;
+                                systemPrompts = prompts.filter(function (p) { return p.systemPrompt; });
+                                toolsFunctionCall = mcpClient.transformToolsToOpenAIFunctions(tools);
+                                resolve({ tools: tools, mcpClient: mcpClient, toolsFunctionCall: toolsFunctionCall, systemPrompts: systemPrompts });
+                                _b.label = 2;
+                            case 2: return [2 /*return*/];
+                        }
+                    });
+                }); },
                 onError: function (error) {
                     if (mcpClient) {
                         mcpClient.disconnect();
@@ -1205,4 +1217,3 @@ var prepareTools = function (url, timeout) {
 };
 
 export { MCPClient, prepareTools };
-//# sourceMappingURL=MCPClient.js.map

@@ -1,0 +1,285 @@
+# MCP UIUX
+MCP UIUX 是一个 React 组件库，专门用于实现模型上下文协议(Model Context Protocol)中的工具(Tools)、提示(Prompts)和资源(Resources)管理。它提供了直观的界面来连接和展示 MCP 服务器的状态和数据。
+
+## 安装
+```bash
+npm install mcp-uiux
+```
+
+## 使用示例
+
+### nodejs用例
+
+```javascript
+const { prepareTools } = require('mcp-uiux/dist/MCPClient.js')
+
+// 使用 fetch 调用 OpenAI API 并处理工具调用结果
+async function callOpenAIFunctionAndProcessToolCalls (systemPrompt, tools) {
+  const apiKey = 'sk-' // 替换为你的 OpenAI API Key
+  const url = 'https://api.siliconflow.cn/v1/chat/completions'
+
+  let messages = systemPrompt
+    ? [
+        {
+          role: 'system',
+          content: systemPrompt
+        }
+      ]
+    : []
+
+  const requestBody = {
+    model: 'Qwen/Qwen2.5-7B-Instruct', // 或其他支持 function calling 的模型
+    messages: [
+      ...messages,
+      {
+        role: 'user',
+        content: /`MCP UIUX 是一个 React 组件库，专门用于实现模型上下文协议(Model Context Protocol)中的工具(Tools)、提示(Prompts)和资源(Resources)管理。它提供了直观的界面来连接和展示 MCP 服务器的状态和数据。
+
+关注 https://codenow.wiki/ 获得更多
+
+主要功能
+Tools 工具管理：集成和调用 MCP 服务器提供的各类工具
+Prompts 提示管理：创建和维护 AI 提示模板
+Resources 资源管理：处理和展示各类资源数据
+实时连接：与 MCP 服务器保持实时数据同步
+科幻界面：提供现代化的用户交互体验/`
+      }
+    ],
+    tools,
+    tool_choice: 'auto'
+  }
+
+  try {
+    // 发送请求
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`
+      },
+      body: JSON.stringify(requestBody)
+    })
+
+    const data = await response.json()
+
+    // 处理工具调用结果
+    const toolCalls = data.choices[0].message.tool_calls
+    if (!toolCalls || toolCalls.length === 0) {
+      console.log('No tool calls in response.')
+      return null
+    }
+
+    // 转换工具调用结果
+    const processedToolCalls = toolCalls
+      .map(toolCall => {
+        const functionName = toolCall.function.name
+        try {
+          const functionArgs = JSON.parse(toolCall.function.arguments.trim()) // arguments 是字符串，需要解析为对象
+          return {
+            id: toolCall.id,
+            name: functionName,
+            arguments: functionArgs
+          }
+        } catch (error) {
+          console.log(error)
+        }
+      })
+      .filter(Boolean)
+
+    // 返回处理后的结果
+    // console.log("Processed Tool Calls:", JSON.stringify(processedToolCalls, null, 2));
+    return processedToolCalls
+  } catch (error) {
+    console.error('Error:', error)
+    return null
+  }
+}
+
+;(async () => {
+  // 使用memory mcp测试
+  // win  -  https://github.com/shadowcz007/aio_mcp_exe/releases/download/0.1/mcp_server_memory.exe
+  // mac  -  https://github.com/shadowcz007/aio_mcp_exe/releases/download/0.1/mcp_server_memory
+
+  const url = 'http://127.0.0.1:8080'
+
+  let { mcpClient, tools, toolsFunctionCall, systemPrompts } =
+    await prepareTools(url)
+
+  const knowledgeExtractorPrompt = systemPrompts.find(
+    s => s.name === 'knowledge_extractor'
+  )
+
+  const knowledgeTools = toolsFunctionCall.filter(t =>
+    ['create_relations', 'create_entities'].includes(t.function.name)
+  )
+
+  console.log(knowledgeTools)
+  console.log(
+    '---------------',
+    knowledgeExtractorPrompt?.systemPrompt,
+    '---------------'
+  )
+
+  // 调用函数
+  let toolsResult = await callOpenAIFunctionAndProcessToolCalls(
+    knowledgeExtractorPrompt?.systemPrompt,
+    knowledgeTools
+  )
+  console.log(JSON.stringify(toolsResult, null, 2))
+
+  for (const item of toolsResult) {
+    let tool = tools.find(t => t.name == item.name)
+    let result = await tool.execute(item.arguments)
+    console.log('工具执行结果', item.name, result)
+  }
+
+  await mcpClient.disconnect()
+})()
+
+```
+
+### React前端用例
+
+```typescript
+import React, { useEffect, useState } from 'react';
+import ReactDOM from 'react-dom/client';
+import { MCPProvider, useMCP, MCPStatus } from 'mcp-uiux';
+
+const AppContent: React.FC = () => {
+  const [serverUrl, setServerUrl] = useState('http://localhost:8080');
+  const [resourcePath, setResourcePath] = useState('');
+  const {
+    connect,
+    loading,
+    error,
+    tools,
+    resources,
+    resourceTemplates,
+    prompts
+  } = useMCP();
+
+  useEffect(() => {
+    connect(serverUrl, resourcePath);
+  }, [serverUrl, resourcePath]);
+
+  return (
+  <div>
+      <button onClick={()=>{
+        // 工具调用
+        tools[0].excute({});
+    }}></button>
+
+     <MCPStatus
+        serverUrl={serverUrl}
+      />
+  </div>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <MCPProvider>
+      <AppContent />
+    </MCPProvider>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+
+```
+
+### UMD前端用例 
+
+除了通过 npm 安装使用外，MCP UIUX 也支持通过 UMD 方式在浏览器中直接使用。通过 CDN 引入
+
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCP UIUX UMD 示例</title>
+  <!-- 引入 React 和 ReactDOM -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  
+  <!-- 引入 Babel 用于 JSX 转换 -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- 引入 MCP UIUX -->
+  <script src="https://unpkg.com/mcp-uiux@latest/dist/index.umd.min.js"></script>
+ 
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { MCPProvider, useMCP, MCPStatus } = MCPUIUX;
+    
+    const AppContent = () => {
+      const [serverUrl, setServerUrl] = React.useState('http://localhost:8080');
+      const [resourcePath, setResourcePath] = React.useState('');
+      const {
+        connect,
+        loading,
+        error,
+        tools,
+        resources,
+        resourceTemplates,
+        prompts
+      } = useMCP();
+      
+      React.useEffect(() => {
+        connect(serverUrl, resourcePath);
+      }, [serverUrl, resourcePath]);
+      
+      return (
+        <div>
+          <h1>MCP UIUX UMD 示例</h1>
+          
+          <div style={{ marginBottom: '20px' }}>
+            <div>
+              <label>服务器地址：</label>
+              <input
+                type="text"
+                value={serverUrl}
+                onChange={(e) => setServerUrl(e.target.value)}
+                style={{ width: '300px', marginLeft: '10px' }}
+              />
+            </div>
+            <div style={{ marginTop: '10px' }}>
+              <label>资源路径过滤：</label>
+              <input
+                type="text"
+                value={resourcePath}
+                onChange={(e) => setResourcePath(e.target.value)}
+                style={{ width: '300px', marginLeft: '10px' }}
+              />
+            </div>
+          </div>
+          
+          {loading && <div>正在加载...</div>}
+          {error && <div style={{ color: 'red' }}>错误: {error}</div>}
+        
+          <MCPStatus serverUrl={serverUrl} />
+        </div>
+      );
+    };
+    
+    const App = () => {
+      return (
+        <MCPProvider>
+          <AppContent />
+        </MCPProvider>
+      );
+    };
+    
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
+```

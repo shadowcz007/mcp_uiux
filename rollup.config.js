@@ -11,13 +11,13 @@ export default [{
                 file: pkg.main,
                 format: 'cjs',
                 exports: 'named',
-                sourcemap: true
+                sourcemap: false
             },
             {
                 file: pkg.module,
                 format: 'es',
                 exports: 'named',
-                sourcemap: true
+                sourcemap: false
             },
             {
                 file: 'dist/index.umd.js',
@@ -28,7 +28,7 @@ export default [{
                     'react-dom': 'ReactDOM'
                 },
                 exports: 'named',
-                sourcemap: true
+                sourcemap: false
             },
             {
                 file: 'dist/index.umd.min.js',
@@ -40,7 +40,7 @@ export default [{
                 },
                 exports: 'named',
                 plugins: [terser()],
-                sourcemap: true
+                sourcemap: false
             }
         ],
         external: [...Object.keys(pkg.peerDependencies || {})],
@@ -79,7 +79,7 @@ export default [{
             file: 'dist/MCPClient.js', // 输出文件路径
             format: 'es', // 使用 ES 模块格式，你可以根据需要改为 'cjs' 或 'umd'
             exports: 'named',
-            sourcemap: true
+            sourcemap: false
         }],
         external: [...Object.keys(pkg.peerDependencies || {})], // 与主配置保持一致
         plugins: [
