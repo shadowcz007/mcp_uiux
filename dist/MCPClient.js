@@ -1182,7 +1182,7 @@ var prepareTools = function (url, timeout) {
                                 return [4 /*yield*/, mcpClient.getPromptsList()];
                             case 1:
                                 prompts = (_a = (_b.sent())) === null || _a === void 0 ? void 0 : _a.prompts;
-                                systemPrompts = prompts.filter(function (p) { return p.systemPrompt; });
+                                systemPrompts = (prompts === null || prompts === void 0 ? void 0 : prompts.filter(function (p) { return p === null || p === void 0 ? void 0 : p.systemPrompt; })) || '';
                                 toolsFunctionCall = mcpClient.transformToolsToOpenAIFunctions(tools);
                                 resolve({ tools: tools, mcpClient: mcpClient, toolsFunctionCall: toolsFunctionCall, systemPrompts: systemPrompts });
                                 _b.label = 2;

@@ -709,9 +709,10 @@ export const prepareTools = (url: string, timeout: number = 15000) => {
         onToolsReady: async tools => {
           if (mcpClient) {
             cleanup()
-            let prompts = (await mcpClient.getPromptsList())?.prompts;
+            let prompts = (await mcpClient.getPromptsList())?.prompts
             // console.log('prompts',prompts)
-            let systemPrompts = prompts.filter((p: any) => p.systemPrompt)
+            let systemPrompts =
+              prompts?.filter((p: any) => p?.systemPrompt) || ''
             let toolsFunctionCall =
               mcpClient.transformToolsToOpenAIFunctions(tools)
             resolve({ tools, mcpClient, toolsFunctionCall, systemPrompts })
