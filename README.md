@@ -36,7 +36,7 @@ npm install mcp-uiux
 
 ## 使用示例
 
-- [nodejs](./example/index.js)
+- [js直接使用tools](./example/index.js)
 
 ```javascript
 const { prepareTools } = require('mcp-uiux/dist/MCPClient.js')
@@ -65,7 +65,7 @@ const { prepareTools } = require('mcp-uiux/dist/MCPClient.js')
       '---------------'
     )
 
-    // 调用函数
+    // 调用函数,需要自行实现 LLM的工具调用 callOpenAIFunctionAndProcessToolCalls 
     let toolsResult = await callOpenAIFunctionAndProcessToolCalls(
       knowledgeExtractorPrompt?.systemPrompt,
       knowledgeTools
@@ -110,7 +110,8 @@ const AppContent: React.FC = () => {
   return (
   <div>
       <button onClick={()=>{
-        // 工具调用
+        // 工具调用 
+        // 如果需要知识提取，可以参考 js直接使用tools
         tools[0].excute({});
     }}></button>
 
