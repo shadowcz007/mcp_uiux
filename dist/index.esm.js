@@ -1,5 +1,5 @@
 import * as React from 'react';
-import React__default, { useContext, useRef, useState, useEffect } from 'react';
+import React__default, { useContext, useState, useEffect, useRef } from 'react';
 import * as ReactDOM from 'react-dom';
 import { createPortal } from 'react-dom';
 
@@ -532,8 +532,9 @@ var MCPClient = /** @class */ (function () {
         (_a = this.onError) === null || _a === void 0 ? void 0 : _a.call(this, mcpError);
         throw mcpError;
     };
-    // 执行工具的公共方法
-    MCPClient.prototype.executeTool = function (toolName, args) {
+    // 执行工具的公共方法 // 30秒超时
+    MCPClient.prototype.executeTool = function (toolName, args, timeout) {
+        if (timeout === void 0) { timeout = 1 * 60000; }
         return __awaiter(this, void 0, void 0, function () {
             var callId_1, resultPromise, error_1;
             var _this = this;
@@ -550,7 +551,7 @@ var MCPClient = /** @class */ (function () {
                                     _this.pendingCalls.delete(callId_1);
                                     reject(new Error("\u5DE5\u5177\u6267\u884C\u8D85\u65F6: ".concat(toolName)));
                                 }
-                            }, 30000); // 30秒超时
+                            }, timeout);
                         });
                         // 发送请求，添加callId作为元数据
                         return [4 /*yield*/, this.sendJsonRpcRequest('tools/call', {
@@ -684,7 +685,10 @@ var MCPClient = /** @class */ (function () {
                                 if ((_c = message.result) === null || _c === void 0 ? void 0 : _c.tools) {
                                     // console.log('获取到工具列表:', this.sessionId, message.result.tools)
                                     // 为每个工具添加执行方法
-                                    message.result.tools = message.result.tools.map(function (tool) { return (__assign(__assign({}, tool), { fromServerName: _this.serverName, execute: function (args) { return _this.executeTool(tool.name, args); } })); });
+                                    message.result.tools = message.result.tools.map(function (tool) { return (__assign(__assign({}, tool), { fromServerName: _this.serverName, execute: function (args, timeout) {
+                                            if (timeout === void 0) { timeout = 1 * 60000; }
+                                            return _this.executeTool(tool.name, args, timeout);
+                                        } })); });
                                     (_d = this.onToolsReady) === null || _d === void 0 ? void 0 : _d.call(this, message.result.tools);
                                     this.handleCallback(message);
                                 }
@@ -1179,274 +1183,6 @@ var MCPContext = React.createContext({
     notifications: []
 });
 var useMCP = function () { return useContext(MCPContext); };
-function MCPProvider(_a) {
-    var _this = this;
-    var children = _a.children;
-    var mcpClientRef = useRef(null);
-    var _b = useState(false), loading = _b[0], setLoading = _b[1];
-    var _c = useState(null), error = _c[0], setError = _c[1];
-    var _d = useState({}), notifications = _d[0], setNotifications = _d[1];
-    var _e = useState([]), tools = _e[0], setTools = _e[1];
-    var _f = useState([]), resources = _f[0], setResources = _f[1];
-    var _g = useState([]), resourceTemplates = _g[0], setResourceTemplates = _g[1];
-    var _h = useState([]), prompts = _h[0], setPrompts = _h[1];
-    var _j = useState(null), serverInfo = _j[0], setServerInfo = _j[1];
-    var _k = useState(null), lastConnectedUrl = _k[0], setLastConnectedUrl = _k[1];
-    var _l = useState(""), lastResourceFilter = _l[0], setLastResourceFilter = _l[1];
-    // 添加节流相关的状态和引用
-    var connectTimeoutRef = useRef(null);
-    var pendingConnectParamsRef = useRef(null);
-    // 断开连接函数
-    var disconnect = function () { return __awaiter(_this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            if (mcpClientRef.current) {
-                try {
-                    mcpClientRef.current.disconnect();
-                    mcpClientRef.current = null;
-                    // 清空所有状态数据
-                    setTools([]);
-                    setResources([]);
-                    setResourceTemplates([]);
-                    setPrompts([]);
-                    setServerInfo(null);
-                }
-                catch (e) {
-                    console.warn('关闭连接时出错:', e);
-                }
-                // 返回一个Promise，延迟200ms后解析，确保连接完全关闭
-                return [2 /*return*/, new Promise(function (resolve) { return setTimeout(resolve, 200); })];
-            }
-            return [2 /*return*/, Promise.resolve()]; // 如果没有客户端，立即返回已解析的Promise
-        });
-    }); };
-    // 创建MCP客户端的函数
-    var createClient = function (sseUrl, currentFilter) { return __awaiter(_this, void 0, void 0, function () {
-        var client, error_1, errorMessage;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    setLoading(true);
-                    setError(null);
-                    if (!mcpClientRef.current) return [3 /*break*/, 2];
-                    return [4 /*yield*/, disconnect()];
-                case 1:
-                    _a.sent();
-                    _a.label = 2;
-                case 2:
-                    // 清空之前的数据
-                    setTools([]);
-                    setResources([]);
-                    setResourceTemplates([]);
-                    setPrompts([]);
-                    setServerInfo(null);
-                    _a.label = 3;
-                case 3:
-                    _a.trys.push([3, 5, , 6]);
-                    client = new MCPClient({
-                        url: sseUrl,
-                        onToolsReady: function (toolsList) {
-                            console.log('获取到工具列表:', toolsList);
-                            setTools(Array.from(toolsList || [], function (t) {
-                                return __assign(__assign({}, t), { _type: 'tool' });
-                            }));
-                        },
-                        onResourcesReady: function (resourcesList) {
-                            console.log('获取到资源列表:', currentFilter, resourcesList);
-                            setResources(Array.from(resourcesList || [], function (r) {
-                                var _a;
-                                if (!currentFilter || ((_a = r.uri) === null || _a === void 0 ? void 0 : _a.startsWith(currentFilter))) {
-                                    return __assign(__assign({}, r), { _type: 'resource' });
-                                }
-                            }).filter(Boolean));
-                        },
-                        onResourceTemplatesReady: function (resourceTemplatesList) {
-                            console.log('获取到资源变量列表:', currentFilter, resourceTemplatesList);
-                            setResourceTemplates(Array.from(resourceTemplatesList || [], function (rt) {
-                                var _a;
-                                if (!currentFilter || ((_a = rt.uriTemplate) === null || _a === void 0 ? void 0 : _a.startsWith(currentFilter))) {
-                                    return __assign(__assign({}, rt), { _type: 'resourceTemplate' });
-                                }
-                            }).filter(Boolean));
-                        },
-                        onPromptsReady: function (promptsList) {
-                            console.log('获取到提示列表:', promptsList);
-                            setPrompts(Array.from(promptsList || [], function (p) {
-                                return __assign(__assign({}, p), { _type: 'prompt' });
-                            }).filter(Boolean));
-                        },
-                        onError: function (err) {
-                            var errorMessage = err.message || '未知错误';
-                            console.error('MCP客户端连接失败:', err);
-                            setError("\u8FDE\u63A5\u5931\u8D25: ".concat(errorMessage));
-                        },
-                        onReady: function (data) {
-                            console.log('MCP客户端连接成功', data);
-                            // 保存 serverInfo
-                            setServerInfo(data);
-                        },
-                        onNotifications: function (data) {
-                            console.log('收到通知消息:', data);
-                            setNotifications(data);
-                        }
-                    });
-                    // 连接到服务器
-                    return [4 /*yield*/, client.connect()];
-                case 4:
-                    // 连接到服务器
-                    _a.sent();
-                    // @ts-ignore
-                    window.mcpClient = client;
-                    mcpClientRef.current = client;
-                    setLoading(false);
-                    return [2 /*return*/, client];
-                case 5:
-                    error_1 = _a.sent();
-                    errorMessage = error_1 instanceof Error ? error_1.message : '未知错误';
-                    console.error('MCP客户端连接失败:', error_1);
-                    setError("\u8FDE\u63A5\u5931\u8D25: ".concat(errorMessage));
-                    setLoading(false);
-                    return [2 /*return*/, null];
-                case 6: return [2 /*return*/];
-            }
-        });
-    }); };
-    // 修改初始连接函数，添加节流逻辑
-    var connect = function (sseUrl, resourceFilter) { return __awaiter(_this, void 0, void 0, function () {
-        var filter;
-        var _this = this;
-        return __generator(this, function (_a) {
-            if (!(sseUrl && sseUrl.match('http')))
-                return [2 /*return*/];
-            filter = resourceFilter || "";
-            // 存储最新的连接参数
-            pendingConnectParamsRef.current = { url: sseUrl, filter: filter };
-            // 如果已经有一个定时器在等待，则清除它
-            if (connectTimeoutRef.current) {
-                clearTimeout(connectTimeoutRef.current);
-            }
-            // 设置一个新的定时器，300ms后执行实际的连接操作
-            connectTimeoutRef.current = setTimeout(function () { return __awaiter(_this, void 0, void 0, function () {
-                var params, client;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            params = pendingConnectParamsRef.current;
-                            if (!params)
-                                return [2 /*return*/];
-                            // 重置待处理的连接参数
-                            pendingConnectParamsRef.current = null;
-                            // 确保先断开现有连接
-                            return [4 /*yield*/, disconnect()];
-                        case 1:
-                            // 确保先断开现有连接
-                            _a.sent();
-                            console.log('正在连接MCP服务...', params.url);
-                            return [4 /*yield*/, createClient(params.url, params.filter)];
-                        case 2:
-                            client = _a.sent();
-                            if (client) {
-                                setLastConnectedUrl(params.url);
-                                setLastResourceFilter(params.filter);
-                            }
-                            // 清除定时器引用
-                            connectTimeoutRef.current = null;
-                            return [2 /*return*/];
-                    }
-                });
-            }); }, 300);
-            return [2 /*return*/];
-        });
-    }); };
-    // 修改重连函数，也应用节流逻辑
-    var reconnect = function (sseUrl, resourceFilter) { return __awaiter(_this, void 0, void 0, function () {
-        var connectionUrl, filter;
-        var _this = this;
-        var _a;
-        return __generator(this, function (_b) {
-            connectionUrl = sseUrl || lastConnectedUrl || ((_a = mcpClientRef.current) === null || _a === void 0 ? void 0 : _a.url) || 'http://127.0.0.1:8080';
-            filter = resourceFilter !== undefined ? resourceFilter : lastResourceFilter;
-            // 存储最新的连接参数
-            pendingConnectParamsRef.current = { url: connectionUrl, filter: filter };
-            // 如果已经有一个定时器在等待，则清除它
-            if (connectTimeoutRef.current) {
-                clearTimeout(connectTimeoutRef.current);
-            }
-            // 设置一个新的定时器，300ms后执行实际的重连操作
-            connectTimeoutRef.current = setTimeout(function () { return __awaiter(_this, void 0, void 0, function () {
-                var params, client;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            params = pendingConnectParamsRef.current;
-                            if (!params)
-                                return [2 /*return*/];
-                            // 重置待处理的连接参数
-                            pendingConnectParamsRef.current = null;
-                            // 确保先断开现有连接
-                            return [4 /*yield*/, disconnect()];
-                        case 1:
-                            // 确保先断开现有连接
-                            _a.sent();
-                            console.log('正在重新连接MCP服务...', params.url);
-                            return [4 /*yield*/, createClient(params.url, params.filter)];
-                        case 2:
-                            client = _a.sent();
-                            if (client && !sseUrl) {
-                                // 只有在使用保存的URL重连时才更新lastConnectedUrl
-                                setLastConnectedUrl(params.url);
-                                setLastResourceFilter(params.filter);
-                            }
-                            // 清除定时器引用
-                            connectTimeoutRef.current = null;
-                            return [2 /*return*/];
-                    }
-                });
-            }); }, 300);
-            return [2 /*return*/];
-        });
-    }); };
-    // 添加自动重连逻辑
-    useEffect(function () {
-        // 当连接出错时自动尝试重连
-        if (error && lastConnectedUrl) {
-            var timer_1 = setTimeout(function () {
-                console.log('检测到连接错误，尝试自动重连...');
-                reconnect();
-            }, 5000); // 5秒后尝试重连
-            return function () { return clearTimeout(timer_1); };
-        }
-    }, [error, lastConnectedUrl]);
-    // 组件卸载时清理连接和定时器
-    useEffect(function () {
-        return function () {
-            if (mcpClientRef.current) {
-                try {
-                    mcpClientRef.current.disconnect();
-                }
-                catch (e) {
-                    console.warn('关闭连接时出错:', e);
-                }
-            }
-            // 清理可能存在的定时器
-            if (connectTimeoutRef.current) {
-                clearTimeout(connectTimeoutRef.current);
-            }
-        };
-    }, []);
-    return (React.createElement(MCPContext.Provider, { value: {
-            mcpClient: mcpClientRef.current,
-            loading: loading,
-            error: error,
-            reconnect: reconnect,
-            connect: connect,
-            tools: tools,
-            resources: resources,
-            resourceTemplates: resourceTemplates,
-            prompts: prompts,
-            serverInfo: serverInfo,
-            notifications: notifications
-        } }, children));
-}
 
 function getDefaultExportFromCjs (x) {
 	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
@@ -68388,7 +68124,7 @@ var InputSchemaForm = function (_a) {
                             });
                         }
                         setSurvey(null);
-                        return [4 /*yield*/, tool.execute(data_1)];
+                        return [4 /*yield*/, tool.execute(data_1, 5 * 60000)];
                     case 1:
                         result = _b.sent();
                         if (Array.isArray(result) && ((_a = result[0]) === null || _a === void 0 ? void 0 : _a.type) === 'text') {
@@ -68537,5 +68273,274 @@ var MCPStatus = function (_a) {
         showSettings && (React__default.createElement(MCPSettings, { serverUrl: serverUrl, resourcePath: resourcePath, onServerUrlChange: function (url) { setServerUrl(url); localStorage.setItem('mcp-uiux-serverUrl', url); }, onResourcePathChange: function (path) { setResourcePath(path); localStorage.setItem('mcp-uiux-resourcePath', path); }, style: { marginBottom: '20px' } })),
         React__default.createElement(SciFiMCPStatus, { serverInfo: serverInfo, loading: loading, error: error, tools: tools, resources: resources, resourceTemplates: resourceTemplates, prompts: prompts, notifications: notifications, onSettingsOpen: function () { return setShowSettings(!showSettings); } })));
 };
+
+function MCPProvider(_a) {
+    var _this = this;
+    var children = _a.children;
+    var mcpClientRef = useRef(null);
+    var _b = useState(false), loading = _b[0], setLoading = _b[1];
+    var _c = useState(null), error = _c[0], setError = _c[1];
+    var _d = useState({}), notifications = _d[0], setNotifications = _d[1];
+    var _e = useState([]), tools = _e[0], setTools = _e[1];
+    var _f = useState([]), resources = _f[0], setResources = _f[1];
+    var _g = useState([]), resourceTemplates = _g[0], setResourceTemplates = _g[1];
+    var _h = useState([]), prompts = _h[0], setPrompts = _h[1];
+    var _j = useState(null), serverInfo = _j[0], setServerInfo = _j[1];
+    var _k = useState(null), lastConnectedUrl = _k[0], setLastConnectedUrl = _k[1];
+    var _l = useState(""), lastResourceFilter = _l[0], setLastResourceFilter = _l[1];
+    // 添加节流相关的状态和引用
+    var connectTimeoutRef = useRef(null);
+    var pendingConnectParamsRef = useRef(null);
+    // 断开连接函数
+    var disconnect = function () { return __awaiter(_this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            if (mcpClientRef.current) {
+                try {
+                    mcpClientRef.current.disconnect();
+                    mcpClientRef.current = null;
+                    // 清空所有状态数据
+                    setTools([]);
+                    setResources([]);
+                    setResourceTemplates([]);
+                    setPrompts([]);
+                    setServerInfo(null);
+                }
+                catch (e) {
+                    console.warn('关闭连接时出错:', e);
+                }
+                // 返回一个Promise，延迟200ms后解析，确保连接完全关闭
+                return [2 /*return*/, new Promise(function (resolve) { return setTimeout(resolve, 200); })];
+            }
+            return [2 /*return*/, Promise.resolve()]; // 如果没有客户端，立即返回已解析的Promise
+        });
+    }); };
+    // 创建MCP客户端的函数
+    var createClient = function (sseUrl, currentFilter) { return __awaiter(_this, void 0, void 0, function () {
+        var client, error_1, errorMessage;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    setLoading(true);
+                    setError(null);
+                    if (!mcpClientRef.current) return [3 /*break*/, 2];
+                    return [4 /*yield*/, disconnect()];
+                case 1:
+                    _a.sent();
+                    _a.label = 2;
+                case 2:
+                    // 清空之前的数据
+                    setTools([]);
+                    setResources([]);
+                    setResourceTemplates([]);
+                    setPrompts([]);
+                    setServerInfo(null);
+                    _a.label = 3;
+                case 3:
+                    _a.trys.push([3, 5, , 6]);
+                    client = new MCPClient({
+                        url: sseUrl,
+                        onToolsReady: function (toolsList) {
+                            console.log('获取到工具列表:', toolsList);
+                            setTools(Array.from(toolsList || [], function (t) {
+                                return __assign(__assign({}, t), { _type: 'tool' });
+                            }));
+                        },
+                        onResourcesReady: function (resourcesList) {
+                            console.log('获取到资源列表:', currentFilter, resourcesList);
+                            setResources(Array.from(resourcesList || [], function (r) {
+                                var _a;
+                                if (!currentFilter || ((_a = r.uri) === null || _a === void 0 ? void 0 : _a.startsWith(currentFilter))) {
+                                    return __assign(__assign({}, r), { _type: 'resource' });
+                                }
+                            }).filter(Boolean));
+                        },
+                        onResourceTemplatesReady: function (resourceTemplatesList) {
+                            console.log('获取到资源变量列表:', currentFilter, resourceTemplatesList);
+                            setResourceTemplates(Array.from(resourceTemplatesList || [], function (rt) {
+                                var _a;
+                                if (!currentFilter || ((_a = rt.uriTemplate) === null || _a === void 0 ? void 0 : _a.startsWith(currentFilter))) {
+                                    return __assign(__assign({}, rt), { _type: 'resourceTemplate' });
+                                }
+                            }).filter(Boolean));
+                        },
+                        onPromptsReady: function (promptsList) {
+                            console.log('获取到提示列表:', promptsList);
+                            setPrompts(Array.from(promptsList || [], function (p) {
+                                return __assign(__assign({}, p), { _type: 'prompt' });
+                            }).filter(Boolean));
+                        },
+                        onError: function (err) {
+                            var errorMessage = err.message || '未知错误';
+                            console.error('MCP客户端连接失败:', err);
+                            setError("\u8FDE\u63A5\u5931\u8D25: ".concat(errorMessage));
+                        },
+                        onReady: function (data) {
+                            console.log('MCP客户端连接成功', data);
+                            // 保存 serverInfo
+                            setServerInfo(data);
+                        },
+                        onNotifications: function (data) {
+                            console.log('收到通知消息:', data);
+                            setNotifications(data);
+                        }
+                    });
+                    // 连接到服务器
+                    return [4 /*yield*/, client.connect()];
+                case 4:
+                    // 连接到服务器
+                    _a.sent();
+                    // @ts-ignore
+                    window.mcpClient = client;
+                    mcpClientRef.current = client;
+                    setLoading(false);
+                    return [2 /*return*/, client];
+                case 5:
+                    error_1 = _a.sent();
+                    errorMessage = error_1 instanceof Error ? error_1.message : '未知错误';
+                    console.error('MCP客户端连接失败:', error_1);
+                    setError("\u8FDE\u63A5\u5931\u8D25: ".concat(errorMessage));
+                    setLoading(false);
+                    return [2 /*return*/, null];
+                case 6: return [2 /*return*/];
+            }
+        });
+    }); };
+    // 修改初始连接函数，添加节流逻辑
+    var connect = function (sseUrl, resourceFilter) { return __awaiter(_this, void 0, void 0, function () {
+        var filter;
+        var _this = this;
+        return __generator(this, function (_a) {
+            if (!(sseUrl && sseUrl.match('http')))
+                return [2 /*return*/];
+            filter = resourceFilter || "";
+            // 存储最新的连接参数
+            pendingConnectParamsRef.current = { url: sseUrl, filter: filter };
+            // 如果已经有一个定时器在等待，则清除它
+            if (connectTimeoutRef.current) {
+                clearTimeout(connectTimeoutRef.current);
+            }
+            // 设置一个新的定时器，300ms后执行实际的连接操作
+            connectTimeoutRef.current = setTimeout(function () { return __awaiter(_this, void 0, void 0, function () {
+                var params, client;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            params = pendingConnectParamsRef.current;
+                            if (!params)
+                                return [2 /*return*/];
+                            // 重置待处理的连接参数
+                            pendingConnectParamsRef.current = null;
+                            // 确保先断开现有连接
+                            return [4 /*yield*/, disconnect()];
+                        case 1:
+                            // 确保先断开现有连接
+                            _a.sent();
+                            console.log('正在连接MCP服务...', params.url);
+                            return [4 /*yield*/, createClient(params.url, params.filter)];
+                        case 2:
+                            client = _a.sent();
+                            if (client) {
+                                setLastConnectedUrl(params.url);
+                                setLastResourceFilter(params.filter);
+                            }
+                            // 清除定时器引用
+                            connectTimeoutRef.current = null;
+                            return [2 /*return*/];
+                    }
+                });
+            }); }, 300);
+            return [2 /*return*/];
+        });
+    }); };
+    // 修改重连函数，也应用节流逻辑
+    var reconnect = function (sseUrl, resourceFilter) { return __awaiter(_this, void 0, void 0, function () {
+        var connectionUrl, filter;
+        var _this = this;
+        var _a;
+        return __generator(this, function (_b) {
+            connectionUrl = sseUrl || lastConnectedUrl || ((_a = mcpClientRef.current) === null || _a === void 0 ? void 0 : _a.url) || 'http://127.0.0.1:8080';
+            filter = resourceFilter !== undefined ? resourceFilter : lastResourceFilter;
+            // 存储最新的连接参数
+            pendingConnectParamsRef.current = { url: connectionUrl, filter: filter };
+            // 如果已经有一个定时器在等待，则清除它
+            if (connectTimeoutRef.current) {
+                clearTimeout(connectTimeoutRef.current);
+            }
+            // 设置一个新的定时器，300ms后执行实际的重连操作
+            connectTimeoutRef.current = setTimeout(function () { return __awaiter(_this, void 0, void 0, function () {
+                var params, client;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            params = pendingConnectParamsRef.current;
+                            if (!params)
+                                return [2 /*return*/];
+                            // 重置待处理的连接参数
+                            pendingConnectParamsRef.current = null;
+                            // 确保先断开现有连接
+                            return [4 /*yield*/, disconnect()];
+                        case 1:
+                            // 确保先断开现有连接
+                            _a.sent();
+                            console.log('正在重新连接MCP服务...', params.url);
+                            return [4 /*yield*/, createClient(params.url, params.filter)];
+                        case 2:
+                            client = _a.sent();
+                            if (client && !sseUrl) {
+                                // 只有在使用保存的URL重连时才更新lastConnectedUrl
+                                setLastConnectedUrl(params.url);
+                                setLastResourceFilter(params.filter);
+                            }
+                            // 清除定时器引用
+                            connectTimeoutRef.current = null;
+                            return [2 /*return*/];
+                    }
+                });
+            }); }, 300);
+            return [2 /*return*/];
+        });
+    }); };
+    // 添加自动重连逻辑
+    useEffect(function () {
+        // 当连接出错时自动尝试重连
+        if (error && lastConnectedUrl) {
+            var timer_1 = setTimeout(function () {
+                console.log('检测到连接错误，尝试自动重连...');
+                reconnect();
+            }, 5000); // 5秒后尝试重连
+            return function () { return clearTimeout(timer_1); };
+        }
+    }, [error, lastConnectedUrl]);
+    // 组件卸载时清理连接和定时器
+    useEffect(function () {
+        return function () {
+            if (mcpClientRef.current) {
+                try {
+                    mcpClientRef.current.disconnect();
+                }
+                catch (e) {
+                    console.warn('关闭连接时出错:', e);
+                }
+            }
+            // 清理可能存在的定时器
+            if (connectTimeoutRef.current) {
+                clearTimeout(connectTimeoutRef.current);
+            }
+        };
+    }, []);
+    return (React.createElement(MCPContext.Provider, { value: {
+            mcpClient: mcpClientRef.current,
+            loading: loading,
+            error: error,
+            reconnect: reconnect,
+            connect: connect,
+            tools: tools,
+            resources: resources,
+            resourceTemplates: resourceTemplates,
+            prompts: prompts,
+            serverInfo: serverInfo,
+            notifications: notifications
+        } }, children));
+}
 
 export { InputSchemaForm, MCPClient, MCPProvider, MCPStatus, ReactJson, SurveyModel, useMCP };

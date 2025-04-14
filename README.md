@@ -39,46 +39,58 @@ npm install mcp-uiux
 - [js直接使用tools](./example/index.js)
 
 ```javascript
-const { prepareTools } = require('mcp-uiux/dist/MCPClient.js')
+const {
+  prepareTools,
+  callOpenAIFunctionAndProcessToolCalls
+} = require('mcp-uiux/dist/MCPClient.js')
 
-(async() => {
-    // 使用memory mcp测试
-    // win  -  https://github.com/shadowcz007/aio_mcp_exe/releases/download/0.1/mcp_server_memory.exe
-    // mac  -  https://github.com/shadowcz007/aio_mcp_exe/releases/download/0.1/mcp_server_memory
+;(async () => {
+  // 使用memory mcp测试
+  // win  -  https://github.com/shadowcz007/aio_mcp_exe/releases/download/0.1/mcp_server_memory.exe
+  // mac  -  https://github.com/shadowcz007/aio_mcp_exe/releases/download/0.1/mcp_server_memory
 
-    const url = "http://127.0.0.1:8080";
+  const url = 'http://127.0.0.1:8080'
 
-    let { mcpClient, tools, toolsFunctionCall, systemPrompts } = await prepareTools(url)
+  let { mcpClient, tools, toolsFunctionCall, systemPrompts } =
+    await prepareTools(url)
 
-    const knowledgeExtractorPrompt = systemPrompts.find(
-      s => s.name === 'knowledge_extractor'
-    )
+  const knowledgeExtractorPrompt = systemPrompts.find(
+    s => s.name === 'knowledge_extractor'
+  )
 
-    const knowledgeTools = toolsFunctionCall.filter(t =>
-      ['create_relations', 'create_entities'].includes(t.function.name)
-    )
+  const knowledgeTools = toolsFunctionCall.filter(t =>
+    ['create_relations', 'create_entities'].includes(t.function.name)
+  )
 
-    console.log(knowledgeTools)
-    console.log(
-      '---------------',
-      knowledgeExtractorPrompt?.systemPrompt,
-      '---------------'
-    )
+  console.log(knowledgeTools)
+  console.log(
+    '---------------',
+    knowledgeExtractorPrompt?.systemPrompt,
+    '---------------'
+  )
 
-    // 调用函数,需要自行实现 LLM的工具调用 callOpenAIFunctionAndProcessToolCalls 
-    let toolsResult = await callOpenAIFunctionAndProcessToolCalls(
-      knowledgeExtractorPrompt?.systemPrompt,
-      knowledgeTools
-    );
-    console.log(JSON.stringify(toolsResult, null, 2));
-
-    for (const item of toolsResult) {
-        let tool = tools.find(t => t.name == item.name)
-        let result = await tool.execute(item.arguments)
-        console.log("工具执行结果", item.name, result)
+  // 工具调用
+  let toolsResult = await callOpenAIFunctionAndProcessToolCalls(
+    knowledgeExtractorPrompt?.systemPrompt,
+    `mixlab的AI编程训练营，助力每一位新时代的创作者。`,
+    knowledgeTools,
+    'Qwen/Qwen2.5-7B-Instruct', // 或其他支持 function calling 的模型
+    'sk-', // 替换为你的 OpenAI API Key
+    'https://api.siliconflow.cn/v1/chat/completions',
+    chunk => {
+      console.log(chunk)
     }
+  )
 
-    await mcpClient.disconnect();
+  console.log('#工具调用结果:', JSON.stringify(toolsResult, null, 2))
+
+  for (const item of toolsResult) {
+    let tool = tools.find(t => t.name == item.name)
+    let result = await tool.execute(item.arguments)
+    console.log('工具执行结果', item.name, result)
+  }
+
+  await mcpClient.disconnect()
 })()
 
 ```

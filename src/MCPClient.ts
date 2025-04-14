@@ -14,6 +14,8 @@ interface PendingCall {
   reject: (reason: any) => void
 }
 
+export { callOpenAIFunctionAndProcessToolCalls } from './LLM'
+
 export class MCPClient {
   public url: string
   private onToolsReady?: (tools: Tool[]) => void
@@ -107,8 +109,12 @@ export class MCPClient {
     throw mcpError
   }
 
-  // 执行工具的公共方法
-  public async executeTool (toolName: string, args: any): Promise<any> {
+  // 执行工具的公共方法 // 30秒超时
+  public async executeTool (
+    toolName: string,
+    args: any,
+    timeout = 1 * 60000
+  ): Promise<any> {
     try {
       const callId = `${toolName}_${this.callIdCounter++}`
 
@@ -122,7 +128,7 @@ export class MCPClient {
             this.pendingCalls.delete(callId)
             reject(new Error(`工具执行超时: ${toolName}`))
           }
-        }, 30000) // 30秒超时
+        }, timeout)
       })
 
       // 发送请求，添加callId作为元数据
@@ -254,7 +260,8 @@ export class MCPClient {
             message.result.tools = message.result.tools.map((tool: any) => ({
               ...tool,
               fromServerName: this.serverName,
-              execute: (args: any) => this.executeTool(tool.name, args)
+              execute: (args: any, timeout = 1 * 60000) =>
+                this.executeTool(tool.name, args, timeout)
             }))
             this.onToolsReady?.(message.result.tools)
 
