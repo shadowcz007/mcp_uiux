@@ -1482,12 +1482,21 @@ var callOpenAIFunctionAndProcessToolCalls = function (systemPrompt, userContent,
                                                     tool_call.function.arguments;
                                             }
                                         }
-                                        console.log(JSON.stringify(finalData_1.choices[0].message.tool_calls[tool_call.index], null, 2));
+                                        // console.log(
+                                        //   JSON.stringify(
+                                        //     finalData.choices[0].message.tool_calls[tool_call.index],
+                                        //     null,
+                                        //     2
+                                        //   )
+                                        // )
                                     }
                                 }
                             }
                         });
-                        console.log(' finalData.choices[0].message.tool_calls:', finalData_1.choices[0].message.tool_calls);
+                        // console.log(
+                        //   ' finalData.choices[0].message.tool_calls:',
+                        //   finalData.choices[0].message.tool_calls
+                        // )
                     }
                     return [3 /*break*/, 8];
                 case 6: return [4 /*yield*/, response.json()];

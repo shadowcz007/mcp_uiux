@@ -124,21 +124,21 @@ export const callOpenAIFunctionAndProcessToolCalls = async (
                   }
                 }
 
-                console.log(
-                  JSON.stringify(
-                    finalData.choices[0].message.tool_calls[tool_call.index],
-                    null,
-                    2
-                  )
-                )
+                // console.log(
+                //   JSON.stringify(
+                //     finalData.choices[0].message.tool_calls[tool_call.index],
+                //     null,
+                //     2
+                //   )
+                // )
               }
             }
           }
         })
-        console.log(
-          ' finalData.choices[0].message.tool_calls:',
-          finalData.choices[0].message.tool_calls
-        )
+        // console.log(
+        //   ' finalData.choices[0].message.tool_calls:',
+        //   finalData.choices[0].message.tool_calls
+        // )
       }
     } else {
       // 非流式模式直接获取数据
