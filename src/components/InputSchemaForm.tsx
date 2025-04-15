@@ -204,7 +204,7 @@ const InputSchemaForm = ({ tool, onComplete }: any) => {
         }
         setSurvey(null)
         // console.log('sender.data', data);
-        let result = await tool.execute(data);
+        let result = await tool.execute(data,5*60000);
         if (Array.isArray(result) && result[0]?.type === 'text') {
           result = result.map((item: any) => {
             if (item.type == 'text') {

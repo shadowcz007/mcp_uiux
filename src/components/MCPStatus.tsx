@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useMCP } from '../contexts/MCPProvider';
+import { useMCP } from '../contexts/useMCP';
 import { useEffect } from 'react';
 import { SciFiMCPStatus } from './SciFiMCPStatus';
 import { MCPSettings } from './MCPSettings';

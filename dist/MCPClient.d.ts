@@ -1,4 +1,5 @@
 import { MCPProps } from './types';
+export { callOpenAIFunctionAndProcessToolCalls } from './LLM';
 export declare class MCPClient {
     url: string;
     private onToolsReady?;
@@ -25,7 +26,7 @@ export declare class MCPClient {
     constructor({ url, onToolsReady, onToolResult, onError, onResourcesReady, onResourceTemplatesReady, onPromptsReady, onReady, onNotifications }: MCPProps);
     private sendJsonRpcRequest;
     private handleError;
-    executeTool(toolName: string, args: any): Promise<any>;
+    executeTool(toolName: string, args: any, timeout?: number): Promise<any>;
     connect(): Promise<void>;
     private initializeSession;
     private handleInitialized;

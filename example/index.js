@@ -1,86 +1,7 @@
-const { prepareTools } = require('mcp-uiux/dist/MCPClient.js')
-
-// 使用 fetch 调用 OpenAI API 并处理工具调用结果
-async function callOpenAIFunctionAndProcessToolCalls (systemPrompt, tools) {
-  const apiKey = 'sk-' // 替换为你的 OpenAI API Key
-  const url = 'https://api.siliconflow.cn/v1/chat/completions'
-
-  let messages = systemPrompt
-    ? [
-        {
-          role: 'system',
-          content: systemPrompt
-        }
-      ]
-    : []
-
-  const requestBody = {
-    model: 'Qwen/Qwen2.5-7B-Instruct', // 或其他支持 function calling 的模型
-    messages: [
-      ...messages,
-      {
-        role: 'user',
-        content: `MCP UIUX 是一个 React 组件库，专门用于实现模型上下文协议(Model Context Protocol)中的工具(Tools)、提示(Prompts)和资源(Resources)管理。它提供了直观的界面来连接和展示 MCP 服务器的状态和数据。
-
-关注 https://codenow.wiki/ 获得更多
-
-主要功能
-Tools 工具管理：集成和调用 MCP 服务器提供的各类工具
-Prompts 提示管理：创建和维护 AI 提示模板
-Resources 资源管理：处理和展示各类资源数据
-实时连接：与 MCP 服务器保持实时数据同步
-科幻界面：提供现代化的用户交互体验`
-      }
-    ],
-    tools,
-    tool_choice: 'auto'
-  }
-
-  try {
-    // 发送请求
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`
-      },
-      body: JSON.stringify(requestBody)
-    })
-
-    const data = await response.json()
-
-    // 处理工具调用结果
-    const toolCalls = data.choices[0].message.tool_calls
-    if (!toolCalls || toolCalls.length === 0) {
-      console.log('No tool calls in response.')
-      return null
-    }
-
-    // 转换工具调用结果
-    const processedToolCalls = toolCalls
-      .map(toolCall => {
-        const functionName = toolCall.function.name
-        try {
-          const functionArgs = JSON.parse(toolCall.function.arguments.trim()) // arguments 是字符串，需要解析为对象
-          return {
-            id: toolCall.id,
-            name: functionName,
-            arguments: functionArgs
-          }
-        } catch (error) {
-          console.log(error)
-        }
-      })
-      .filter(Boolean)
-
-    // 返回处理后的结果
-    // console.log("Processed Tool Calls:", JSON.stringify(processedToolCalls, null, 2));
-    return processedToolCalls
-  } catch (error) {
-    console.error('Error:', error)
-    return null
-  }
-}
+const {
+  prepareTools,
+  callOpenAIFunctionAndProcessToolCalls
+} = require('mcp-uiux/dist/MCPClient.js')
 
 ;(async () => {
   // 使用memory mcp测试
@@ -110,14 +31,31 @@ Resources 资源管理：处理和展示各类资源数据
   // 调用函数
   let toolsResult = await callOpenAIFunctionAndProcessToolCalls(
     knowledgeExtractorPrompt?.systemPrompt,
-    knowledgeTools
-  )
-  console.log(JSON.stringify(toolsResult, null, 2))
+    `mixlab的AI编程训练营，助力每一位新时代的创作者。` +
+      `What?
 
-  for (const item of toolsResult) {
-    let tool = tools.find(t => t.name == item.name)
-    let result = await tool.execute(item.arguments)
-    console.log('工具执行结果', item.name, result)
+Yes. The first Mac I have ever owned: this beautiful beast, a PowerMac G4 MDD: specifically a top-of-the-line dual 1.25 GHz FireWire 400 model circa 2002.
+
+Here's the full specs if you're curious.
+So, how did such an icon of early 2000s Apple fall into my grubby hands? Well, it all started with the Wii U. I'm not joking.
+
+For a while now, I have been working intermittently on the Wii U Linux kernel. In December, for reasons that aren't important right now3, I turned my attention towards fixing KVM on the Wii U, but in order to fix it, I needed to figure when and why it broke, and the easiest way I could think to do that was with a PowerMac.4 Fortunately, my roommate already had a 233 MHz Bondi Blue iMac G3, which he very kindly agreed to lend me. However, when I tried to use it, it was so slow that I couldn't even get Linux installed. After that, I decided I'd rather get crushed by a crane then do kernel debugging on a 233 MHz G3. I realized, somewhere, something needed a change.5`,
+    knowledgeTools,
+    'Qwen/Qwen2.5-7B-Instruct', // 或其他支持 function calling 的模型
+    'sk-miiciyfktmetnvvqptyukjiqbmjdybvvhvcetscitwazxzgl', // 替换为你的 OpenAI API Key
+    'https://api.siliconflow.cn/v1/chat/completions',
+    chunk => {
+      // console.log(chunk)
+    }
+  )
+
+  console.log('#工具调用结果:', JSON.stringify(toolsResult, null, 2))
+  if (toolsResult?.length > 0) {
+    for (const item of toolsResult) {
+      let tool = tools.find(t => t.name == item.name)
+      let result = await tool.execute(item.arguments)
+      console.log('工具执行结果', item.name, result)
+    }
   }
 
   await mcpClient.disconnect()

@@ -1,36 +1,7 @@
 import * as React from 'react';
-import { useContext, useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { MCPClient } from '../MCPClient';
-
-interface MCPContextType {
-    mcpClient: MCPClient | null;
-    loading: boolean;
-    error: string | null;
-    reconnect: (sseUrl?: string, resourceFilter?: string) => Promise<void>;
-    connect: (sseUrl: string, resourceFilter?: string) => Promise<void>;
-    tools: any[];
-    resources: any[];
-    resourceTemplates: any[];
-    prompts: any[];
-    serverInfo: any | null;
-    notifications: any[];
-}
-
-const MCPContext = React.createContext<MCPContextType>({
-    mcpClient: null,
-    loading: false,
-    error: null,
-    reconnect: async () => { },
-    connect: async () => { },
-    tools: [],
-    resources: [],
-    resourceTemplates: [],
-    prompts: [],
-    serverInfo: null,
-    notifications: []
-});
-
-export const useMCP = () => useContext(MCPContext);
+import { MCPContext } from './useMCP';
 
 export function MCPProvider({ children }: { children: React.ReactNode }) {
     const mcpClientRef = useRef<MCPClient | null>(null);
