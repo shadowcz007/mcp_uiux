@@ -37,7 +37,7 @@ export declare class MCPClient {
     getResourceTemplates(): Promise<any>;
     expandUriByVariables(uri: string, variables: Record<string, string>): string;
     getTemplateVariables(template: any): string[];
-    readResource(uri: string): Promise<any>;
+    readResource(uri: string, timeout?: number): Promise<any>;
     getPromptsList(): Promise<any>;
     getPrompt(name: string, args?: any): Promise<any>;
     reconnect(): void;

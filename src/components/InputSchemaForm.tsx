@@ -172,7 +172,7 @@ const mapToolParamsToSurveyJson = (tool: any) => {
 // 工具表单组件
 const InputSchemaForm = ({ tool, onComplete }: any) => {
   const [survey, setSurvey] = useState(null);
-  // console.log('InputSchemaForm', tool);
+  console.log('InputSchemaForm', tool);
   useEffect(() => {
     if (!tool) return;
 
@@ -204,7 +204,7 @@ const InputSchemaForm = ({ tool, onComplete }: any) => {
         }
         setSurvey(null)
         // console.log('sender.data', data);
-        let result = await tool.execute(data,5*60000);
+        let result = await tool.execute(data,15*60000);
         if (Array.isArray(result) && result[0]?.type === 'text') {
           result = result.map((item: any) => {
             if (item.type == 'text') {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactJson from 'react-json-view'
 import './SciFiMCPStatus.css'
 
@@ -18,8 +18,14 @@ export const SciFiMCPStatus: React.FC<{
 
     const [selectedItem, setSelectedItem] = useState<any>(null);
     const [formData, setFormData] = useState<any>(null);
+    const [resourceLoading, setResourceLoading] = useState<boolean>(false);
 
-    const handleItemSelect = (item: any) => {
+    const handleToolSelect = (item: any) => {
+        setSelectedItem(item);
+        setFormData(null);
+    };
+
+    const handleResourceSelect = (item: any) => {
         setSelectedItem(item);
         setFormData(null);
     };
@@ -28,6 +34,53 @@ export const SciFiMCPStatus: React.FC<{
         setFormData(data);
         setSelectedItem(null);
     };
+
+    useEffect(() => {
+        const executeResource = async () => {
+            if (selectedItem?._type === 'resource') {
+                setResourceLoading(true);
+                try {
+                    let result = await selectedItem.execute({}, 5*60000);
+                    
+                    if (Array.isArray(result) && result[0]?.type === 'text') {
+                        result = result.map((item: any) => {
+                            if (item.type === 'text') {
+                                let json = null;
+                                try {
+                                    json = JSON.parse(item.text);
+                                } catch (error) {
+                                    console.log(error);
+                                }
+                                if (json) {
+                                    item.type = 'json';
+                                    item.json = json;
+                                    delete item.text;
+                                }
+                            }
+                            return {
+                                ...item
+                            };
+                        });
+                    }
+                    
+                    setFormData({
+                        input: {},
+                        output: result
+                    });
+                } catch (error: any) {
+                    console.error('执行资源时出错:', error);
+                    setFormData({
+                        input: {},
+                        output: [{ type: 'text', text: `执行出错: ${error.message || '未知错误'}` }]
+                    });
+                } finally {
+                    setResourceLoading(false);
+                }
+            }
+        };
+
+        executeResource();
+    }, [selectedItem]);
 
     return (
         <div className="sci-fi-container">
@@ -80,7 +133,7 @@ export const SciFiMCPStatus: React.FC<{
                         <div className="scrollable-content">
                             {tools.map((tool, index) => (
                                 <div key={index} className="item"
-                                    onClick={() => handleItemSelect(tool)}
+                                    onClick={() => handleToolSelect(tool)}
                                 >
                                     <span className="item-indicator"></span>
                                     {tool.name}
@@ -98,7 +151,9 @@ export const SciFiMCPStatus: React.FC<{
                         </div>
                         <div className="scrollable-content">
                             {resources.map((resource, index) => (
-                                <div key={index} className="item">
+                                <div key={index} className="item"
+                                    onClick={() => handleResourceSelect(resource)}
+                                >
                                     <span className="item-indicator"></span>
                                     {decodeURIComponent(resource.uri)}
                                 </div>
@@ -124,9 +179,14 @@ export const SciFiMCPStatus: React.FC<{
                         </div>
                     </div>}
                 </div>
-                {selectedItem && <div className='module' style={{ width: '100%' }}>
+                {selectedItem?._type === 'tool' && <div className='module' style={{ width: '100%' }}>
                     <InputSchemaForm tool={selectedItem} onComplete={handleFormComplete} />
                 </div>}
+           
+                {selectedItem?._type === 'resource' && resourceLoading && <div className='module' style={{ width: '100%' }}>
+                    <div className="loading-indicator">资源加载中...</div>
+                </div>}
+                
                 {formData && <div className='module' style={{ margin: '0 20px' }}>
                     <h4>数据</h4>
                     <ReactJson src={formData} theme="colors" />

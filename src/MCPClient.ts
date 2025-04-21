@@ -268,6 +268,14 @@ export class MCPClient {
             this.handleCallback(message)
           } else if (message.result?.resources) {
             // console.log('获取到资源列表:', message.result.resources)
+            message.result.resources = message.result.resources.map(
+              (resource: any) => ({
+                ...resource,
+                fromServerName: this.serverName,
+                execute: (args: any, timeout = 1 * 60000) =>
+                  this.readResource(resource.uri, timeout)
+              })
+            )
             this.onResourcesReady?.(message.result.resources)
             this.handleCallback(message)
           } else if (message.result?.resourceTemplates) {
@@ -553,7 +561,7 @@ export class MCPClient {
   }
 
   // 读取特定资源
-  public async readResource (uri: string): Promise<any> {
+  public async readResource (uri: string, timeout = 1 * 60000): Promise<any> {
     try {
       const callId = `resources_read_${this.callIdCounter++}`
 
@@ -567,7 +575,7 @@ export class MCPClient {
             this.pendingCalls.delete(callId)
             reject(new Error(`读取资源超时: ${uri}`))
           }
-        }, 30000) // 30秒超时
+        }, timeout) // 30秒超时
       })
 
       // 发送请求

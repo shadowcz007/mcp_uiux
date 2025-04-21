@@ -720,6 +720,10 @@ var MCPClient = /** @class */ (function () {
                                 }
                                 else if ((_e = message.result) === null || _e === void 0 ? void 0 : _e.resources) {
                                     // console.log('获取到资源列表:', message.result.resources)
+                                    message.result.resources = message.result.resources.map(function (resource) { return (__assign(__assign({}, resource), { fromServerName: _this.serverName, execute: function (args, timeout) {
+                                            if (timeout === void 0) { timeout = 1 * 60000; }
+                                            return _this.readResource(resource.uri, timeout);
+                                        } })); });
                                     (_f = this.onResourcesReady) === null || _f === void 0 ? void 0 : _f.call(this, message.result.resources);
                                     this.handleCallback(message);
                                 }
@@ -1017,8 +1021,9 @@ var MCPClient = /** @class */ (function () {
         return variables;
     };
     // 读取特定资源
-    MCPClient.prototype.readResource = function (uri) {
+    MCPClient.prototype.readResource = function (uri, timeout) {
         var _a;
+        if (timeout === void 0) { timeout = 1 * 60000; }
         return __awaiter(this, void 0, void 0, function () {
             var callId_5, resultPromise, error_8;
             var _this = this;
@@ -1035,7 +1040,7 @@ var MCPClient = /** @class */ (function () {
                                     _this.pendingCalls.delete(callId_5);
                                     reject(new Error("\u8BFB\u53D6\u8D44\u6E90\u8D85\u65F6: ".concat(uri)));
                                 }
-                            }, 30000); // 30秒超时
+                            }, timeout); // 30秒超时
                         });
                         // 发送请求
                         return [4 /*yield*/, this.sendJsonRpcRequest('resources/read', { uri: uri }, callId_5)];
@@ -68116,7 +68121,7 @@ var mapToolParamsToSurveyJson = function (tool) {
 var InputSchemaForm = function (_a) {
     var tool = _a.tool, onComplete = _a.onComplete;
     var _b = React.useState(null), survey = _b[0], setSurvey = _b[1];
-    // console.log('InputSchemaForm', tool);
+    console.log('InputSchemaForm', tool);
     React.useEffect(function () {
         if (!tool)
             return;
@@ -68150,7 +68155,7 @@ var InputSchemaForm = function (_a) {
                             });
                         }
                         setSurvey(null);
-                        return [4 /*yield*/, tool.execute(data_1, 5 * 60000)];
+                        return [4 /*yield*/, tool.execute(data_1, 15 * 60000)];
                     case 1:
                         result = _b.sent();
                         if (Array.isArray(result) && ((_a = result[0]) === null || _a === void 0 ? void 0 : _a.type) === 'text') {
@@ -68199,7 +68204,12 @@ var SciFiMCPStatus = function (_a) {
     var serverInfo = _a.serverInfo, loading = _a.loading, error = _a.error, tools = _a.tools, resources = _a.resources; _a.resourceTemplates; var prompts = _a.prompts, notifications = _a.notifications, onSettingsOpen = _a.onSettingsOpen;
     var _b = React.useState(null), selectedItem = _b[0], setSelectedItem = _b[1];
     var _c = React.useState(null), formData = _c[0], setFormData = _c[1];
-    var handleItemSelect = function (item) {
+    var _d = React.useState(false), resourceLoading = _d[0], setResourceLoading = _d[1];
+    var handleToolSelect = function (item) {
+        setSelectedItem(item);
+        setFormData(null);
+    };
+    var handleResourceSelect = function (item) {
         setSelectedItem(item);
         setFormData(null);
     };
@@ -68207,6 +68217,62 @@ var SciFiMCPStatus = function (_a) {
         setFormData(data);
         setSelectedItem(null);
     };
+    React.useEffect(function () {
+        var executeResource = function () { return __awaiter(void 0, void 0, void 0, function () {
+            var result, error_1;
+            var _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        if (!((selectedItem === null || selectedItem === void 0 ? void 0 : selectedItem._type) === 'resource')) return [3 /*break*/, 5];
+                        setResourceLoading(true);
+                        _b.label = 1;
+                    case 1:
+                        _b.trys.push([1, 3, 4, 5]);
+                        return [4 /*yield*/, selectedItem.execute({}, 5 * 60000)];
+                    case 2:
+                        result = _b.sent();
+                        if (Array.isArray(result) && ((_a = result[0]) === null || _a === void 0 ? void 0 : _a.type) === 'text') {
+                            result = result.map(function (item) {
+                                if (item.type === 'text') {
+                                    var json = null;
+                                    try {
+                                        json = JSON.parse(item.text);
+                                    }
+                                    catch (error) {
+                                        console.log(error);
+                                    }
+                                    if (json) {
+                                        item.type = 'json';
+                                        item.json = json;
+                                        delete item.text;
+                                    }
+                                }
+                                return __assign({}, item);
+                            });
+                        }
+                        setFormData({
+                            input: {},
+                            output: result
+                        });
+                        return [3 /*break*/, 5];
+                    case 3:
+                        error_1 = _b.sent();
+                        console.error('执行资源时出错:', error_1);
+                        setFormData({
+                            input: {},
+                            output: [{ type: 'text', text: "\u6267\u884C\u51FA\u9519: ".concat(error_1.message || '未知错误') }]
+                        });
+                        return [3 /*break*/, 5];
+                    case 4:
+                        setResourceLoading(false);
+                        return [7 /*endfinally*/];
+                    case 5: return [2 /*return*/];
+                }
+            });
+        }); };
+        executeResource();
+    }, [selectedItem]);
     return (React__default["default"].createElement("div", { className: "sci-fi-container" },
         React__default["default"].createElement("div", { className: "hologram-title" },
             React__default["default"].createElement("h1", { style: { display: 'flex', alignItems: 'center' } },
@@ -68232,7 +68298,7 @@ var SciFiMCPStatus = function (_a) {
                         React__default["default"].createElement("span", { className: "module-icon" }, "\u26A1"),
                         React__default["default"].createElement("h2", null, "\u7CFB\u7EDF\u5DE5\u5177\u5E93"),
                         React__default["default"].createElement("span", { className: "count" }, tools.length)),
-                    React__default["default"].createElement("div", { className: "scrollable-content" }, tools.map(function (tool, index) { return (React__default["default"].createElement("div", { key: index, className: "item", onClick: function () { return handleItemSelect(tool); } },
+                    React__default["default"].createElement("div", { className: "scrollable-content" }, tools.map(function (tool, index) { return (React__default["default"].createElement("div", { key: index, className: "item", onClick: function () { return handleToolSelect(tool); } },
                         React__default["default"].createElement("span", { className: "item-indicator" }),
                         tool.name)); }))),
                 resources.length > 0 && React__default["default"].createElement("div", { className: "module" },
@@ -68240,7 +68306,7 @@ var SciFiMCPStatus = function (_a) {
                         React__default["default"].createElement("span", { className: "module-icon" }, "\uD83D\uDCE6"),
                         React__default["default"].createElement("h2", null, "\u8D44\u6E90\u77E9\u9635"),
                         React__default["default"].createElement("span", { className: "count" }, resources.length)),
-                    React__default["default"].createElement("div", { className: "scrollable-content" }, resources.map(function (resource, index) { return (React__default["default"].createElement("div", { key: index, className: "item" },
+                    React__default["default"].createElement("div", { className: "scrollable-content" }, resources.map(function (resource, index) { return (React__default["default"].createElement("div", { key: index, className: "item", onClick: function () { return handleResourceSelect(resource); } },
                         React__default["default"].createElement("span", { className: "item-indicator" }),
                         decodeURIComponent(resource.uri))); }))),
                 prompts.length > 0 && React__default["default"].createElement("div", { className: "module" },
@@ -68251,8 +68317,10 @@ var SciFiMCPStatus = function (_a) {
                     React__default["default"].createElement("div", { className: "scrollable-content" }, prompts.map(function (prompt, index) { return (React__default["default"].createElement("div", { key: index, className: "item" },
                         React__default["default"].createElement("span", { className: "item-indicator" }),
                         prompt.name)); })))),
-            selectedItem && React__default["default"].createElement("div", { className: 'module', style: { width: '100%' } },
+            (selectedItem === null || selectedItem === void 0 ? void 0 : selectedItem._type) === 'tool' && React__default["default"].createElement("div", { className: 'module', style: { width: '100%' } },
                 React__default["default"].createElement(InputSchemaForm, { tool: selectedItem, onComplete: handleFormComplete })),
+            (selectedItem === null || selectedItem === void 0 ? void 0 : selectedItem._type) === 'resource' && resourceLoading && React__default["default"].createElement("div", { className: 'module', style: { width: '100%' } },
+                React__default["default"].createElement("div", { className: "loading-indicator" }, "\u8D44\u6E90\u52A0\u8F7D\u4E2D...")),
             formData && React__default["default"].createElement("div", { className: 'module', style: { margin: '0 20px' } },
                 React__default["default"].createElement("h4", null, "\u6570\u636E"),
                 React__default["default"].createElement(ReactJson, { src: formData, theme: "colors" }))))));
