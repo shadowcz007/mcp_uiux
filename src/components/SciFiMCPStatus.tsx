@@ -171,6 +171,7 @@ export const SciFiMCPStatus: React.FC<{
                         <div className="scrollable-content">
                             {prompts.map((prompt, index) => (
                                 <div key={index} className="item"
+                                    onClick={() => handleToolSelect(prompt)}
                                 >
                                     <span className="item-indicator"></span>
                                     {prompt.name}
@@ -179,7 +180,7 @@ export const SciFiMCPStatus: React.FC<{
                         </div>
                     </div>}
                 </div>
-                {selectedItem?._type === 'tool' && <div className='module' style={{ width: '100%' }}>
+                {(selectedItem?._type === 'tool' || (selectedItem?._type === 'prompt' && selectedItem?.arguments)) && <div className='module' style={{ width: '100%' }}>
                     <InputSchemaForm tool={selectedItem} onComplete={handleFormComplete} />
                 </div>}
            
