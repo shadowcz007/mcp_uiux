@@ -68199,6 +68199,85 @@
         return React__default["default"].createElement(Survey, { model: survey, rootNodeClassName: "mcp-uiux-input-schema-form" });
     };
 
+    // 将prompt参数转换为SurveyJS格式
+    var mapPromptArgsToSurveyJson = function (prompt) {
+        if (!prompt || !prompt.arguments || !Array.isArray(prompt.arguments))
+            return { elements: [] };
+        var elements = prompt.arguments.map(function (arg) {
+            return {
+                type: 'text',
+                name: arg.name,
+                title: arg.description || arg.name,
+                isRequired: arg.required || false,
+                defaultValue: arg.default || ''
+            };
+        });
+        return {
+            elements: elements,
+            showQuestionNumbers: false,
+            completeText: "执行",
+            pageNextText: "下一步",
+            pagePrevText: "上一步"
+        };
+    };
+    // Prompt参数表单组件
+    var PromptArgumentsForm = function (_a) {
+        var prompt = _a.prompt, onComplete = _a.onComplete;
+        var _b = React.useState(null), survey = _b[0], setSurvey = _b[1];
+        React.useEffect(function () {
+            if (!prompt)
+                return;
+            var surveyJson = mapPromptArgsToSurveyJson(prompt);
+            var surveyModel = new SurveyModel(surveyJson);
+            // 设置完成事件
+            surveyModel.onComplete.add(function (sender) { return __awaiter(void 0, void 0, void 0, function () {
+                var data, result;
+                var _a;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0:
+                            if (!onComplete) return [3 /*break*/, 2];
+                            data = __assign({}, sender.data);
+                            setSurvey(null);
+                            return [4 /*yield*/, prompt.execute(data, 15 * 60000)];
+                        case 1:
+                            result = _b.sent();
+                            if (Array.isArray(result) && ((_a = result[0]) === null || _a === void 0 ? void 0 : _a.type) === 'text') {
+                                result = result.map(function (item) {
+                                    if (item.type === 'text') {
+                                        var json = null;
+                                        try {
+                                            json = JSON.parse(item.text);
+                                        }
+                                        catch (error) {
+                                            console.log(error);
+                                        }
+                                        if (json) {
+                                            item.type = 'json';
+                                            item.json = json;
+                                            delete item.text;
+                                        }
+                                    }
+                                    return __assign({}, item);
+                                });
+                            }
+                            onComplete({
+                                input: data,
+                                output: result
+                            });
+                            _b.label = 2;
+                        case 2: return [2 /*return*/];
+                    }
+                });
+            }); });
+            surveyModel.applyTheme(SharpDark);
+            setSurvey(surveyModel);
+        }, [prompt, onComplete]);
+        if (!survey)
+            return null;
+        return React__default["default"].createElement(Survey, { model: survey, rootNodeClassName: "mcp-uiux-input-schema-form" });
+    };
+
     var SciFiMCPStatus = function (_a) {
         var serverInfo = _a.serverInfo, loading = _a.loading, error = _a.error, tools = _a.tools, resources = _a.resources; _a.resourceTemplates; var prompts = _a.prompts, notifications = _a.notifications, onSettingsOpen = _a.onSettingsOpen;
         var _b = React.useState(null), selectedItem = _b[0], setSelectedItem = _b[1];
@@ -68316,8 +68395,10 @@
                         React__default["default"].createElement("div", { className: "scrollable-content" }, prompts.map(function (prompt, index) { return (React__default["default"].createElement("div", { key: index, className: "item", onClick: function () { return handleToolSelect(prompt); } },
                             React__default["default"].createElement("span", { className: "item-indicator" }),
                             prompt.name)); })))),
-                ((selectedItem === null || selectedItem === void 0 ? void 0 : selectedItem._type) === 'tool' || ((selectedItem === null || selectedItem === void 0 ? void 0 : selectedItem._type) === 'prompt' && (selectedItem === null || selectedItem === void 0 ? void 0 : selectedItem.arguments))) && React__default["default"].createElement("div", { className: 'module', style: { width: '100%' } },
+                (selectedItem === null || selectedItem === void 0 ? void 0 : selectedItem._type) === 'tool' && React__default["default"].createElement("div", { className: 'module', style: { width: '100%' } },
                     React__default["default"].createElement(InputSchemaForm, { tool: selectedItem, onComplete: handleFormComplete })),
+                (selectedItem === null || selectedItem === void 0 ? void 0 : selectedItem._type) === 'prompt' && (selectedItem === null || selectedItem === void 0 ? void 0 : selectedItem.arguments) && React__default["default"].createElement("div", { className: 'module', style: { width: '100%' } },
+                    React__default["default"].createElement(PromptArgumentsForm, { prompt: selectedItem, onComplete: handleFormComplete })),
                 (selectedItem === null || selectedItem === void 0 ? void 0 : selectedItem._type) === 'resource' && resourceLoading && React__default["default"].createElement("div", { className: 'module', style: { width: '100%' } },
                     React__default["default"].createElement("div", { className: "loading-indicator" }, "\u8D44\u6E90\u52A0\u8F7D\u4E2D...")),
                 formData && React__default["default"].createElement("div", { className: 'module', style: { margin: '0 20px' } },

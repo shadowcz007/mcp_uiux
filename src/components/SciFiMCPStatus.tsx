@@ -3,6 +3,7 @@ import ReactJson from 'react-json-view'
 import './SciFiMCPStatus.css'
 
 import InputSchemaForm from './InputSchemaForm';
+import PromptArgumentsForm from './PromptArgumentsForm';
 
 export const SciFiMCPStatus: React.FC<{
     serverInfo: any | null;
@@ -180,8 +181,12 @@ export const SciFiMCPStatus: React.FC<{
                         </div>
                     </div>}
                 </div>
-                {(selectedItem?._type === 'tool' || (selectedItem?._type === 'prompt' && selectedItem?.arguments)) && <div className='module' style={{ width: '100%' }}>
+                {selectedItem?._type === 'tool' && <div className='module' style={{ width: '100%' }}>
                     <InputSchemaForm tool={selectedItem} onComplete={handleFormComplete} />
+                </div>}
+
+                {selectedItem?._type === 'prompt' && selectedItem?.arguments && <div className='module' style={{ width: '100%' }}>
+                    <PromptArgumentsForm prompt={selectedItem} onComplete={handleFormComplete} />
                 </div>}
            
                 {selectedItem?._type === 'resource' && resourceLoading && <div className='module' style={{ width: '100%' }}>
