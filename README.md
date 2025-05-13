@@ -107,6 +107,7 @@ const AppContent: React.FC = () => {
   const [resourcePath, setResourcePath] = useState('');
   const {
     connect,
+    disconnect,
     loading,
     error,
     tools,

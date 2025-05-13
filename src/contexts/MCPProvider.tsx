@@ -256,6 +256,7 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
             error,
             reconnect,
             connect,
+            disconnect,  
             tools,
             resources,
             resourceTemplates,

@@ -6,6 +6,7 @@ interface MCPContextType {
     error: string | null;
     reconnect: (sseUrl?: string, resourceFilter?: string) => Promise<void>;
     connect: (sseUrl: string, resourceFilter?: string) => Promise<void>;
+    disconnect: () => Promise<any>;
     tools: any[];
     resources: any[];
     resourceTemplates: any[];

@@ -8,6 +8,7 @@ interface MCPContextType {
     error: string | null;
     reconnect: (sseUrl?: string, resourceFilter?: string) => Promise<void>;
     connect: (sseUrl: string, resourceFilter?: string) => Promise<void>;
+    disconnect: () => Promise<any>;  
     tools: any[];
     resources: any[];
     resourceTemplates: any[];
@@ -23,6 +24,7 @@ export const MCPContext = React.createContext<MCPContextType>({
     error: null,
     reconnect: async () => { },
     connect: async () => { },
+    disconnect: async () => { },
     tools: [],
     resources: [],
     resourceTemplates: [],

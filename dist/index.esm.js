@@ -1180,6 +1180,9 @@ var MCPContext = React.createContext({
     connect: function () { return __awaiter(void 0, void 0, void 0, function () { return __generator(this, function (_a) {
         return [2 /*return*/];
     }); }); },
+    disconnect: function () { return __awaiter(void 0, void 0, void 0, function () { return __generator(this, function (_a) {
+        return [2 /*return*/];
+    }); }); },
     tools: [],
     resources: [],
     resourceTemplates: [],
@@ -68683,6 +68686,7 @@ function MCPProvider(_a) {
             error: error,
             reconnect: reconnect,
             connect: connect,
+            disconnect: disconnect,
             tools: tools,
             resources: resources,
             resourceTemplates: resourceTemplates,
