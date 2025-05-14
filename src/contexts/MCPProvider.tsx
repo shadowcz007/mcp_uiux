@@ -258,6 +258,7 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
             connect,
             disconnect,  
             tools,
+            toolsFunctionCall:mcpClientRef.current?.transformToolsToOpenAIFunctions(tools),
             resources,
             resourceTemplates,
             prompts,

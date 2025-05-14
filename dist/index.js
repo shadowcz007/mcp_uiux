@@ -1210,6 +1210,7 @@ var MCPContext = React__namespace.createContext({
         return [2 /*return*/];
     }); }); },
     tools: [],
+    toolsFunctionCall: [],
     resources: [],
     resourceTemplates: [],
     prompts: [],
@@ -68454,18 +68455,19 @@ var MCPStatus = function (_a) {
 
 function MCPProvider(_a) {
     var _this = this;
+    var _b;
     var children = _a.children;
     var mcpClientRef = React.useRef(null);
-    var _b = React.useState(false), loading = _b[0], setLoading = _b[1];
-    var _c = React.useState(null), error = _c[0], setError = _c[1];
-    var _d = React.useState({}), notifications = _d[0], setNotifications = _d[1];
-    var _e = React.useState([]), tools = _e[0], setTools = _e[1];
-    var _f = React.useState([]), resources = _f[0], setResources = _f[1];
-    var _g = React.useState([]), resourceTemplates = _g[0], setResourceTemplates = _g[1];
-    var _h = React.useState([]), prompts = _h[0], setPrompts = _h[1];
-    var _j = React.useState(null), serverInfo = _j[0], setServerInfo = _j[1];
-    var _k = React.useState(null), lastConnectedUrl = _k[0], setLastConnectedUrl = _k[1];
-    var _l = React.useState(""), lastResourceFilter = _l[0], setLastResourceFilter = _l[1];
+    var _c = React.useState(false), loading = _c[0], setLoading = _c[1];
+    var _d = React.useState(null), error = _d[0], setError = _d[1];
+    var _e = React.useState({}), notifications = _e[0], setNotifications = _e[1];
+    var _f = React.useState([]), tools = _f[0], setTools = _f[1];
+    var _g = React.useState([]), resources = _g[0], setResources = _g[1];
+    var _h = React.useState([]), resourceTemplates = _h[0], setResourceTemplates = _h[1];
+    var _j = React.useState([]), prompts = _j[0], setPrompts = _j[1];
+    var _k = React.useState(null), serverInfo = _k[0], setServerInfo = _k[1];
+    var _l = React.useState(null), lastConnectedUrl = _l[0], setLastConnectedUrl = _l[1];
+    var _m = React.useState(""), lastResourceFilter = _m[0], setLastResourceFilter = _m[1];
     // 添加节流相关的状态和引用
     var connectTimeoutRef = React.useRef(null);
     var pendingConnectParamsRef = React.useRef(null);
@@ -68714,6 +68716,7 @@ function MCPProvider(_a) {
             connect: connect,
             disconnect: disconnect,
             tools: tools,
+            toolsFunctionCall: (_b = mcpClientRef.current) === null || _b === void 0 ? void 0 : _b.transformToolsToOpenAIFunctions(tools),
             resources: resources,
             resourceTemplates: resourceTemplates,
             prompts: prompts,

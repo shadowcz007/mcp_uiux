@@ -8,6 +8,7 @@ interface MCPContextType {
     connect: (sseUrl: string, resourceFilter?: string) => Promise<void>;
     disconnect: () => Promise<any>;
     tools: any[];
+    toolsFunctionCall: any[];
     resources: any[];
     resourceTemplates: any[];
     prompts: any[];
