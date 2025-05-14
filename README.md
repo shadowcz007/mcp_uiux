@@ -76,7 +76,7 @@ const {
     knowledgeTools,
     'Qwen/Qwen2.5-7B-Instruct', // 或其他支持 function calling 的模型
     'sk-', // 替换为你的 OpenAI API Key
-    'https://api.siliconflow.cn/v1/chat/completions',
+    'https://api.siliconflow.cn/v1/chat/completions', 
     chunk => {
       console.log(chunk)
     }

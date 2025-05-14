@@ -1357,10 +1357,13 @@ function atEndOfBlockComment(text, i) {
   return text[i] === '*' && text[i + 1] === '/';
 }
 
-var callOpenAIFunctionAndProcessToolCalls = function (systemPrompt, userContent, tools, model, apiKey, apiUrl, callback) {
+var callOpenAIFunctionAndProcessToolCalls = function (systemPrompt, userContent, tools, model, apiKey, apiUrl, callback, params) {
     if (model === void 0) { model = 'Qwen/Qwen2.5-7B-Instruct'; }
     if (apiKey === void 0) { apiKey = 'sk-'; }
     if (apiUrl === void 0) { apiUrl = 'https://api.siliconflow.cn/v1/chat/completions'; }
+    if (params === void 0) { params = {
+        temperature: 0.1
+    }; }
     return __awaiter(void 0, void 0, void 0, function () {
         var messages, requestBody, response, finalData_1, reader, decoder, buffer, accumulatedData, _a, done, value, lines, _i, lines_1, line, data, parsed, toolCalls, processedToolCalls, error_1;
         var _b;
@@ -1375,18 +1378,12 @@ var callOpenAIFunctionAndProcessToolCalls = function (systemPrompt, userContent,
                             }
                         ]
                         : [];
-                    requestBody = {
-                        model: model,
-                        messages: __spreadArray(__spreadArray([], messages, true), [
+                    requestBody = __assign({ model: model, messages: __spreadArray(__spreadArray([], messages, true), [
                             {
                                 role: 'user',
                                 content: userContent
                             }
-                        ], false),
-                        tools: tools,
-                        tool_choice: 'auto',
-                        stream: Boolean(callback)
-                    };
+                        ], false), tools: tools, tool_choice: 'auto', stream: Boolean(callback) }, params);
                     _c.label = 1;
                 case 1:
                     _c.trys.push([1, 9, , 10]);

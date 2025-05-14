@@ -6,8 +6,11 @@ export const callOpenAIFunctionAndProcessToolCalls = async (
   tools: [],
   model = 'Qwen/Qwen2.5-7B-Instruct',
   apiKey = 'sk-',
-  apiUrl = 'https://api.siliconflow.cn/v1/chat/completions',
-  callback: any
+  apiUrl = 'https://api.siliconflow.cn/v1/chat/completions', 
+  callback: any,
+  params = {
+    temperature: 0.1
+  },
 ) => {
   let messages = systemPrompt
     ? [
@@ -29,9 +32,10 @@ export const callOpenAIFunctionAndProcessToolCalls = async (
     ],
     tools,
     tool_choice: 'auto',
-    stream: Boolean(callback)
-  };
- 
+    stream: Boolean(callback),
+    ...params
+  }
+
   try {
     const response = await fetch(apiUrl, {
       method: 'POST',
