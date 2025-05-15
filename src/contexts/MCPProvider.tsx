@@ -21,13 +21,13 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
     const connectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const pendingConnectParamsRef = useRef<{ url: string, filter: string } | null>(null);
 
-    // 断开连接函数
-    const disconnect = async () => {
+    // 添加一个内部断开连接函数，不清除URL信息
+    const disconnectInternal = async () => {
         if (mcpClientRef.current) {
             try {
                 mcpClientRef.current.disconnect();
                 mcpClientRef.current = null;
-                // 清空所有状态数据
+                // 只清空数据，不清除URL信息
                 setTools([]);
                 setResources([]);
                 setResourceTemplates([]);
@@ -39,7 +39,31 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
             // 返回一个Promise，延迟200ms后解析，确保连接完全关闭
             return new Promise(resolve => setTimeout(resolve, 200));
         }
-        return Promise.resolve(); // 如果没有客户端，立即返回已解析的Promise
+        return Promise.resolve();
+    };
+
+    // 保持原有的disconnect函数，它会清除URL信息
+    const disconnect = async () => {
+        if (mcpClientRef.current) {
+            try {
+                mcpClientRef.current.disconnect();
+                mcpClientRef.current = null;
+                // 清空所有状态数据
+                setTools([]);
+                setResources([]);
+                setResourceTemplates([]);
+                setPrompts([]);
+                setServerInfo(null);
+                // 清除上次连接的URL，防止自动重连
+                setLastConnectedUrl(null);
+                setLastResourceFilter("");
+            } catch (e) {
+                console.warn('关闭连接时出错:', e);
+            }
+            // 返回一个Promise，延迟200ms后解析，确保连接完全关闭
+            return new Promise(resolve => setTimeout(resolve, 200));
+        }
+        return Promise.resolve();
     };
 
     // 创建MCP客户端的函数
@@ -47,9 +71,9 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
         setLoading(true);
         setError(null);
 
-        // 确保先断开任何现有连接
+        // 确保先断开任何现有连接，但不清除URL信息
         if (mcpClientRef.current) {
-            await disconnect();
+            await disconnectInternal();
         }
 
         // 清空之前的数据
@@ -202,9 +226,9 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
             // 重置待处理的连接参数
             pendingConnectParamsRef.current = null;
 
-            // 确保先断开现有连接
-            await disconnect();
-
+            // 使用内部断开函数，不清除URL信息
+            await disconnectInternal();
+            
             console.log('正在重新连接MCP服务...', params.url);
             const client = await createClient(params.url, params.filter);
             if (client && !sseUrl) {

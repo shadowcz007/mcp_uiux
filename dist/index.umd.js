@@ -68470,14 +68470,14 @@
         // 添加节流相关的状态和引用
         var connectTimeoutRef = React.useRef(null);
         var pendingConnectParamsRef = React.useRef(null);
-        // 断开连接函数
-        var disconnect = function () { return __awaiter(_this, void 0, void 0, function () {
+        // 添加一个内部断开连接函数，不清除URL信息
+        var disconnectInternal = function () { return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 if (mcpClientRef.current) {
                     try {
                         mcpClientRef.current.disconnect();
                         mcpClientRef.current = null;
-                        // 清空所有状态数据
+                        // 只清空数据，不清除URL信息
                         setTools([]);
                         setResources([]);
                         setResourceTemplates([]);
@@ -68490,7 +68490,33 @@
                     // 返回一个Promise，延迟200ms后解析，确保连接完全关闭
                     return [2 /*return*/, new Promise(function (resolve) { return setTimeout(resolve, 200); })];
                 }
-                return [2 /*return*/, Promise.resolve()]; // 如果没有客户端，立即返回已解析的Promise
+                return [2 /*return*/, Promise.resolve()];
+            });
+        }); };
+        // 保持原有的disconnect函数，它会清除URL信息
+        var disconnect = function () { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                if (mcpClientRef.current) {
+                    try {
+                        mcpClientRef.current.disconnect();
+                        mcpClientRef.current = null;
+                        // 清空所有状态数据
+                        setTools([]);
+                        setResources([]);
+                        setResourceTemplates([]);
+                        setPrompts([]);
+                        setServerInfo(null);
+                        // 清除上次连接的URL，防止自动重连
+                        setLastConnectedUrl(null);
+                        setLastResourceFilter("");
+                    }
+                    catch (e) {
+                        console.warn('关闭连接时出错:', e);
+                    }
+                    // 返回一个Promise，延迟200ms后解析，确保连接完全关闭
+                    return [2 /*return*/, new Promise(function (resolve) { return setTimeout(resolve, 200); })];
+                }
+                return [2 /*return*/, Promise.resolve()];
             });
         }); };
         // 创建MCP客户端的函数
@@ -68502,7 +68528,7 @@
                         setLoading(true);
                         setError(null);
                         if (!mcpClientRef.current) return [3 /*break*/, 2];
-                        return [4 /*yield*/, disconnect()];
+                        return [4 /*yield*/, disconnectInternal()];
                     case 1:
                         _a.sent();
                         _a.label = 2;
@@ -68656,10 +68682,10 @@
                                     return [2 /*return*/];
                                 // 重置待处理的连接参数
                                 pendingConnectParamsRef.current = null;
-                                // 确保先断开现有连接
-                                return [4 /*yield*/, disconnect()];
+                                // 使用内部断开函数，不清除URL信息
+                                return [4 /*yield*/, disconnectInternal()];
                             case 1:
-                                // 确保先断开现有连接
+                                // 使用内部断开函数，不清除URL信息
                                 _a.sent();
                                 console.log('正在重新连接MCP服务...', params.url);
                                 return [4 /*yield*/, createClient(params.url, params.filter)];
