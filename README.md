@@ -111,6 +111,7 @@ const AppContent: React.FC = () => {
     loading,
     error,
     tools,
+    toolsFunctionCall,//function格式的tool
     resources,
     resourceTemplates,
     prompts
