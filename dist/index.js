@@ -775,10 +775,9 @@ var MCPClient = /** @class */ (function () {
                                         this.handleCallback(message);
                                     }
                                 }
-                                else if (message.method == 'notifications/message' &&
-                                    message.params) {
-                                    // console.log('notifications/message:', message.params)
-                                    (_q = this.onNotifications) === null || _q === void 0 ? void 0 : _q.call(this, message.params);
+                                else if (message.method.match('notifications/')) {
+                                    //所有消息通知
+                                    (_q = this.onNotifications) === null || _q === void 0 ? void 0 : _q.call(this, message);
                                 }
                                 // 添加这个部分：处理任何其他类型的响应
                                 else if (message.id != undefined) {
@@ -68579,11 +68578,13 @@ function MCPProvider(_a) {
                             var errorMessage = err.message || '未知错误';
                             console.error('MCP客户端连接失败:', err);
                             setError("\u8FDE\u63A5\u5931\u8D25: ".concat(errorMessage));
+                            setServerInfo(null);
                         },
                         onReady: function (data) {
                             console.log('MCP客户端连接成功', data);
                             // 保存 serverInfo
                             setServerInfo(data);
+                            setError(null);
                         },
                         onNotifications: function (data) {
                             console.log('收到通知消息:', data);
@@ -68599,6 +68600,7 @@ function MCPProvider(_a) {
                     window.mcpClient = client;
                     mcpClientRef.current = client;
                     setLoading(false);
+                    setError(null);
                     return [2 /*return*/, client];
                 case 5:
                     error_1 = _a.sent();
@@ -68606,6 +68608,7 @@ function MCPProvider(_a) {
                     console.error('MCP客户端连接失败:', error_1);
                     setError("\u8FDE\u63A5\u5931\u8D25: ".concat(errorMessage));
                     setLoading(false);
+                    setServerInfo(null);
                     return [2 /*return*/, null];
                 case 6: return [2 /*return*/];
             }
@@ -68664,6 +68667,11 @@ function MCPProvider(_a) {
         var _this = this;
         var _a;
         return __generator(this, function (_b) {
+            // 先检查连接是否已经正常，如果已经正常连接，则不需要重连
+            if (mcpClientRef.current && !error && !loading) {
+                console.log('当前连接正常，无需重连');
+                return [2 /*return*/];
+            }
             connectionUrl = sseUrl || lastConnectedUrl || ((_a = mcpClientRef.current) === null || _a === void 0 ? void 0 : _a.url) || 'http://127.0.0.1:8080';
             filter = resourceFilter !== undefined ? resourceFilter : lastResourceFilter;
             // 存储最新的连接参数
@@ -68683,6 +68691,13 @@ function MCPProvider(_a) {
                                 return [2 /*return*/];
                             // 重置待处理的连接参数
                             pendingConnectParamsRef.current = null;
+                            // 再次检查连接状态，防止在等待过程中连接已恢复
+                            if (mcpClientRef.current && !error && !loading) {
+                                console.log('连接已恢复正常，取消重连');
+                                connectTimeoutRef.current = null;
+                                setError(null);
+                                return [2 /*return*/];
+                            }
                             // 使用内部断开函数，不清除URL信息
                             return [4 /*yield*/, disconnectInternal()];
                         case 1:
@@ -68709,9 +68724,9 @@ function MCPProvider(_a) {
     // 添加自动重连逻辑
     React.useEffect(function () {
         // 当连接出错时自动尝试重连
-        if (error && lastConnectedUrl) {
+        if (error && lastConnectedUrl && !serverInfo) {
             var timer_1 = setTimeout(function () {
-                console.log('检测到连接错误，尝试自动重连...');
+                console.log('检测到连接错误，尝试自动重连...', error, lastConnectedUrl);
                 reconnect();
             }, 5000); // 5秒后尝试重连
             return function () { return clearTimeout(timer_1); };

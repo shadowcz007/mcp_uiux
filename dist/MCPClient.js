@@ -1831,10 +1831,9 @@ var MCPClient = /** @class */ (function () {
                                         this.handleCallback(message);
                                     }
                                 }
-                                else if (message.method == 'notifications/message' &&
-                                    message.params) {
-                                    // console.log('notifications/message:', message.params)
-                                    (_q = this.onNotifications) === null || _q === void 0 ? void 0 : _q.call(this, message.params);
+                                else if (message.method.match('notifications/')) {
+                                    //所有消息通知
+                                    (_q = this.onNotifications) === null || _q === void 0 ? void 0 : _q.call(this, message);
                                 }
                                 // 添加这个部分：处理任何其他类型的响应
                                 else if (message.id != undefined) {

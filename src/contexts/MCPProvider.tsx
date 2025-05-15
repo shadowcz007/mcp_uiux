@@ -133,11 +133,13 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
                     const errorMessage = err.message || '未知错误';
                     console.error('MCP客户端连接失败:', err);
                     setError(`连接失败: ${errorMessage}`);
+                    setServerInfo(null);
                 },
                 onReady: (data) => {
                     console.log('MCP客户端连接成功', data);
                     // 保存 serverInfo
                     setServerInfo(data);
+                    setError(null);
                 },
                 onNotifications: (data) => {
                     console.log('收到通知消息:', data);
@@ -153,13 +155,14 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
 
             mcpClientRef.current = client;
             setLoading(false);
+            setError(null);
             return client;
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : '未知错误';
             console.error('MCP客户端连接失败:', error);
             setError(`连接失败: ${errorMessage}`);
             setLoading(false);
-
+            setServerInfo(null);
             return null;
         }
     };
@@ -202,8 +205,14 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
         }, 300);
     };
 
-    // 修改重连函数，也应用节流逻辑
-    const reconnect = async (sseUrl?: string, resourceFilter?: string) => {
+      // 修改重连函数，也应用节流逻辑
+      const reconnect = async (sseUrl?: string, resourceFilter?: string) => {
+        // 先检查连接是否已经正常，如果已经正常连接，则不需要重连
+        if (mcpClientRef.current && !error && !loading) {
+            console.log('当前连接正常，无需重连');
+            return;
+        }
+        
         // 使用提供的URL，或最后成功连接的URL，或当前客户端URL，或默认URL
         const connectionUrl = sseUrl || lastConnectedUrl || mcpClientRef.current?.url || 'http://127.0.0.1:8080';
         // 使用提供的过滤器或最后使用的过滤器
@@ -226,9 +235,17 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
             // 重置待处理的连接参数
             pendingConnectParamsRef.current = null;
 
+            // 再次检查连接状态，防止在等待过程中连接已恢复
+            if (mcpClientRef.current && !error && !loading) {
+                console.log('连接已恢复正常，取消重连');
+                connectTimeoutRef.current = null;
+                setError(null);
+                return;
+            }
+
             // 使用内部断开函数，不清除URL信息
             await disconnectInternal();
-            
+
             console.log('正在重新连接MCP服务...', params.url);
             const client = await createClient(params.url, params.filter);
             if (client && !sseUrl) {
@@ -241,16 +258,14 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
             connectTimeoutRef.current = null;
         }, 300);
     };
-
     // 添加自动重连逻辑
     useEffect(() => {
         // 当连接出错时自动尝试重连
-        if (error && lastConnectedUrl) {
+        if (error && lastConnectedUrl&&!serverInfo) {
             const timer = setTimeout(() => {
-                console.log('检测到连接错误，尝试自动重连...');
+                console.log('检测到连接错误，尝试自动重连...', error, lastConnectedUrl);
                 reconnect();
             }, 5000); // 5秒后尝试重连
-
             return () => clearTimeout(timer);
         }
     }, [error, lastConnectedUrl]);
@@ -280,9 +295,9 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
             error,
             reconnect,
             connect,
-            disconnect,  
+            disconnect,
             tools,
-            toolsFunctionCall:mcpClientRef.current?.transformToolsToOpenAIFunctions(tools),
+            toolsFunctionCall: mcpClientRef.current?.transformToolsToOpenAIFunctions(tools),
             resources,
             resourceTemplates,
             prompts,

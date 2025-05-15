@@ -347,14 +347,10 @@ export class MCPClient {
               // console.log('fix收到采样消息:', message)
               this.handleCallback(message)
             }
-          } else if (
-            message.method == 'notifications/message' &&
-            message.params
-          ) {
-            // console.log('notifications/message:', message.params)
-            this.onNotifications?.(message.params)
+          } else if (message.method.match('notifications/')) {
+            //所有消息通知
+            this.onNotifications?.(message)
           }
-
           // 添加这个部分：处理任何其他类型的响应
           else if (message.id != undefined) {
             // 确保任何带有 ID 的响应都能触发回调
