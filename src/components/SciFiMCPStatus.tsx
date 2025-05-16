@@ -41,8 +41,8 @@ export const SciFiMCPStatus: React.FC<{
             if (selectedItem?._type === 'resource') {
                 setResourceLoading(true);
                 try {
-                    let result = await selectedItem.execute({}, 5*60000);
-                    
+                    let result = await selectedItem.execute({}, 5 * 60000);
+
                     if (Array.isArray(result) && result[0]?.type === 'text') {
                         result = result.map((item: any) => {
                             if (item.type === 'text') {
@@ -63,7 +63,7 @@ export const SciFiMCPStatus: React.FC<{
                             };
                         });
                     }
-                    
+
                     setFormData({
                         input: {},
                         output: result
@@ -113,14 +113,11 @@ export const SciFiMCPStatus: React.FC<{
                 </div>
             )}
 
-            {Object.keys(notification).length > 0 && <div className='module' style={{ margin: 20 }}>
-                {
-                    Object.keys(notification).map((key, index) => (
-                        <div key={index}>
-                            {key}: {notification[key]}
-                        </div>
-                    ))
-                }
+            {notification?.method && <div className='module' style={{ margin: 20 }}>
+
+                {notification.method}<br />
+                {notification?.params && typeof (notification.params) == 'object' ? JSON.stringify(notification.params, null, 2) : notification.params}
+
             </div>}
             {!loading && !error && (<div style={{ display: 'flex' }}>
                 <div className="data-grid">
@@ -188,11 +185,11 @@ export const SciFiMCPStatus: React.FC<{
                 {selectedItem?._type === 'prompt' && selectedItem?.arguments && <div className='module' style={{ width: '100%' }}>
                     <PromptArgumentsForm prompt={selectedItem} onComplete={handleFormComplete} />
                 </div>}
-           
+
                 {selectedItem?._type === 'resource' && resourceLoading && <div className='module' style={{ width: '100%' }}>
                     <div className="loading-indicator">资源加载中...</div>
                 </div>}
-                
+
                 {formData && <div className='module' style={{ margin: '0 20px' }}>
                     <h4>数据</h4>
                     <ReactJson src={formData} theme="colors" />
