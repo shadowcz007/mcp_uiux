@@ -1554,7 +1554,7 @@ var callOpenAIFunctionAndProcessToolCalls = function (systemPrompt, userContent,
 
 var MCPClient = /** @class */ (function () {
     function MCPClient(_a) {
-        var _b = _a.url, url = _b === void 0 ? 'http://localhost:8000' : _b, onToolsReady = _a.onToolsReady, onToolResult = _a.onToolResult, onError = _a.onError, onResourcesReady = _a.onResourcesReady, onResourceTemplatesReady = _a.onResourceTemplatesReady, onPromptsReady = _a.onPromptsReady, onReady = _a.onReady, onNotifications = _a.onNotifications;
+        var _b = _a.url, url = _b === void 0 ? 'http://localhost:8000' : _b, onToolsReady = _a.onToolsReady, onToolResult = _a.onToolResult, onError = _a.onError, onResourcesReady = _a.onResourcesReady, onResourceTemplatesReady = _a.onResourceTemplatesReady, onPromptsReady = _a.onPromptsReady, onReady = _a.onReady, onNotification = _a.onNotification;
         this.sessionId = null;
         this.messageEndpoint = null;
         this.eventSource = null;
@@ -1576,7 +1576,7 @@ var MCPClient = /** @class */ (function () {
         this.onResourceTemplatesReady = onResourceTemplatesReady;
         this.onPromptsReady = onPromptsReady;
         this.onReady = onReady;
-        this.onNotifications = onNotifications;
+        this.onNotification = onNotification;
     }
     // 发送 JSON-RPC 请求
     MCPClient.prototype.sendJsonRpcRequest = function (method, params, id) {
@@ -1831,9 +1831,9 @@ var MCPClient = /** @class */ (function () {
                                         this.handleCallback(message);
                                     }
                                 }
-                                else if (message.method.match('notifications/')) {
+                                else if (message.method && message.method.match('/')) {
                                     //所有消息通知
-                                    (_q = this.onNotifications) === null || _q === void 0 ? void 0 : _q.call(this, message);
+                                    (_q = this.onNotification) === null || _q === void 0 ? void 0 : _q.call(this, message);
                                 }
                                 // 添加这个部分：处理任何其他类型的响应
                                 else if (message.id != undefined) {

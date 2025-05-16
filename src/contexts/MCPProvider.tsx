@@ -7,7 +7,7 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
     const mcpClientRef = useRef<MCPClient | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
-    const [notifications, setNotifications] = useState<any>({});
+    const [notification, setNotification] = useState<any>({});
     const [tools, setTools] = useState<any[]>([]);
     const [resources, setResources] = useState<any[]>([]);
     const [resourceTemplates, setResourceTemplates] = useState<any[]>([]);
@@ -141,9 +141,9 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
                     setServerInfo(data);
                     setError(null);
                 },
-                onNotifications: (data) => {
+                onNotification: (data) => {
                     console.log('收到通知消息:', data);
-                    setNotifications(data);
+                    setNotification(data);
                 }
             });
 
@@ -302,7 +302,7 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
             resourceTemplates,
             prompts,
             serverInfo,
-            notifications
+            notification
         }}>
             {children}
         </MCPContext.Provider>

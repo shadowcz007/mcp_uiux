@@ -43,5 +43,5 @@ export interface MCPProps {
     onResourceTemplatesReady?: (resourceTemplates: ResourceTemplate[]) => void;
     onPromptsReady?: (prompts: Prompt[]) => void;
     onReady?: (data: ServerInfo) => void;
-    onNotifications?: (data: any) => void;
+    onNotification?: (data: any) => void;
 }

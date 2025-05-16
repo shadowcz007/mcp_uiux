@@ -17,7 +17,7 @@ export interface MCPStatusProps {
     resources: any[];
     resourceTemplates: any[];
     prompts: any[];
-    notifications: any;
+    notification: any;
   }) => React.ReactNode;
 }
 
@@ -47,7 +47,7 @@ export const MCPStatus: React.FC<MCPStatusProps> = ({
     resourceTemplates,
     prompts,
     serverInfo,
-    notifications
+    notification
   } = useMCP();
 
   useEffect(() => {
@@ -55,7 +55,7 @@ export const MCPStatus: React.FC<MCPStatusProps> = ({
   }, [serverUrl, resourcePath]);
 
   if (render) {
-    return render({ loading, error, tools, resources, resourceTemplates, prompts, notifications }) as JSX.Element;
+    return render({ loading, error, tools, resources, resourceTemplates, prompts, notification }) as JSX.Element;
   }
 
   return (
@@ -77,7 +77,7 @@ export const MCPStatus: React.FC<MCPStatusProps> = ({
         resources={resources}
         resourceTemplates={resourceTemplates}
         prompts={prompts}
-        notifications={notifications}
+        notification={notification}
         onSettingsOpen={() => setShowSettings(!showSettings)}
       />
     </div>

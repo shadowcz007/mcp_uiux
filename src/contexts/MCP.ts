@@ -28,7 +28,7 @@ export const useMCP = ({
   onToolResult,
   onError,
   onReady,
-  onNotifications
+  onNotification
 }: MCPProps): MCPHookResult => {
   const mcpClientRef = useRef<MCPClient | null>(null)
 
@@ -39,14 +39,14 @@ export const useMCP = ({
       onToolResult,
       onError,
       onReady,
-      onNotifications
+      onNotification
     })
     mcpClientRef.current.connect()
 
     return () => {
       mcpClientRef.current?.disconnect()
     }
-  }, [url, onToolsReady, onToolResult, onError, onReady, onNotifications])
+  }, [url, onToolsReady, onToolResult, onError, onReady, onNotification])
 
   return {
     executeTool: useCallback(async (toolName: string, args: any) => {

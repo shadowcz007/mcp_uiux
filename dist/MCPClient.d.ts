@@ -9,7 +9,7 @@ export declare class MCPClient {
     private onResourceTemplatesReady?;
     private onPromptsReady?;
     private onReady?;
-    private onNotifications?;
+    private onNotification?;
     private sessionId;
     private messageEndpoint;
     private eventSource;
@@ -23,7 +23,7 @@ export declare class MCPClient {
     protocolVersion?: string | null;
     capabilities?: any;
     serverInfo?: any;
-    constructor({ url, onToolsReady, onToolResult, onError, onResourcesReady, onResourceTemplatesReady, onPromptsReady, onReady, onNotifications }: MCPProps);
+    constructor({ url, onToolsReady, onToolResult, onError, onResourcesReady, onResourceTemplatesReady, onPromptsReady, onReady, onNotification }: MCPProps);
     private sendJsonRpcRequest;
     private handleError;
     executeTool(toolName: string, args: any, timeout?: number): Promise<any>;

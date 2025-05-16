@@ -13,9 +13,9 @@ export const SciFiMCPStatus: React.FC<{
     resources: any[];
     resourceTemplates: any[];
     prompts: any[];
-    notifications: any;
+    notification: any;
     onSettingsOpen?: () => void;
-}> = ({ serverInfo, loading, error, tools, resources, resourceTemplates, prompts, notifications, onSettingsOpen }) => {
+}> = ({ serverInfo, loading, error, tools, resources, resourceTemplates, prompts, notification, onSettingsOpen }) => {
 
     const [selectedItem, setSelectedItem] = useState<any>(null);
     const [formData, setFormData] = useState<any>(null);
@@ -113,11 +113,11 @@ export const SciFiMCPStatus: React.FC<{
                 </div>
             )}
 
-            {Object.keys(notifications).length > 0 && <div className='module' style={{ margin: 20 }}>
+            {Object.keys(notification).length > 0 && <div className='module' style={{ margin: 20 }}>
                 {
-                    Object.keys(notifications).map((key, index) => (
+                    Object.keys(notification).map((key, index) => (
                         <div key={index}>
-                            {key}: {notifications[key]}
+                            {key}: {notification[key]}
                         </div>
                     ))
                 }

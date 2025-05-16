@@ -12,5 +12,5 @@ export interface MCPHookResult {
     expandUriByVariables: (template: string, variables: Record<string, string>) => string | undefined;
     getTemplateVariables: (template: any) => string[];
 }
-export declare const useMCP: ({ url, onToolsReady, onToolResult, onError, onReady, onNotifications }: MCPProps) => MCPHookResult;
+export declare const useMCP: ({ url, onToolsReady, onToolResult, onError, onReady, onNotification }: MCPProps) => MCPHookResult;
 export declare const MCP: React.FC<MCPProps>;

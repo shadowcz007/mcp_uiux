@@ -472,7 +472,7 @@ var MCPError = /** @class */ (function (_super) {
 
 var MCPClient = /** @class */ (function () {
     function MCPClient(_a) {
-        var _b = _a.url, url = _b === void 0 ? 'http://localhost:8000' : _b, onToolsReady = _a.onToolsReady, onToolResult = _a.onToolResult, onError = _a.onError, onResourcesReady = _a.onResourcesReady, onResourceTemplatesReady = _a.onResourceTemplatesReady, onPromptsReady = _a.onPromptsReady, onReady = _a.onReady, onNotifications = _a.onNotifications;
+        var _b = _a.url, url = _b === void 0 ? 'http://localhost:8000' : _b, onToolsReady = _a.onToolsReady, onToolResult = _a.onToolResult, onError = _a.onError, onResourcesReady = _a.onResourcesReady, onResourceTemplatesReady = _a.onResourceTemplatesReady, onPromptsReady = _a.onPromptsReady, onReady = _a.onReady, onNotification = _a.onNotification;
         this.sessionId = null;
         this.messageEndpoint = null;
         this.eventSource = null;
@@ -494,7 +494,7 @@ var MCPClient = /** @class */ (function () {
         this.onResourceTemplatesReady = onResourceTemplatesReady;
         this.onPromptsReady = onPromptsReady;
         this.onReady = onReady;
-        this.onNotifications = onNotifications;
+        this.onNotification = onNotification;
     }
     // 发送 JSON-RPC 请求
     MCPClient.prototype.sendJsonRpcRequest = function (method, params, id) {
@@ -749,9 +749,9 @@ var MCPClient = /** @class */ (function () {
                                         this.handleCallback(message);
                                     }
                                 }
-                                else if (message.method.match('notifications/')) {
+                                else if (message.method && message.method.match('/')) {
                                     //所有消息通知
-                                    (_q = this.onNotifications) === null || _q === void 0 ? void 0 : _q.call(this, message);
+                                    (_q = this.onNotification) === null || _q === void 0 ? void 0 : _q.call(this, message);
                                 }
                                 // 添加这个部分：处理任何其他类型的响应
                                 else if (message.id != undefined) {
@@ -1188,7 +1188,7 @@ var MCPContext = React.createContext({
     resourceTemplates: [],
     prompts: [],
     serverInfo: null,
-    notifications: []
+    notification: {}
 });
 var useMCP = function () { return useContext(MCPContext); };
 
@@ -68257,7 +68257,7 @@ var PromptArgumentsForm = function (_a) {
 };
 
 var SciFiMCPStatus = function (_a) {
-    var serverInfo = _a.serverInfo, loading = _a.loading, error = _a.error, tools = _a.tools, resources = _a.resources; _a.resourceTemplates; var prompts = _a.prompts, notifications = _a.notifications, onSettingsOpen = _a.onSettingsOpen;
+    var serverInfo = _a.serverInfo, loading = _a.loading, error = _a.error, tools = _a.tools, resources = _a.resources; _a.resourceTemplates; var prompts = _a.prompts, notification = _a.notification, onSettingsOpen = _a.onSettingsOpen;
     var _b = useState(null), selectedItem = _b[0], setSelectedItem = _b[1];
     var _c = useState(null), formData = _c[0], setFormData = _c[1];
     var _d = useState(false), resourceLoading = _d[0], setResourceLoading = _d[1];
@@ -68343,10 +68343,10 @@ var SciFiMCPStatus = function (_a) {
         error && (React__default.createElement("div", { className: "error-panel" },
             React__default.createElement("div", { className: "error-icon" }, "\u26A0"),
             React__default.createElement("div", { className: "error-message" }, error))),
-        Object.keys(notifications).length > 0 && React__default.createElement("div", { className: 'module', style: { margin: 20 } }, Object.keys(notifications).map(function (key, index) { return (React__default.createElement("div", { key: index },
+        Object.keys(notification).length > 0 && React__default.createElement("div", { className: 'module', style: { margin: 20 } }, Object.keys(notification).map(function (key, index) { return (React__default.createElement("div", { key: index },
             key,
             ": ",
-            notifications[key])); })),
+            notification[key])); })),
         !loading && !error && (React__default.createElement("div", { style: { display: 'flex' } },
             React__default.createElement("div", { className: "data-grid" },
                 tools.length > 0 && React__default.createElement("div", { className: "module" },
@@ -68414,16 +68414,16 @@ var MCPStatus = function (_a) {
         setServerUrl(localStorage.getItem('mcp-uiux-serverUrl') || initialServerUrl);
         setResourcePath(localStorage.getItem('mcp-uiux-resourcePath') || initialResourcePath);
     }, []);
-    var _h = useMCP(), connect = _h.connect, loading = _h.loading, error = _h.error, tools = _h.tools, resources = _h.resources, resourceTemplates = _h.resourceTemplates, prompts = _h.prompts, serverInfo = _h.serverInfo, notifications = _h.notifications;
+    var _h = useMCP(), connect = _h.connect, loading = _h.loading, error = _h.error, tools = _h.tools, resources = _h.resources, resourceTemplates = _h.resourceTemplates, prompts = _h.prompts, serverInfo = _h.serverInfo, notification = _h.notification;
     useEffect(function () {
         connect(serverUrl, resourcePath);
     }, [serverUrl, resourcePath]);
     if (render) {
-        return render({ loading: loading, error: error, tools: tools, resources: resources, resourceTemplates: resourceTemplates, prompts: prompts, notifications: notifications });
+        return render({ loading: loading, error: error, tools: tools, resources: resources, resourceTemplates: resourceTemplates, prompts: prompts, notification: notification });
     }
     return (React__default.createElement("div", { className: className, style: style },
         showSettings && (React__default.createElement(MCPSettings, { serverUrl: serverUrl, resourcePath: resourcePath, onServerUrlChange: function (url) { setServerUrl(url); localStorage.setItem('mcp-uiux-serverUrl', url); }, onResourcePathChange: function (path) { setResourcePath(path); localStorage.setItem('mcp-uiux-resourcePath', path); }, style: { marginBottom: '20px' } })),
-        React__default.createElement(SciFiMCPStatus, { serverInfo: serverInfo, loading: loading, error: error, tools: tools, resources: resources, resourceTemplates: resourceTemplates, prompts: prompts, notifications: notifications, onSettingsOpen: function () { return setShowSettings(!showSettings); } })));
+        React__default.createElement(SciFiMCPStatus, { serverInfo: serverInfo, loading: loading, error: error, tools: tools, resources: resources, resourceTemplates: resourceTemplates, prompts: prompts, notification: notification, onSettingsOpen: function () { return setShowSettings(!showSettings); } })));
 };
 
 function MCPProvider(_a) {
@@ -68433,7 +68433,7 @@ function MCPProvider(_a) {
     var mcpClientRef = useRef(null);
     var _c = useState(false), loading = _c[0], setLoading = _c[1];
     var _d = useState(null), error = _d[0], setError = _d[1];
-    var _e = useState({}), notifications = _e[0], setNotifications = _e[1];
+    var _e = useState({}), notification = _e[0], setNotification = _e[1];
     var _f = useState([]), tools = _f[0], setTools = _f[1];
     var _g = useState([]), resources = _g[0], setResources = _g[1];
     var _h = useState([]), resourceTemplates = _h[0], setResourceTemplates = _h[1];
@@ -68560,9 +68560,9 @@ function MCPProvider(_a) {
                             setServerInfo(data);
                             setError(null);
                         },
-                        onNotifications: function (data) {
+                        onNotification: function (data) {
                             console.log('收到通知消息:', data);
-                            setNotifications(data);
+                            setNotification(data);
                         }
                     });
                     // 连接到服务器
@@ -68736,7 +68736,7 @@ function MCPProvider(_a) {
             resourceTemplates: resourceTemplates,
             prompts: prompts,
             serverInfo: serverInfo,
-            notifications: notifications
+            notification: notification
         } }, children));
 }
 

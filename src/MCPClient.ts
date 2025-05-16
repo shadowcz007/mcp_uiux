@@ -27,7 +27,7 @@ export class MCPClient {
   ) => void
   private onPromptsReady?: (prompts: Prompt[]) => void
   private onReady?: (data: ServerInfo) => void
-  private onNotifications?: (data: any) => void
+  private onNotification?: (data: any) => void
   private sessionId: string | null = null
   private messageEndpoint: string | null = null
   private eventSource: EventSource | null = null
@@ -54,7 +54,7 @@ export class MCPClient {
     onResourceTemplatesReady,
     onPromptsReady,
     onReady,
-    onNotifications
+    onNotification
   }: MCPProps) {
     this.url = url
     this.onToolsReady = onToolsReady
@@ -64,7 +64,7 @@ export class MCPClient {
     this.onResourceTemplatesReady = onResourceTemplatesReady
     this.onPromptsReady = onPromptsReady
     this.onReady = onReady
-    this.onNotifications = onNotifications
+    this.onNotification = onNotification
   }
 
   // 发送 JSON-RPC 请求
@@ -347,9 +347,9 @@ export class MCPClient {
               // console.log('fix收到采样消息:', message)
               this.handleCallback(message)
             }
-          } else if (message.method.match('notifications/')) {
+          } else if (message.method && message.method.match('/')) {
             //所有消息通知
-            this.onNotifications?.(message)
+            this.onNotification?.(message)
           }
           // 添加这个部分：处理任何其他类型的响应
           else if (message.id != undefined) {

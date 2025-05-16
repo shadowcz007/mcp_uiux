@@ -13,7 +13,7 @@ interface MCPContextType {
     resourceTemplates: any[];
     prompts: any[];
     serverInfo: any | null;
-    notifications: any[];
+    notification: any;
 }
 export declare const MCPContext: React.Context<MCPContextType>;
 export declare const useMCP: () => MCPContextType;
