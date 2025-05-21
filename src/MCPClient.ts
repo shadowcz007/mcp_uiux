@@ -16,6 +16,20 @@ interface PendingCall {
 
 export { callOpenAIFunctionAndProcessToolCalls } from './LLM'
 
+
+const transformToolsToOpenAIFunctions = (tools: any = []) => {
+  return tools.map((tool: any) => ({
+    type: 'function',
+    function: {
+      name: tool.name,
+      description: tool.description,
+      parameters: tool.inputSchema
+    }
+  }))
+}
+
+export {transformToolsToOpenAIFunctions}
+
 export class MCPClient {
   public url: string
   private onToolsReady?: (tools: Tool[]) => void
@@ -682,20 +696,10 @@ export class MCPClient {
     this.sessionId = null
   }
 
-  public transformToolsToOpenAIFunctions (tools: any = []) {
-    return tools.map((tool: any) => ({
-      type: 'function',
-      function: {
-        name: tool.name,
-        description: tool.description,
-        parameters: tool.inputSchema
-      }
-    }))
-  }
-
+ 
   public async getToolsOfOpenAIFunctions (tools: any = []) {
     const _ts = tools || (await this.getToolsList())
-    return this.transformToolsToOpenAIFunctions(_ts)
+    return transformToolsToOpenAIFunctions(_ts)
   }
 }
 
@@ -724,8 +728,7 @@ export const prepareTools = (url: string, timeout: number = 15000) => {
             // console.log('prompts',prompts)
             let systemPrompts =
               prompts?.filter((p: any) => p?.systemPrompt) || ''
-            let toolsFunctionCall =
-              mcpClient.transformToolsToOpenAIFunctions(tools)
+            let toolsFunctionCall = transformToolsToOpenAIFunctions(tools)
             resolve({ tools, mcpClient, toolsFunctionCall, systemPrompts })
           }
         },

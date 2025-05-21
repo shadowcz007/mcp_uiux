@@ -1552,6 +1552,17 @@ var callOpenAIFunctionAndProcessToolCalls = function (systemPrompt, userContent,
     });
 };
 
+var transformToolsToOpenAIFunctions = function (tools) {
+    if (tools === void 0) { tools = []; }
+    return tools.map(function (tool) { return ({
+        type: 'function',
+        function: {
+            name: tool.name,
+            description: tool.description,
+            parameters: tool.inputSchema
+        }
+    }); });
+};
 var MCPClient = /** @class */ (function () {
     function MCPClient(_a) {
         var _b = _a.url, url = _b === void 0 ? 'http://localhost:8000' : _b, onToolsReady = _a.onToolsReady, onToolResult = _a.onToolResult, onError = _a.onError, onResourcesReady = _a.onResourcesReady, onResourceTemplatesReady = _a.onResourceTemplatesReady, onPromptsReady = _a.onPromptsReady, onReady = _a.onReady, onNotification = _a.onNotification;
@@ -2217,17 +2228,6 @@ var MCPClient = /** @class */ (function () {
         this.eventSource = null;
         this.sessionId = null;
     };
-    MCPClient.prototype.transformToolsToOpenAIFunctions = function (tools) {
-        if (tools === void 0) { tools = []; }
-        return tools.map(function (tool) { return ({
-            type: 'function',
-            function: {
-                name: tool.name,
-                description: tool.description,
-                parameters: tool.inputSchema
-            }
-        }); });
-    };
     MCPClient.prototype.getToolsOfOpenAIFunctions = function (tools) {
         if (tools === void 0) { tools = []; }
         return __awaiter(this, void 0, void 0, function () {
@@ -2243,7 +2243,7 @@ var MCPClient = /** @class */ (function () {
                         _b.label = 2;
                     case 2:
                         _ts = _a;
-                        return [2 /*return*/, this.transformToolsToOpenAIFunctions(_ts)];
+                        return [2 /*return*/, transformToolsToOpenAIFunctions(_ts)];
                 }
             });
         });
@@ -2278,7 +2278,7 @@ var prepareTools = function (url, timeout) {
                             case 1:
                                 prompts = (_a = (_b.sent())) === null || _a === void 0 ? void 0 : _a.prompts;
                                 systemPrompts = (prompts === null || prompts === void 0 ? void 0 : prompts.filter(function (p) { return p === null || p === void 0 ? void 0 : p.systemPrompt; })) || '';
-                                toolsFunctionCall = mcpClient.transformToolsToOpenAIFunctions(tools);
+                                toolsFunctionCall = transformToolsToOpenAIFunctions(tools);
                                 resolve({ tools: tools, mcpClient: mcpClient, toolsFunctionCall: toolsFunctionCall, systemPrompts: systemPrompts });
                                 _b.label = 2;
                             case 2: return [2 /*return*/];
@@ -2311,4 +2311,4 @@ var prepareTools = function (url, timeout) {
     });
 };
 
-export { MCPClient, callOpenAIFunctionAndProcessToolCalls, prepareTools };
+export { MCPClient, callOpenAIFunctionAndProcessToolCalls, prepareTools, transformToolsToOpenAIFunctions };
