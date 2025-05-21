@@ -1,5 +1,7 @@
 import { MCPProps } from './types';
 export { callOpenAIFunctionAndProcessToolCalls } from './LLM';
+declare const transformToolsToOpenAIFunctions: (tools?: any) => any;
+export { transformToolsToOpenAIFunctions };
 export declare class MCPClient {
     url: string;
     private onToolsReady?;
@@ -42,7 +44,6 @@ export declare class MCPClient {
     getPrompt(name: string, args?: any): Promise<any>;
     reconnect(): void;
     disconnect(): void;
-    transformToolsToOpenAIFunctions(tools?: any): any;
     getToolsOfOpenAIFunctions(tools?: any): Promise<any>;
 }
 export declare const prepareTools: (url: string, timeout?: number) => Promise<unknown>;
