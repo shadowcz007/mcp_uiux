@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState, useRef } from 'react';
-import { MCPClient } from '../MCPClient';
+import { MCPClient, transformToolsToOpenAIFunctions } from '../MCPClient';
 import { MCPContext } from './useMCP';
 
 export function MCPProvider({ children }: { children: React.ReactNode }) {
@@ -297,7 +297,7 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
             connect,
             disconnect,
             tools,
-            toolsFunctionCall: mcpClientRef.current?.transformToolsToOpenAIFunctions(tools),
+            toolsFunctionCall: transformToolsToOpenAIFunctions(tools),
             resources,
             resourceTemplates,
             prompts,

@@ -4,6 +4,7 @@ import './SciFiMCPStatus.css'
 
 import InputSchemaForm from './InputSchemaForm';
 import PromptArgumentsForm from './PromptArgumentsForm';
+import { transformToolsToOpenAIFunctions } from '../MCPClient';
 
 export const SciFiMCPStatus: React.FC<{
     serverInfo: any | null;
@@ -20,6 +21,8 @@ export const SciFiMCPStatus: React.FC<{
     const [selectedItem, setSelectedItem] = useState<any>(null);
     const [formData, setFormData] = useState<any>(null);
     const [resourceLoading, setResourceLoading] = useState<boolean>(false);
+
+    const toolsFunctionCall = transformToolsToOpenAIFunctions(tools);
 
     const handleToolSelect = (item: any) => {
         setSelectedItem(item);
@@ -126,8 +129,13 @@ export const SciFiMCPStatus: React.FC<{
                         <div className="module-header">
                             <span className="module-icon">⚡</span>
                             <h2>系统工具库</h2>
-                            <span className="count">{tools.length}</span>
+                            <span className="count">{tools.length}</span> 
                         </div>
+                        <button className='item' onClick={() => {
+                            console.log(toolsFunctionCall);
+                            //复制到剪切板
+                            navigator.clipboard.writeText(JSON.stringify(toolsFunctionCall, null, 2));
+                        }}>Function Call</button>
                         <div className="scrollable-content">
                             {tools.map((tool, index) => (
                                 <div key={index} className="item"
