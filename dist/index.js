@@ -571,7 +571,7 @@ var MCPClient = /** @class */ (function () {
     };
     // 执行工具的公共方法 // 30秒超时
     MCPClient.prototype.executeTool = function (toolName, args, timeout) {
-        if (timeout === void 0) { timeout = 1 * 60000; }
+        if (timeout === void 0) { timeout = 5 * 60000; }
         return __awaiter(this, void 0, void 0, function () {
             var callId_1, resultPromise, error_1;
             var _this = this;
@@ -723,7 +723,7 @@ var MCPClient = /** @class */ (function () {
                                     // console.log('获取到工具列表:', this.sessionId, message.result.tools)
                                     // 为每个工具添加执行方法
                                     message.result.tools = message.result.tools.map(function (tool) { return (__assign(__assign({}, tool), { fromServerName: _this.serverName, execute: function (args, timeout) {
-                                            if (timeout === void 0) { timeout = 1 * 60000; }
+                                            if (timeout === void 0) { timeout = 5 * 60000; }
                                             return _this.executeTool(tool.name, args, timeout);
                                         } })); });
                                     (_d = this.onToolsReady) === null || _d === void 0 ? void 0 : _d.call(this, message.result.tools);
@@ -732,7 +732,7 @@ var MCPClient = /** @class */ (function () {
                                 else if ((_e = message.result) === null || _e === void 0 ? void 0 : _e.resources) {
                                     // console.log('获取到资源列表:', message.result.resources)
                                     message.result.resources = message.result.resources.map(function (resource) { return (__assign(__assign({}, resource), { fromServerName: _this.serverName, execute: function (args, timeout) {
-                                            if (timeout === void 0) { timeout = 1 * 60000; }
+                                            if (timeout === void 0) { timeout = 5 * 60000; }
                                             return _this.readResource(resource.uri, timeout);
                                         } })); });
                                     (_f = this.onResourcesReady) === null || _f === void 0 ? void 0 : _f.call(this, message.result.resources);
@@ -1033,7 +1033,7 @@ var MCPClient = /** @class */ (function () {
     // 读取特定资源
     MCPClient.prototype.readResource = function (uri, timeout) {
         var _a;
-        if (timeout === void 0) { timeout = 1 * 60000; }
+        if (timeout === void 0) { timeout = 5 * 60000; }
         return __awaiter(this, void 0, void 0, function () {
             var callId_5, resultPromise, error_8;
             var _this = this;
@@ -1171,6 +1171,12 @@ var MCPClient = /** @class */ (function () {
         (_a = this.eventSource) === null || _a === void 0 ? void 0 : _a.close();
         this.eventSource = null;
         this.sessionId = null;
+        this.pendingCalls.clear();
+        this.callIdCounter = 0;
+        this.serverInfo = null;
+        this.capabilities = null;
+        this.serverName = null;
+        this.protocolVersion = null;
     };
     MCPClient.prototype.getToolsOfOpenAIFunctions = function (tools) {
         if (tools === void 0) { tools = []; }

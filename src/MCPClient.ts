@@ -127,7 +127,7 @@ export class MCPClient {
   public async executeTool (
     toolName: string,
     args: any,
-    timeout = 1 * 60000
+    timeout = 5 * 60000
   ): Promise<any> {
     try {
       const callId = `${toolName}_${this.callIdCounter++}`
@@ -274,7 +274,7 @@ export class MCPClient {
             message.result.tools = message.result.tools.map((tool: any) => ({
               ...tool,
               fromServerName: this.serverName,
-              execute: (args: any, timeout = 1 * 60000) =>
+              execute: (args: any, timeout = 5 * 60000) =>
                 this.executeTool(tool.name, args, timeout)
             }))
             this.onToolsReady?.(message.result.tools)
@@ -286,7 +286,7 @@ export class MCPClient {
               (resource: any) => ({
                 ...resource,
                 fromServerName: this.serverName,
-                execute: (args: any, timeout = 1 * 60000) =>
+                execute: (args: any, timeout = 5 * 60000) =>
                   this.readResource(resource.uri, timeout)
               })
             )
@@ -571,7 +571,7 @@ export class MCPClient {
   }
 
   // 读取特定资源
-  public async readResource (uri: string, timeout = 1 * 60000): Promise<any> {
+  public async readResource (uri: string, timeout = 5 * 60000): Promise<any> {
     try {
       const callId = `resources_read_${this.callIdCounter++}`
 
@@ -694,6 +694,13 @@ export class MCPClient {
     this.eventSource?.close()
     this.eventSource = null
     this.sessionId = null
+    this.pendingCalls.clear()
+    this.callIdCounter = 0
+    this.serverInfo = null
+    this.capabilities = null
+    this.serverName = null
+    this.protocolVersion = null 
+
   }
 
  
