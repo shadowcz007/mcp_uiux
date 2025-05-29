@@ -16,6 +16,7 @@ interface MCPContextType {
     prompts: any[];
     serverInfo: any | null;
     notification: any;
+    notifications: any[];
 }
 
 
@@ -32,7 +33,8 @@ export const MCPContext = React.createContext<MCPContextType>({
     resourceTemplates: [],
     prompts: [],
     serverInfo: null,
-    notification: {}
+    notification: {},
+    notifications: []
 });
 
 export const useMCP = () => useContext(MCPContext);

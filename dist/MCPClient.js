@@ -1842,7 +1842,7 @@ var MCPClient = /** @class */ (function () {
                                         this.handleCallback(message);
                                     }
                                 }
-                                else if (message.method && message.method.match('/')) {
+                                else if (message.method && message.method.match('notifications')) {
                                     //所有消息通知
                                     (_q = this.onNotification) === null || _q === void 0 ? void 0 : _q.call(this, message);
                                 }

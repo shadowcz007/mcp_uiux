@@ -244,7 +244,7 @@ export class MCPClient {
     this.eventSource.addEventListener('message', async event => {
       try {
         const message = JSON.parse(event.data)
-        // console.log('收到消息:', message)
+        // console.log('##收到消息:', message)
 
         if (message.jsonrpc === '2.0') {
           // 处理初始化完成
@@ -361,7 +361,7 @@ export class MCPClient {
               // console.log('fix收到采样消息:', message)
               this.handleCallback(message)
             }
-          } else if (message.method && message.method.match('/')) {
+          } else if (message.method && message.method.match('notifications')) {
             //所有消息通知
             this.onNotification?.(message)
           }

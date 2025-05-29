@@ -83,6 +83,16 @@ function __generator(thisArg, body) {
     }
 }
 
+function __spreadArray(to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+}
+
 typeof SuppressedError === "function" ? SuppressedError : function (error, suppressed, message) {
     var e = new Error(message);
     return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
@@ -760,7 +770,7 @@ var MCPClient = /** @class */ (function () {
                                         this.handleCallback(message);
                                     }
                                 }
-                                else if (message.method && message.method.match('/')) {
+                                else if (message.method && message.method.match('notifications')) {
                                     //所有消息通知
                                     (_q = this.onNotification) === null || _q === void 0 ? void 0 : _q.call(this, message);
                                 }
@@ -1194,7 +1204,8 @@ var MCPContext = React.createContext({
     resourceTemplates: [],
     prompts: [],
     serverInfo: null,
-    notification: {}
+    notification: {},
+    notifications: []
 });
 var useMCP = function () { return useContext(MCPContext); };
 
@@ -68445,13 +68456,14 @@ function MCPProvider(_a) {
     var _b = useState(false), loading = _b[0], setLoading = _b[1];
     var _c = useState(null), error = _c[0], setError = _c[1];
     var _d = useState({}), notification = _d[0], setNotification = _d[1];
-    var _e = useState([]), tools = _e[0], setTools = _e[1];
-    var _f = useState([]), resources = _f[0], setResources = _f[1];
-    var _g = useState([]), resourceTemplates = _g[0], setResourceTemplates = _g[1];
-    var _h = useState([]), prompts = _h[0], setPrompts = _h[1];
-    var _j = useState(null), serverInfo = _j[0], setServerInfo = _j[1];
-    var _k = useState(null), lastConnectedUrl = _k[0], setLastConnectedUrl = _k[1];
-    var _l = useState(""), lastResourceFilter = _l[0], setLastResourceFilter = _l[1];
+    var _e = useState({}), notifications = _e[0], setNotifications = _e[1];
+    var _f = useState([]), tools = _f[0], setTools = _f[1];
+    var _g = useState([]), resources = _g[0], setResources = _g[1];
+    var _h = useState([]), resourceTemplates = _h[0], setResourceTemplates = _h[1];
+    var _j = useState([]), prompts = _j[0], setPrompts = _j[1];
+    var _k = useState(null), serverInfo = _k[0], setServerInfo = _k[1];
+    var _l = useState(null), lastConnectedUrl = _l[0], setLastConnectedUrl = _l[1];
+    var _m = useState(""), lastResourceFilter = _m[0], setLastResourceFilter = _m[1];
     // 添加节流相关的状态和引用
     var connectTimeoutRef = useRef(null);
     var pendingConnectParamsRef = useRef(null);
@@ -68572,8 +68584,9 @@ function MCPProvider(_a) {
                             setError(null);
                         },
                         onNotification: function (data) {
-                            console.log('收到通知消息:', data);
+                            console.log('onNotification 收到通知消息:', data);
                             setNotification(data);
+                            setNotifications(function (prev) { return __spreadArray(__spreadArray([], prev, true), [__assign(__assign({}, data), { id: Date.now(), timestamp: new Date() })], false); });
                         }
                     });
                     // 连接到服务器
@@ -68747,7 +68760,8 @@ function MCPProvider(_a) {
             resourceTemplates: resourceTemplates,
             prompts: prompts,
             serverInfo: serverInfo,
-            notification: notification
+            notification: notification,
+            notifications: notifications
         } }, children));
 }
 
