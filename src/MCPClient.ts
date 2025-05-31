@@ -16,7 +16,6 @@ interface PendingCall {
 
 export { callOpenAIFunctionAndProcessToolCalls } from './LLM'
 
-
 const transformToolsToOpenAIFunctions = (tools: any = []) => {
   return tools.map((tool: any) => ({
     type: 'function',
@@ -28,7 +27,7 @@ const transformToolsToOpenAIFunctions = (tools: any = []) => {
   }))
 }
 
-export {transformToolsToOpenAIFunctions}
+export { transformToolsToOpenAIFunctions }
 
 export class MCPClient {
   public url: string
@@ -216,12 +215,25 @@ export class MCPClient {
       } else {
         // 确保 URL 正确拼接，避免路径重复
         const baseUrl = new URL(this.url)
-        // 如果 sessionUri 以 / 开头，则直接使用主机名
-        if (sessionUri.startsWith('/')) {
-          this.messageEndpoint = `${baseUrl.origin}${sessionUri}`
-        } else {
-          this.messageEndpoint = `${baseUrl.origin}/${sessionUri}`
+        
+        // Use the original URL as the base to resolve the received endpoint
+        const messageEndpoint = new URL(sessionUri, baseUrl)
+
+        // If the original URL had a custom path, preserve it in the endpoint URL
+        const originalPath = baseUrl.pathname
+        if (originalPath && originalPath !== '/' && originalPath !== '/sse') {
+          // Extract the base path from the original URL (everything before the /sse suffix)
+          const basePath = originalPath.replace(/\/sse$/, '')
+          // The endpoint should use the same base path but with /messages instead of /sse
+          messageEndpoint.pathname = basePath + '/messages'
         }
+        if (messageEndpoint.origin !== baseUrl.origin) {
+          throw new Error(
+            `Endpoint origin does not match connection origin: ${messageEndpoint.origin}`
+          )
+        }
+
+        this.messageEndpoint = messageEndpoint.toString()
       }
 
       const sessionIdMatch =
@@ -699,11 +711,9 @@ export class MCPClient {
     this.serverInfo = null
     this.capabilities = null
     this.serverName = null
-    this.protocolVersion = null 
-
+    this.protocolVersion = null
   }
 
- 
   public async getToolsOfOpenAIFunctions (tools: any = []) {
     const _ts = tools || (await this.getToolsList())
     return transformToolsToOpenAIFunctions(_ts)

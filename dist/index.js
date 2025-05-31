@@ -656,7 +656,7 @@ var MCPClient = /** @class */ (function () {
                 };
                 // 处理 endpoint 事件
                 this.eventSource.addEventListener('endpoint', function (event) { return __awaiter(_this, void 0, void 0, function () {
-                    var sessionUri, baseUrl, sessionIdMatch;
+                    var sessionUri, baseUrl, messageEndpoint, originalPath, basePath, sessionIdMatch;
                     var _a;
                     return __generator(this, function (_b) {
                         switch (_b.label) {
@@ -670,13 +670,17 @@ var MCPClient = /** @class */ (function () {
                                 }
                                 else {
                                     baseUrl = new URL(this.url);
-                                    // 如果 sessionUri 以 / 开头，则直接使用主机名
-                                    if (sessionUri.startsWith('/')) {
-                                        this.messageEndpoint = "".concat(baseUrl.origin).concat(sessionUri);
+                                    messageEndpoint = new URL(sessionUri, baseUrl);
+                                    originalPath = baseUrl.pathname;
+                                    if (originalPath && originalPath !== '/' && originalPath !== '/sse') {
+                                        basePath = originalPath.replace(/\/sse$/, '');
+                                        // The endpoint should use the same base path but with /messages instead of /sse
+                                        messageEndpoint.pathname = basePath + '/messages';
                                     }
-                                    else {
-                                        this.messageEndpoint = "".concat(baseUrl.origin, "/").concat(sessionUri);
+                                    if (messageEndpoint.origin !== baseUrl.origin) {
+                                        throw new Error("Endpoint origin does not match connection origin: ".concat(messageEndpoint.origin));
                                     }
+                                    this.messageEndpoint = messageEndpoint.toString();
                                 }
                                 sessionIdMatch = sessionUri.match(/session_id=([^&]+)/) ||
                                     sessionUri.match(/sessionId=([^&]+)/);
