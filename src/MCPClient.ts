@@ -215,18 +215,8 @@ export class MCPClient {
       } else {
         // 确保 URL 正确拼接，避免路径重复
         const baseUrl = new URL(this.url)
-        
-        // Use the original URL as the base to resolve the received endpoint
-        const messageEndpoint = new URL(sessionUri, baseUrl)
 
-        // If the original URL had a custom path, preserve it in the endpoint URL
-        const originalPath = baseUrl.pathname
-        if (originalPath && originalPath !== '/' && originalPath !== '/sse') {
-          // Extract the base path from the original URL (everything before the /sse suffix)
-          const basePath = originalPath.replace(/\/sse$/, '')
-          // The endpoint should use the same base path but with /messages instead of /sse
-          messageEndpoint.pathname = basePath + '/messages'
-        }
+        const messageEndpoint = new URL(sessionUri, baseUrl)
         if (messageEndpoint.origin !== baseUrl.origin) {
           throw new Error(
             `Endpoint origin does not match connection origin: ${messageEndpoint.origin}`

@@ -655,7 +655,7 @@
                     };
                     // 处理 endpoint 事件
                     this.eventSource.addEventListener('endpoint', function (event) { return __awaiter(_this, void 0, void 0, function () {
-                        var sessionUri, baseUrl, messageEndpoint, originalPath, basePath, sessionIdMatch;
+                        var sessionUri, baseUrl, messageEndpoint, sessionIdMatch;
                         var _a;
                         return __generator(this, function (_b) {
                             switch (_b.label) {
@@ -670,12 +670,6 @@
                                     else {
                                         baseUrl = new URL(this.url);
                                         messageEndpoint = new URL(sessionUri, baseUrl);
-                                        originalPath = baseUrl.pathname;
-                                        if (originalPath && originalPath !== '/' && originalPath !== '/sse') {
-                                            basePath = originalPath.replace(/\/sse$/, '');
-                                            // The endpoint should use the same base path but with /messages instead of /sse
-                                            messageEndpoint.pathname = basePath + '/messages';
-                                        }
                                         if (messageEndpoint.origin !== baseUrl.origin) {
                                             throw new Error("Endpoint origin does not match connection origin: ".concat(messageEndpoint.origin));
                                         }
