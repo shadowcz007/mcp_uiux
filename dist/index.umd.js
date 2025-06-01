@@ -67993,7 +67993,7 @@
             case 'number':
             case 'integer':
                 return {
-                    type: 'number',
+                    type: 'text',
                     name: elementName,
                     title: elementTitle,
                     isRequired: schema.required || false
@@ -68168,6 +68168,10 @@
                                         Array.isArray(data_1[key])) {
                                         // console.log('object data[key]', data[key]);
                                         data_1[key] = data_1[key].filter(function (item) { return Object.keys(item).length > 0; });
+                                    }
+                                    console.log('##inputSchema', key, prop, data_1[key]);
+                                    if (prop.type === 'number') {
+                                        data_1[key] = Number(data_1[key]);
                                     }
                                 });
                             }
