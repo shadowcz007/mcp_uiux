@@ -194,6 +194,11 @@ const InputSchemaForm = ({ tool, onComplete }: any) => {
               // 将 [{value: 'a'}, {value: 'b'}] 转换为 ['a', 'b']
               data[key] = data[key].map((item: any) => item.value);
             }
+            if (prop.type === 'object') {
+              Object.entries(prop.properties).forEach(([key, prop]: [string, any]) => {
+
+              })
+            }
             if (prop.type === 'array' &&
               prop.items.type === 'object' &&
               Array.isArray(data[key])) {
@@ -201,9 +206,10 @@ const InputSchemaForm = ({ tool, onComplete }: any) => {
               data[key] = data[key].filter((item: any) => Object.keys(item).length > 0)
             }
             console.log('##inputSchema', key, prop, data[key]);
-            if (prop.type === 'number') {
+            if (prop.type === 'number' || prop.type === 'integer') {
               data[key] = Number(data[key])
             }
+
           });
         }
         setSurvey(null)

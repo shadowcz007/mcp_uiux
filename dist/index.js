@@ -68164,6 +68164,11 @@ var InputSchemaForm = function (_a) {
                                     // 将 [{value: 'a'}, {value: 'b'}] 转换为 ['a', 'b']
                                     data_1[key] = data_1[key].map(function (item) { return item.value; });
                                 }
+                                if (prop.type === 'object') {
+                                    Object.entries(prop.properties).forEach(function (_a) {
+                                        _a[0]; _a[1];
+                                    });
+                                }
                                 if (prop.type === 'array' &&
                                     prop.items.type === 'object' &&
                                     Array.isArray(data_1[key])) {
@@ -68171,7 +68176,7 @@ var InputSchemaForm = function (_a) {
                                     data_1[key] = data_1[key].filter(function (item) { return Object.keys(item).length > 0; });
                                 }
                                 console.log('##inputSchema', key, prop, data_1[key]);
-                                if (prop.type === 'number') {
+                                if (prop.type === 'number' || prop.type === 'integer') {
                                     data_1[key] = Number(data_1[key]);
                                 }
                             });
