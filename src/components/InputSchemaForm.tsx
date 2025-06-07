@@ -24,7 +24,7 @@ const convertSchemaToSurveyElement = (schema: any, name: string = '', title: str
     case 'number':
     case 'integer':
       return {
-        type: 'number',
+        type: 'text',
         name: elementName,
         title: elementTitle,
         isRequired: schema.required || false
@@ -194,17 +194,27 @@ const InputSchemaForm = ({ tool, onComplete }: any) => {
               // 将 [{value: 'a'}, {value: 'b'}] 转换为 ['a', 'b']
               data[key] = data[key].map((item: any) => item.value);
             }
+            if (prop.type === 'object') {
+              Object.entries(prop.properties).forEach(([key, prop]: [string, any]) => {
+
+              })
+            }
             if (prop.type === 'array' &&
               prop.items.type === 'object' &&
               Array.isArray(data[key])) {
               // console.log('object data[key]', data[key]);
               data[key] = data[key].filter((item: any) => Object.keys(item).length > 0)
             }
+            console.log('##inputSchema', key, prop, data[key]);
+            if (prop.type === 'number' || prop.type === 'integer') {
+              data[key] = Number(data[key])
+            }
+
           });
         }
         setSurvey(null)
-        // console.log('sender.data', data);
-        let result = await tool.execute(data,15*60000);
+        // console.log('sender.data',surveyJson, data);
+        let result = await tool.execute(data, 15 * 60000);
         if (Array.isArray(result) && result[0]?.type === 'text') {
           result = result.map((item: any) => {
             if (item.type == 'text') {

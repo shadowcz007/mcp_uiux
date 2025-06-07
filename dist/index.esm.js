@@ -83,6 +83,16 @@ function __generator(thisArg, body) {
     }
 }
 
+function __spreadArray(to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+}
+
 typeof SuppressedError === "function" ? SuppressedError : function (error, suppressed, message) {
     var e = new Error(message);
     return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
@@ -620,7 +630,7 @@ var MCPClient = /** @class */ (function () {
                 };
                 // 处理 endpoint 事件
                 this.eventSource.addEventListener('endpoint', function (event) { return __awaiter(_this, void 0, void 0, function () {
-                    var sessionUri, baseUrl, sessionIdMatch;
+                    var sessionUri, baseUrl, messageEndpoint, sessionIdMatch;
                     var _a;
                     return __generator(this, function (_b) {
                         switch (_b.label) {
@@ -634,13 +644,11 @@ var MCPClient = /** @class */ (function () {
                                 }
                                 else {
                                     baseUrl = new URL(this.url);
-                                    // 如果 sessionUri 以 / 开头，则直接使用主机名
-                                    if (sessionUri.startsWith('/')) {
-                                        this.messageEndpoint = "".concat(baseUrl.origin).concat(sessionUri);
+                                    messageEndpoint = new URL(sessionUri, baseUrl);
+                                    if (messageEndpoint.origin !== baseUrl.origin) {
+                                        throw new Error("Endpoint origin does not match connection origin: ".concat(messageEndpoint.origin));
                                     }
-                                    else {
-                                        this.messageEndpoint = "".concat(baseUrl.origin, "/").concat(sessionUri);
-                                    }
+                                    this.messageEndpoint = messageEndpoint.toString();
                                 }
                                 sessionIdMatch = sessionUri.match(/session_id=([^&]+)/) ||
                                     sessionUri.match(/sessionId=([^&]+)/);
@@ -760,7 +768,7 @@ var MCPClient = /** @class */ (function () {
                                         this.handleCallback(message);
                                     }
                                 }
-                                else if (message.method && message.method.match('/')) {
+                                else if (message.method && message.method.match('notifications')) {
                                     //所有消息通知
                                     (_q = this.onNotification) === null || _q === void 0 ? void 0 : _q.call(this, message);
                                 }
@@ -1194,7 +1202,8 @@ var MCPContext = React.createContext({
     resourceTemplates: [],
     prompts: [],
     serverInfo: null,
-    notification: {}
+    notification: {},
+    notifications: []
 });
 var useMCP = function () { return useContext(MCPContext); };
 
@@ -67959,7 +67968,7 @@ var convertSchemaToSurveyElement = function (schema, name, title) {
         case 'number':
         case 'integer':
             return {
-                type: 'number',
+                type: 'text',
                 name: elementName,
                 title: elementTitle,
                 isRequired: schema.required || false
@@ -68129,11 +68138,20 @@ var InputSchemaForm = function (_a) {
                                     // 将 [{value: 'a'}, {value: 'b'}] 转换为 ['a', 'b']
                                     data_1[key] = data_1[key].map(function (item) { return item.value; });
                                 }
+                                if (prop.type === 'object') {
+                                    Object.entries(prop.properties).forEach(function (_a) {
+                                        _a[0]; _a[1];
+                                    });
+                                }
                                 if (prop.type === 'array' &&
                                     prop.items.type === 'object' &&
                                     Array.isArray(data_1[key])) {
                                     // console.log('object data[key]', data[key]);
                                     data_1[key] = data_1[key].filter(function (item) { return Object.keys(item).length > 0; });
+                                }
+                                console.log('##inputSchema', key, prop, data_1[key]);
+                                if (prop.type === 'number' || prop.type === 'integer') {
+                                    data_1[key] = Number(data_1[key]);
                                 }
                             });
                         }
@@ -68445,13 +68463,14 @@ function MCPProvider(_a) {
     var _b = useState(false), loading = _b[0], setLoading = _b[1];
     var _c = useState(null), error = _c[0], setError = _c[1];
     var _d = useState({}), notification = _d[0], setNotification = _d[1];
-    var _e = useState([]), tools = _e[0], setTools = _e[1];
-    var _f = useState([]), resources = _f[0], setResources = _f[1];
-    var _g = useState([]), resourceTemplates = _g[0], setResourceTemplates = _g[1];
-    var _h = useState([]), prompts = _h[0], setPrompts = _h[1];
-    var _j = useState(null), serverInfo = _j[0], setServerInfo = _j[1];
-    var _k = useState(null), lastConnectedUrl = _k[0], setLastConnectedUrl = _k[1];
-    var _l = useState(""), lastResourceFilter = _l[0], setLastResourceFilter = _l[1];
+    var _e = useState({}), notifications = _e[0], setNotifications = _e[1];
+    var _f = useState([]), tools = _f[0], setTools = _f[1];
+    var _g = useState([]), resources = _g[0], setResources = _g[1];
+    var _h = useState([]), resourceTemplates = _h[0], setResourceTemplates = _h[1];
+    var _j = useState([]), prompts = _j[0], setPrompts = _j[1];
+    var _k = useState(null), serverInfo = _k[0], setServerInfo = _k[1];
+    var _l = useState(null), lastConnectedUrl = _l[0], setLastConnectedUrl = _l[1];
+    var _m = useState(""), lastResourceFilter = _m[0], setLastResourceFilter = _m[1];
     // 添加节流相关的状态和引用
     var connectTimeoutRef = useRef(null);
     var pendingConnectParamsRef = useRef(null);
@@ -68572,8 +68591,9 @@ function MCPProvider(_a) {
                             setError(null);
                         },
                         onNotification: function (data) {
-                            console.log('收到通知消息:', data);
+                            console.log('onNotification 收到通知消息:', data);
                             setNotification(data);
+                            setNotifications(function (prev) { return __spreadArray(__spreadArray([], prev, true), [__assign(__assign({}, data), { id: Date.now(), timestamp: new Date() })], false); });
                         }
                     });
                     // 连接到服务器
@@ -68747,7 +68767,8 @@ function MCPProvider(_a) {
             resourceTemplates: resourceTemplates,
             prompts: prompts,
             serverInfo: serverInfo,
-            notification: notification
+            notification: notification,
+            notifications: notifications
         } }, children));
 }
 

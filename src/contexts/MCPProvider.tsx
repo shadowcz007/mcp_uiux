@@ -8,6 +8,7 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [notification, setNotification] = useState<any>({});
+    const [notifications, setNotifications] = useState<any>({});
     const [tools, setTools] = useState<any[]>([]);
     const [resources, setResources] = useState<any[]>([]);
     const [resourceTemplates, setResourceTemplates] = useState<any[]>([]);
@@ -142,8 +143,15 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
                     setError(null);
                 },
                 onNotification: (data) => {
-                    console.log('收到通知消息:', data);
+                    console.log('onNotification 收到通知消息:', data);
                     setNotification(data);
+
+                    setNotifications((prev:any) => [...prev, {
+                        ...data,
+                        id: Date.now(), // 添加唯一ID
+                        timestamp: new Date()
+                    }]);
+                    
                 }
             });
 
@@ -205,14 +213,14 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
         }, 300);
     };
 
-      // 修改重连函数，也应用节流逻辑
-      const reconnect = async (sseUrl?: string, resourceFilter?: string) => {
+    // 修改重连函数，也应用节流逻辑
+    const reconnect = async (sseUrl?: string, resourceFilter?: string) => {
         // 先检查连接是否已经正常，如果已经正常连接，则不需要重连
         if (mcpClientRef.current && !error && !loading) {
             console.log('当前连接正常，无需重连');
             return;
         }
-        
+
         // 使用提供的URL，或最后成功连接的URL，或当前客户端URL，或默认URL
         const connectionUrl = sseUrl || lastConnectedUrl || mcpClientRef.current?.url || 'http://127.0.0.1:8080';
         // 使用提供的过滤器或最后使用的过滤器
@@ -261,7 +269,7 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
     // 添加自动重连逻辑
     useEffect(() => {
         // 当连接出错时自动尝试重连
-        if (error && lastConnectedUrl&&!serverInfo) {
+        if (error && lastConnectedUrl && !serverInfo) {
             const timer = setTimeout(() => {
                 console.log('检测到连接错误，尝试自动重连...', error, lastConnectedUrl);
                 reconnect();
@@ -302,7 +310,8 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
             resourceTemplates,
             prompts,
             serverInfo,
-            notification
+            notification,
+            notifications
         }}>
             {children}
         </MCPContext.Provider>

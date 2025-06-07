@@ -16,7 +16,6 @@ interface PendingCall {
 
 export { callOpenAIFunctionAndProcessToolCalls } from './LLM'
 
-
 const transformToolsToOpenAIFunctions = (tools: any = []) => {
   return tools.map((tool: any) => ({
     type: 'function',
@@ -28,7 +27,7 @@ const transformToolsToOpenAIFunctions = (tools: any = []) => {
   }))
 }
 
-export {transformToolsToOpenAIFunctions}
+export { transformToolsToOpenAIFunctions }
 
 export class MCPClient {
   public url: string
@@ -216,12 +215,15 @@ export class MCPClient {
       } else {
         // 确保 URL 正确拼接，避免路径重复
         const baseUrl = new URL(this.url)
-        // 如果 sessionUri 以 / 开头，则直接使用主机名
-        if (sessionUri.startsWith('/')) {
-          this.messageEndpoint = `${baseUrl.origin}${sessionUri}`
-        } else {
-          this.messageEndpoint = `${baseUrl.origin}/${sessionUri}`
+
+        const messageEndpoint = new URL(sessionUri, baseUrl)
+        if (messageEndpoint.origin !== baseUrl.origin) {
+          throw new Error(
+            `Endpoint origin does not match connection origin: ${messageEndpoint.origin}`
+          )
         }
+
+        this.messageEndpoint = messageEndpoint.toString()
       }
 
       const sessionIdMatch =
@@ -244,7 +246,7 @@ export class MCPClient {
     this.eventSource.addEventListener('message', async event => {
       try {
         const message = JSON.parse(event.data)
-        // console.log('收到消息:', message)
+        // console.log('##收到消息:', message)
 
         if (message.jsonrpc === '2.0') {
           // 处理初始化完成
@@ -361,7 +363,7 @@ export class MCPClient {
               // console.log('fix收到采样消息:', message)
               this.handleCallback(message)
             }
-          } else if (message.method && message.method.match('/')) {
+          } else if (message.method && message.method.match('notifications')) {
             //所有消息通知
             this.onNotification?.(message)
           }
@@ -699,11 +701,9 @@ export class MCPClient {
     this.serverInfo = null
     this.capabilities = null
     this.serverName = null
-    this.protocolVersion = null 
-
+    this.protocolVersion = null
   }
 
- 
   public async getToolsOfOpenAIFunctions (tools: any = []) {
     const _ts = tools || (await this.getToolsList())
     return transformToolsToOpenAIFunctions(_ts)
