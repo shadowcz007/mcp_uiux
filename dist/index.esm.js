@@ -498,8 +498,8 @@ var MCPClient = /** @class */ (function () {
         this.messageEndpoint = null;
         this.eventSource = null;
         this.reconnectAttempts = 0;
-        this.maxReconnectAttempts = 99;
-        this.reconnectTimeout = 1000;
+        this.maxReconnectAttempts = Infinity;
+        this.reconnectTimeout = 500;
         this.reconnectTimer = null;
         this.pendingCalls = new Map();
         this.callIdCounter = 0;
@@ -600,7 +600,9 @@ var MCPClient = /** @class */ (function () {
             return __generator(this, function (_a) {
                 sseUrl = "".concat(this.url);
                 // console.log('正在连接 SSE:', sseUrl)
-                this.eventSource = new EventSource(sseUrl);
+                this.eventSource = new EventSource(sseUrl, {
+                    withCredentials: true
+                });
                 initialized = false;
                 toolsRequested = false;
                 this.eventSource.onopen = function () {
