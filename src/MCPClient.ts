@@ -45,8 +45,8 @@ export class MCPClient {
   private messageEndpoint: string | null = null
   private eventSource: EventSource | null = null
   private reconnectAttempts: number = 0
-  private maxReconnectAttempts: number = 99
-  private reconnectTimeout: number = 1000
+  private maxReconnectAttempts: number = Infinity
+  private reconnectTimeout: number = 500
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null
   private pendingCalls: Map<
     string,
@@ -165,7 +165,9 @@ export class MCPClient {
     const sseUrl = `${this.url}`
     // console.log('正在连接 SSE:', sseUrl)
 
-    this.eventSource = new EventSource(sseUrl)
+    this.eventSource = new EventSource(sseUrl, {
+      withCredentials: true
+    });
     let initialized = false
     let toolsRequested = false
 
