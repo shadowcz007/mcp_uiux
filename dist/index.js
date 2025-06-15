@@ -581,7 +581,7 @@ var MCPClient = /** @class */ (function () {
     };
     // 执行工具的公共方法 // 30秒超时
     MCPClient.prototype.executeTool = function (toolName, args, timeout) {
-        if (timeout === void 0) { timeout = 5 * 60000; }
+        if (timeout === void 0) { timeout = 60 * 60000; }
         return __awaiter(this, void 0, void 0, function () {
             var callId_1, resultPromise, error_1;
             var _this = this;
@@ -626,9 +626,7 @@ var MCPClient = /** @class */ (function () {
             return __generator(this, function (_a) {
                 sseUrl = "".concat(this.url);
                 // console.log('正在连接 SSE:', sseUrl)
-                this.eventSource = new EventSource(sseUrl, {
-                    withCredentials: true
-                });
+                this.eventSource = new EventSource(sseUrl);
                 initialized = false;
                 toolsRequested = false;
                 this.eventSource.onopen = function () {
@@ -733,7 +731,7 @@ var MCPClient = /** @class */ (function () {
                                     // console.log('获取到工具列表:', this.sessionId, message.result.tools)
                                     // 为每个工具添加执行方法
                                     message.result.tools = message.result.tools.map(function (tool) { return (__assign(__assign({}, tool), { fromServerName: _this.serverName, execute: function (args, timeout) {
-                                            if (timeout === void 0) { timeout = 5 * 60000; }
+                                            if (timeout === void 0) { timeout = 60 * 60000; }
                                             return _this.executeTool(tool.name, args, timeout);
                                         } })); });
                                     (_d = this.onToolsReady) === null || _d === void 0 ? void 0 : _d.call(this, message.result.tools);
@@ -742,7 +740,7 @@ var MCPClient = /** @class */ (function () {
                                 else if ((_e = message.result) === null || _e === void 0 ? void 0 : _e.resources) {
                                     // console.log('获取到资源列表:', message.result.resources)
                                     message.result.resources = message.result.resources.map(function (resource) { return (__assign(__assign({}, resource), { fromServerName: _this.serverName, execute: function (args, timeout) {
-                                            if (timeout === void 0) { timeout = 5 * 60000; }
+                                            if (timeout === void 0) { timeout = 60 * 60000; }
                                             return _this.readResource(resource.uri, timeout);
                                         } })); });
                                     (_f = this.onResourcesReady) === null || _f === void 0 ? void 0 : _f.call(this, message.result.resources);
@@ -919,7 +917,7 @@ var MCPClient = /** @class */ (function () {
                                     _this.pendingCalls.delete(callId_2);
                                     reject(new Error("\u83B7\u53D6\u5DE5\u5177\u5217\u8868\u8D85\u65F6"));
                                 }
-                            }, 30000); // 30秒超时
+                            }, 15000); // 30秒超时
                         });
                         // 发送请求
                         return [4 /*yield*/, this.sendJsonRpcRequest('tools/list', {}, callId_2)];
@@ -959,7 +957,7 @@ var MCPClient = /** @class */ (function () {
                                     _this.pendingCalls.delete(callId_3);
                                     reject(new Error("\u83B7\u53D6\u8D44\u6E90\u5217\u8868\u8D85\u65F6"));
                                 }
-                            }, 30000); // 30秒超时
+                            }, 15000); // 30秒超时
                         });
                         // 发送请求
                         return [4 /*yield*/, this.sendJsonRpcRequest('resources/list', {}, callId_3)];
@@ -999,7 +997,7 @@ var MCPClient = /** @class */ (function () {
                                     _this.pendingCalls.delete(callId_4);
                                     reject(new Error("\u83B7\u53D6\u52A8\u6001\u8D44\u6E90\u5217\u8868\u8D85\u65F6"));
                                 }
-                            }, 30000); // 30秒超时
+                            }, 15000); // 30秒超时
                         });
                         // 发送请求
                         return [4 /*yield*/, this.sendJsonRpcRequest('resources/templates/list', {}, callId_4)];
@@ -1043,7 +1041,7 @@ var MCPClient = /** @class */ (function () {
     // 读取特定资源
     MCPClient.prototype.readResource = function (uri, timeout) {
         var _a;
-        if (timeout === void 0) { timeout = 5 * 60000; }
+        if (timeout === void 0) { timeout = 60 * 60000; }
         return __awaiter(this, void 0, void 0, function () {
             var callId_5, resultPromise, error_8;
             var _this = this;
@@ -1096,7 +1094,7 @@ var MCPClient = /** @class */ (function () {
                                     _this.pendingCalls.delete(callId_6);
                                     reject(new Error("\u83B7\u53D6\u63D0\u793A\u5217\u8868\u8D85\u65F6"));
                                 }
-                            }, 30000); // 30秒超时
+                            }, 15000); // 30秒超时
                         });
                         // 发送请求
                         return [4 /*yield*/, this.sendJsonRpcRequest('prompts/list', {}, callId_6)];
@@ -1133,7 +1131,7 @@ var MCPClient = /** @class */ (function () {
                                     _this.pendingCalls.delete(callId_7);
                                     reject(new Error("\u83B7\u53D6\u63D0\u793A\u8D85\u65F6: ".concat(name)));
                                 }
-                            }, 30000); // 30秒超时
+                            }, 15000); // 30秒超时
                         });
                         // 发送请求
                         return [4 /*yield*/, this.sendJsonRpcRequest('prompts/get', {

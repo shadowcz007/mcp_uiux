@@ -126,7 +126,7 @@ export class MCPClient {
   public async executeTool (
     toolName: string,
     args: any,
-    timeout = 5 * 60000
+    timeout = 60 * 60000
   ): Promise<any> {
     try {
       const callId = `${toolName}_${this.callIdCounter++}`
@@ -165,9 +165,7 @@ export class MCPClient {
     const sseUrl = `${this.url}`
     // console.log('正在连接 SSE:', sseUrl)
 
-    this.eventSource = new EventSource(sseUrl, {
-      withCredentials: true
-    });
+    this.eventSource = new EventSource(sseUrl);
     let initialized = false
     let toolsRequested = false
 
@@ -278,7 +276,7 @@ export class MCPClient {
             message.result.tools = message.result.tools.map((tool: any) => ({
               ...tool,
               fromServerName: this.serverName,
-              execute: (args: any, timeout = 5 * 60000) =>
+              execute: (args: any, timeout = 60 * 60000) =>
                 this.executeTool(tool.name, args, timeout)
             }))
             this.onToolsReady?.(message.result.tools)
@@ -290,7 +288,7 @@ export class MCPClient {
               (resource: any) => ({
                 ...resource,
                 fromServerName: this.serverName,
-                execute: (args: any, timeout = 5 * 60000) =>
+                execute: (args: any, timeout = 60 * 60000) =>
                   this.readResource(resource.uri, timeout)
               })
             )
@@ -465,7 +463,7 @@ export class MCPClient {
             this.pendingCalls.delete(callId)
             reject(new Error(`获取工具列表超时`))
           }
-        }, 30000) // 30秒超时
+        }, 15000) // 30秒超时
       })
 
       // 发送请求
@@ -496,7 +494,7 @@ export class MCPClient {
             this.pendingCalls.delete(callId)
             reject(new Error(`获取资源列表超时`))
           }
-        }, 30000) // 30秒超时
+        }, 15000) // 30秒超时
       })
 
       // 发送请求
@@ -527,7 +525,7 @@ export class MCPClient {
             this.pendingCalls.delete(callId)
             reject(new Error(`获取动态资源列表超时`))
           }
-        }, 30000) // 30秒超时
+        }, 15000) // 30秒超时
       })
 
       // 发送请求
@@ -575,7 +573,7 @@ export class MCPClient {
   }
 
   // 读取特定资源
-  public async readResource (uri: string, timeout = 5 * 60000): Promise<any> {
+  public async readResource (uri: string, timeout = 60 * 60000): Promise<any> {
     try {
       const callId = `resources_read_${this.callIdCounter++}`
 
@@ -619,7 +617,7 @@ export class MCPClient {
             this.pendingCalls.delete(callId)
             reject(new Error(`获取提示列表超时`))
           }
-        }, 30000) // 30秒超时
+        }, 15000) // 30秒超时
       })
 
       // 发送请求
@@ -649,7 +647,7 @@ export class MCPClient {
             this.pendingCalls.delete(callId)
             reject(new Error(`获取提示超时: ${name}`))
           }
-        }, 30000) // 30秒超时
+        }, 15000) // 30秒超时
       })
 
       // 发送请求
