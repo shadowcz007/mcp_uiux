@@ -2255,7 +2255,7 @@ var MCPClient = /** @class */ (function () {
     return MCPClient;
 }());
 var prepareTools = function (url, timeout) {
-    if (timeout === void 0) { timeout = 15000; }
+    if (timeout === void 0) { timeout = 60000; }
     return new Promise(function (resolve, reject) {
         var mcpClient = null;
         // 添加超时处理

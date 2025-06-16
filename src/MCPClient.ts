@@ -710,7 +710,7 @@ export class MCPClient {
   }
 }
 
-export const prepareTools = (url: string, timeout: number = 15000) => {
+export const prepareTools = (url: string, timeout: number = 60000) => {
   return new Promise((resolve: any, reject) => {
     let mcpClient: MCPClient | null = null
 

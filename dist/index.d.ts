@@ -1,4 +1,4 @@
-export { MCPClient } from './MCPClient';
+export { MCPClient, prepareTools } from './MCPClient';
 export { MCPStatus } from './components/MCPStatus';
 export { MCPProvider } from './contexts/MCPProvider';
 export { useMCP } from './contexts/useMCP';
