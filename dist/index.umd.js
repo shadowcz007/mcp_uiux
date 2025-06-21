@@ -580,7 +580,7 @@
         };
         // 执行工具的公共方法 // 30秒超时
         MCPClient.prototype.executeTool = function (toolName, args, timeout) {
-            if (timeout === void 0) { timeout = 5 * 60000; }
+            if (timeout === void 0) { timeout = 60 * 60000; }
             return __awaiter(this, void 0, void 0, function () {
                 var callId_1, resultPromise, error_1;
                 var _this = this;
@@ -625,9 +625,7 @@
                 return __generator(this, function (_a) {
                     sseUrl = "".concat(this.url);
                     // console.log('正在连接 SSE:', sseUrl)
-                    this.eventSource = new EventSource(sseUrl, {
-                        withCredentials: true
-                    });
+                    this.eventSource = new EventSource(sseUrl);
                     initialized = false;
                     toolsRequested = false;
                     this.eventSource.onopen = function () {
@@ -732,7 +730,7 @@
                                         // console.log('获取到工具列表:', this.sessionId, message.result.tools)
                                         // 为每个工具添加执行方法
                                         message.result.tools = message.result.tools.map(function (tool) { return (__assign(__assign({}, tool), { fromServerName: _this.serverName, execute: function (args, timeout) {
-                                                if (timeout === void 0) { timeout = 5 * 60000; }
+                                                if (timeout === void 0) { timeout = 60 * 60000; }
                                                 return _this.executeTool(tool.name, args, timeout);
                                             } })); });
                                         (_d = this.onToolsReady) === null || _d === void 0 ? void 0 : _d.call(this, message.result.tools);
@@ -741,7 +739,7 @@
                                     else if ((_e = message.result) === null || _e === void 0 ? void 0 : _e.resources) {
                                         // console.log('获取到资源列表:', message.result.resources)
                                         message.result.resources = message.result.resources.map(function (resource) { return (__assign(__assign({}, resource), { fromServerName: _this.serverName, execute: function (args, timeout) {
-                                                if (timeout === void 0) { timeout = 5 * 60000; }
+                                                if (timeout === void 0) { timeout = 60 * 60000; }
                                                 return _this.readResource(resource.uri, timeout);
                                             } })); });
                                         (_f = this.onResourcesReady) === null || _f === void 0 ? void 0 : _f.call(this, message.result.resources);
@@ -918,7 +916,7 @@
                                         _this.pendingCalls.delete(callId_2);
                                         reject(new Error("\u83B7\u53D6\u5DE5\u5177\u5217\u8868\u8D85\u65F6"));
                                     }
-                                }, 30000); // 30秒超时
+                                }, 15000); // 30秒超时
                             });
                             // 发送请求
                             return [4 /*yield*/, this.sendJsonRpcRequest('tools/list', {}, callId_2)];
@@ -958,7 +956,7 @@
                                         _this.pendingCalls.delete(callId_3);
                                         reject(new Error("\u83B7\u53D6\u8D44\u6E90\u5217\u8868\u8D85\u65F6"));
                                     }
-                                }, 30000); // 30秒超时
+                                }, 15000); // 30秒超时
                             });
                             // 发送请求
                             return [4 /*yield*/, this.sendJsonRpcRequest('resources/list', {}, callId_3)];
@@ -998,7 +996,7 @@
                                         _this.pendingCalls.delete(callId_4);
                                         reject(new Error("\u83B7\u53D6\u52A8\u6001\u8D44\u6E90\u5217\u8868\u8D85\u65F6"));
                                     }
-                                }, 30000); // 30秒超时
+                                }, 15000); // 30秒超时
                             });
                             // 发送请求
                             return [4 /*yield*/, this.sendJsonRpcRequest('resources/templates/list', {}, callId_4)];
@@ -1042,7 +1040,7 @@
         // 读取特定资源
         MCPClient.prototype.readResource = function (uri, timeout) {
             var _a;
-            if (timeout === void 0) { timeout = 5 * 60000; }
+            if (timeout === void 0) { timeout = 60 * 60000; }
             return __awaiter(this, void 0, void 0, function () {
                 var callId_5, resultPromise, error_8;
                 var _this = this;
@@ -1095,7 +1093,7 @@
                                         _this.pendingCalls.delete(callId_6);
                                         reject(new Error("\u83B7\u53D6\u63D0\u793A\u5217\u8868\u8D85\u65F6"));
                                     }
-                                }, 30000); // 30秒超时
+                                }, 15000); // 30秒超时
                             });
                             // 发送请求
                             return [4 /*yield*/, this.sendJsonRpcRequest('prompts/list', {}, callId_6)];
@@ -1132,7 +1130,7 @@
                                         _this.pendingCalls.delete(callId_7);
                                         reject(new Error("\u83B7\u53D6\u63D0\u793A\u8D85\u65F6: ".concat(name)));
                                     }
-                                }, 30000); // 30秒超时
+                                }, 15000); // 30秒超时
                             });
                             // 发送请求
                             return [4 /*yield*/, this.sendJsonRpcRequest('prompts/get', {
@@ -1209,6 +1207,66 @@
         };
         return MCPClient;
     }());
+    var prepareTools = function (url, timeout) {
+        if (timeout === void 0) { timeout = 60000; }
+        return new Promise(function (resolve, reject) {
+            var mcpClient = null;
+            // 添加超时处理
+            var timeoutFn = setTimeout(function () {
+                if (mcpClient) {
+                    mcpClient.disconnect();
+                }
+                reject(new Error('Connection timeout'));
+            }, timeout);
+            // 清理超时
+            var cleanup = function () { return clearTimeout(timeoutFn); };
+            try {
+                mcpClient = new MCPClient({
+                    url: url,
+                    onToolsReady: function (tools) { return __awaiter(void 0, void 0, void 0, function () {
+                        var prompts, systemPrompts, toolsFunctionCall;
+                        var _a;
+                        return __generator(this, function (_b) {
+                            switch (_b.label) {
+                                case 0:
+                                    if (!mcpClient) return [3 /*break*/, 2];
+                                    cleanup();
+                                    return [4 /*yield*/, mcpClient.getPromptsList()];
+                                case 1:
+                                    prompts = (_a = (_b.sent())) === null || _a === void 0 ? void 0 : _a.prompts;
+                                    systemPrompts = (prompts === null || prompts === void 0 ? void 0 : prompts.filter(function (p) { return p === null || p === void 0 ? void 0 : p.systemPrompt; })) || '';
+                                    toolsFunctionCall = transformToolsToOpenAIFunctions(tools);
+                                    resolve({ tools: tools, mcpClient: mcpClient, toolsFunctionCall: toolsFunctionCall, systemPrompts: systemPrompts });
+                                    _b.label = 2;
+                                case 2: return [2 /*return*/];
+                            }
+                        });
+                    }); },
+                    onError: function (error) {
+                        if (mcpClient) {
+                            mcpClient.disconnect();
+                        }
+                        cleanup();
+                        reject(new Error("Failed to prepare tools: ".concat(error.message)));
+                    }
+                });
+                // 建立连接
+                mcpClient.connect();
+            }
+            catch (error) {
+                if (mcpClient) {
+                    mcpClient.disconnect();
+                }
+                reject(new Error("Failed to initialize MCPClient: ".concat(error.message)));
+            }
+        })
+            .catch(function (error) {
+            throw error;
+        })
+            .finally(function () {
+            // 可选的清理逻辑
+        });
+    };
 
     var MCPContext = React__namespace.createContext({
         mcpClient: null,
@@ -68805,6 +68863,7 @@
     exports.MCPStatus = MCPStatus;
     exports.ReactJson = ReactJson;
     exports.SurveyModel = SurveyModel;
+    exports.prepareTools = prepareTools;
     exports.useMCP = useMCP;
 
     Object.defineProperty(exports, '__esModule', { value: true });
